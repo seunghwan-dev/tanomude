@@ -1,0 +1,71 @@
+# CLAUDE.md
+
+Guardrails for autonomous and assisted work in this repository. Each rule exists because something went wrong without it — this file is the harness made explicit.
+
+Tanomude is an on-premise AI assistant, built on OpenClaw, that operates company legacy systems (AS-400 / Lotus Notes / Access) through natural-language instructions, human-in-the-loop approval, and per-user growth. Methodology source: ringi-driven-harness.
+
+## Git
+
+- Do not `git commit` or `git push` unless the task explicitly authorizes it. State-changing git is the human's gate by default.
+- Feature work goes on a branch and through a pull request. Never commit directly to `main`, except the initial bootstrap commit of a new repository.
+- English commit messages. No AI co-author trailers or metadata. Never force-push or rewrite history without an explicit instruction.
+
+## Files
+
+- Write files as UTF-8 without a BOM. Never use PowerShell `>>` redirection to create or edit files — on Windows PowerShell it writes UTF-16 and corrupts UTF-8 files. Use the editor or Write tool.
+- When a spec provides verbatim content, place it byte-for-byte. Blank lines are content; do not collapse them or add new ones.
+- Do not delete a file unless the task names it.
+- `_local/` is gitignored and local-only (master design, NDA material). Never commit its contents and never copy them into tracked files.
+
+## Code
+
+- No code comments in application source (Python / TypeScript). Code is self-documenting through clear names, type hints, and structured schemas; the "why" belongs in the Japanese master technical document, not inline. Application source only — comments in config, workflow YAML, and docs are intentional and must remain.
+- Every LLM response must be enforced as structured output (JSON Schema / Pydantic) with retry. Free-form text where a schema is required is a defect.
+- For asynchronous UI, never use `sleep()`. Assert with a Playwright wait-for-selector before the next action.
+
+## Verification
+
+- When reading or measuring a UTF-8 file in PowerShell, always pass `-Encoding UTF8`. The default encoding follows the system locale and will misread the file.
+- When a measurement looks wrong, suspect the instrument before the artifact. Confirm with an encoding-independent method, such as a byte-level read, before reporting a defect.
+- For byte-level checks under PowerShell 5.1, read raw bytes with `[System.IO.File]::ReadAllBytes(path)`. Do not use `Format-Hex -Count` — the `-Count` parameter is PowerShell 7+ only and errors on 5.1.
+
+## Specs
+
+- A task spec must be self-contained. A clean session sees only what is written. If intent is not written down, it does not exist — do not infer it.
+- If a spec is ambiguous or contradicts what you observe, report it and ask. Do not guess, and do not blindly follow an instruction whose premise is false.
+
+## Safety
+
+- Never run `rm -rf`, `curl`, or pipe-to-shell installers.
+- Never commit secrets. No `.env` files, keys, certificates, tokens, or credentials in tracked files. Secrets live in environment variables and GitHub Secrets only.
+- Abstract confidential names to generic identifiers: company → `自社`, customer → `ABC商事`, product → `製品X`, equipment → `実験機A` / `実験機B`, material → `Material-X`.
+
+## Reporting
+
+- After a task, report what was created or changed, the verification results, and any deviation from the spec. If you departed from an instruction for a good reason, say so plainly.
+
+## Implementer Principles
+
+The habits expected of any agent building in this harness. The human gate is the last
+line of defense — these keep less from ever reaching it.
+
+1. **Think before coding.** Don't run with an unstated assumption. If a request is
+   ambiguous, surface the interpretations and ask rather than guess. If a simpler path
+   exists, say so. When confused, name what's unclear and stop — a paused build is
+   cheaper than a wrong one.
+2. **Simplicity first.** Write the minimum that solves the stated problem. No speculative
+   abstractions, no configurability nobody asked for, no error handling for impossible
+   cases. If it could be half the size, rewrite it. Test: would a senior engineer call
+   this overcomplicated?
+3. **Surgical changes.** Touch only what the task requires. Don't reformat, refactor, or
+   "improve" adjacent code; match the existing style even if you'd do it differently.
+   Remove only the orphans your own change created; leave pre-existing dead code alone
+   unless asked. Test: every changed line traces to the request.
+4. **Goal-driven execution.** Turn the task into a verifiable goal and loop until it's
+   met. "Fix the bug" becomes "write a test that reproduces it, then make it pass." State
+   a short plan with a check per step, then run to green.
+
+**Bounded autonomy.** This harness runs on one rule: the AI proposes, the human decides.
+Build, test, and prepare changes autonomously — but nothing reaches `main` without a
+human's review and merge (the ringi stamp). Optimize for making that human decision easy
+and well-informed, not for bypassing it.
