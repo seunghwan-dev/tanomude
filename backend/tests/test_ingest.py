@@ -22,6 +22,14 @@ def test_structure_chunking_splits_on_headings():
     assert "P-###" in proj_chunk.text
 
 
+def test_structure_chunking_section_ids_are_unique():
+    chunks = chunk_by_structure(MANUAL)
+    ids = [chunk.section for chunk in chunks]
+    assert len(ids) == len(set(ids))
+    assert ids[0] == "H1"
+    assert "1" in ids
+
+
 @requires_tei
 def test_ingest_persists_doc_and_chunks_with_embeddings(db):
     doc = ingest_manual(db, workflow="shukko", title="出張申請 操作マニュアル",

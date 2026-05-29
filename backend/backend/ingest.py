@@ -1,6 +1,7 @@
 from collections.abc import Callable
 from pathlib import Path
 
+from sqlalchemy import delete
 from sqlalchemy.orm import Session
 
 from backend.chunker import chunk_by_structure
@@ -24,6 +25,11 @@ def ingest_manual(
     markdown: str,
     embed_fn: Embedder = embed_passages,
 ) -> OperationDoc:
+    db.execute(
+        delete(OperationDoc).where(OperationDoc.workflow == workflow, OperationDoc.source == source)
+    )
+    db.flush()
+
     doc = OperationDoc(workflow=workflow, title=title, source=source)
     db.add(doc)
     db.flush()

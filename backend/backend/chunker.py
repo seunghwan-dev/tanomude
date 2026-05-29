@@ -37,7 +37,7 @@ def chunk_by_structure(markdown: str) -> list[StructureChunk]:
                 section = numbered.group(1)
                 heading = numbered.group(2).strip() or raw
             else:
-                section = str(order)
+                section = f"H{order}"
                 heading = raw
             body = []
         else:
