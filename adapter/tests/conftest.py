@@ -14,6 +14,13 @@ from app.models import MockSession, TripApplication
 MOCK_ROOT = Path(app_pkg.__file__).resolve().parent.parent
 
 
+def _clean_tables() -> None:
+    with SessionLocal() as session:
+        session.execute(delete(MockSession))
+        session.execute(delete(TripApplication))
+        session.commit()
+
+
 @pytest.fixture(scope="session", autouse=True)
 def setup_schema():
     config = Config(str(MOCK_ROOT / "alembic.ini"))
@@ -24,13 +31,8 @@ def setup_schema():
 
 @pytest.fixture
 def mock_client():
-    return TestClient(app)
-
-
-@pytest.fixture(autouse=True)
-def clean_tables():
-    yield
-    with SessionLocal() as session:
-        session.execute(delete(MockSession))
-        session.execute(delete(TripApplication))
-        session.commit()
+    client = TestClient(app)
+    try:
+        yield client
+    finally:
+        _clean_tables()

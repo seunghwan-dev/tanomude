@@ -57,10 +57,20 @@ jobs:
         # Free for personal-account repositories. A GITLEAKS_LICENSE secret is
         # only required for organization-owned repos.
 
+      - name: Secret scan (trufflehog)
+        run: >-
+          docker run --rm -v "${{ github.workspace }}:/repo" trufflesecurity/trufflehog:3.95.2
+          filesystem /repo/mock-as400 /repo/adapter /repo/backend /repo/.github
+          /repo/docker-compose.yml /repo/.env.example
+          --no-update --fail --results=verified,unknown
+
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+
+      - name: Lint (ruff)
+        run: pipx run --spec ruff==0.15.15 ruff check .
 
       - name: Install mock-as400
         working-directory: mock-as400
