@@ -1,10 +1,10 @@
 from typing import Literal
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from adapter.base import ScreenAdapter
 from adapter.types import AssertSpec, KeyStep
-from backend.slotfill import FilledKeysequence, Refusal, RequestInput, Step, fill
+from backend.slotfill import FilledKeysequence, Refusal, RequestInput, SlotExtractor, Step, fill
 
 
 class ExecutionOutcome(BaseModel):
@@ -13,7 +13,7 @@ class ExecutionOutcome(BaseModel):
     trip_id: int | None = None
     executed_steps: int = 0
     final_screen: str | None = None
-    errors: list[str] = []
+    errors: list[str] = Field(default_factory=list)
 
 
 def auto_approve(filled: FilledKeysequence) -> bool:
@@ -52,7 +52,7 @@ def execute(adapter: ScreenAdapter, filled: FilledKeysequence) -> ExecutionOutco
     )
 
 
-def run_task(request: RequestInput, adapter: ScreenAdapter, slot_fn, context: str = "") -> ExecutionOutcome:
+def run_task(request: RequestInput, adapter: ScreenAdapter, slot_fn: SlotExtractor, context: str = "") -> ExecutionOutcome:
     result = fill(request, slot_fn, context)
     if isinstance(result, Refusal):
         return ExecutionOutcome(status="refused", refusal=result, executed_steps=0)
