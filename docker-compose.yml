@@ -1,0 +1,32 @@
+services:
+  mock-db:
+    image: postgres:16
+    container_name: tanomude-mock-db
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    ports:
+      - "5432:5432"
+    volumes:
+      - mock-db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  # AS-400 stand-in (behavior/state mock, design §8 ②). Not the agent platform.
+  mock-as400:
+    build: ./mock-as400
+    container_name: tanomude-mock-as400
+    environment:
+      DATABASE_URL: postgresql+psycopg://${POSTGRES_USER}:${POSTGRES_PASSWORD}@mock-db:5432/${POSTGRES_DB}
+    ports:
+      - "8400:8400"
+    depends_on:
+      mock-db:
+        condition: service_healthy
+
+volumes:
+  mock-db-data:
