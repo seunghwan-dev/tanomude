@@ -60,9 +60,8 @@ jobs:
       - name: Secret scan (trufflehog)
         run: >-
           docker run --rm -v "${{ github.workspace }}:/repo" trufflesecurity/trufflehog:3.95.2
-          filesystem /repo/mock-as400 /repo/adapter /repo/backend /repo/.github
-          /repo/docker-compose.yml /repo/.env.example
-          --no-update --fail --results=verified,unknown
+          filesystem /repo --no-update --fail --results=verified,unknown
+          --exclude-paths=/repo/.github/trufflehog-exclude.txt
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -103,4 +102,6 @@ jobs:
           PLATFORM_DATABASE_URL: postgresql+psycopg://tanomude:tanomude@localhost:5433/platform
           # No embedding service in CI: TEI-dependent tests (ingest/embed/eval) skip; fake-embedder tests gate.
           EMBEDDING_URL: http://localhost:8001
+          # In-process Mock (core-loop test) drives the mock-as400 app against the mock_as400 DB.
+          DATABASE_URL: postgresql+psycopg://tanomude:tanomude@localhost:5432/mock_as400
         run: pytest -q
