@@ -58,3 +58,13 @@ jobs:
           # Host is the mapped service-container port on the runner; same URL format as .env.example.
           DATABASE_URL: postgresql+psycopg://tanomude:tanomude@localhost:5432/mock_as400
         run: pytest -q
+
+      - name: Install adapter
+        working-directory: adapter
+        run: pip install -e ".[dev]"
+
+      - name: Run adapter tests
+        working-directory: adapter
+        env:
+          DATABASE_URL: postgresql+psycopg://tanomude:tanomude@localhost:5432/mock_as400
+        run: pytest -q
