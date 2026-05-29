@@ -8,6 +8,9 @@ from app.schemas import TripApplicationCreate
 
 def start(db: Session, start_screen: str = statemachine.LOGIN) -> MockSession:
     state = statemachine.initial_state(start_screen)
+    last_proj = trip_repo.latest_proj(db)
+    if last_proj:
+        state["prev_proj"] = last_proj
     return session_repo.create(db, state["screen"], state)
 
 

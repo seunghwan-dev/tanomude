@@ -31,12 +31,13 @@ def _replay(db, golden):
 def test_golden_replay(case, db):
     golden = case["golden"]
     cid = case["case_id"]
+    trips_before = len(trip_repo.list_all(db))
     record = _replay(db, golden)
 
     if cid == "case_04_edge_empty_required":
         assert record.screen == sm.ABORTED
         assert record.trip_id is None
-        assert trip_repo.list_all(db) is not None
+        assert len(trip_repo.list_all(db)) == trips_before
         return
 
     assert record.screen == sm.SUBMITTED

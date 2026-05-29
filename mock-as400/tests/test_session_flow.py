@@ -86,3 +86,56 @@ def test_validation_block_keeps_session_on_trip_input(client):
     assert body["screen"] == "trip_input"
     assert "DEST_required" in body["errors"]
     assert body["trip_id"] is None
+
+
+def test_invalid_date_stays_on_screen_without_500(client):
+    sid = _start(client)
+    steps = [
+        nav("Enter"),
+        nav("Enter"),
+        field("DEST", "TOKYO"),
+        field("DEPTDATE", "20261301"),
+        field("RETDATE", "20261302"),
+        field("DAYS", "1"),
+        field("PURPOSE", "確認"),
+        field("PROJ", "P-001"),
+        fkey("Enter"),
+    ]
+    last = None
+    for step in steps:
+        last = client.post(f"/session/{sid}/step", json=step)
+        assert last.status_code == 200
+    body = last.json()
+    assert body["screen"] == "trip_input"
+    assert "DEPTDATE_format" in body["errors"]
+    assert body["trip_id"] is None
+
+
+def test_f9_recalls_last_submitted_proj(client, db):
+    sid1 = _start(client)
+    seq = [
+        nav("Enter"),
+        nav("Enter"),
+        field("DEST", "KYOTO"),
+        field("DEPTDATE", "20260701"),
+        field("RETDATE", "20260702"),
+        field("DAYS", "2"),
+        field("PURPOSE", "確認"),
+        fkey("F4"),
+        field("PROJ", "P-005"),
+        fkey("Enter"),
+        fkey("Enter"),
+    ]
+    last = None
+    for step in seq:
+        last = client.post(f"/session/{sid1}/step", json=step)
+    trip_id = last.json()["trip_id"]
+
+    try:
+        sid2 = _start(client)
+        recalled = None
+        for step in [nav("Enter"), nav("Enter"), fkey("F9")]:
+            recalled = client.post(f"/session/{sid2}/step", json=step)
+        assert recalled.json()["fields"]["PROJ"] == "P-005"
+    finally:
+        trip_repo.delete(db, trip_id)
