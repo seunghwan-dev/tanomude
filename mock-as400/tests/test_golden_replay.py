@@ -43,27 +43,24 @@ def test_golden_replay(case, db):
     assert record.screen == sm.SUBMITTED
     assert record.trip_id is not None
     trip = trip_repo.get(db, record.trip_id)
-    try:
-        assert trip.dest == _last_field(golden, "DEST")
-        assert trip.proj == _last_field(golden, "PROJ")
-        assert trip.purpose == _last_field(golden, "PURPOSE")
-        assert str(trip.days) == _last_field(golden, "DAYS")
-        assert trip.dept_date.strftime("%Y%m%d") == _last_field(golden, "DEPTDATE")
-        assert trip.ret_date.strftime("%Y%m%d") == _last_field(golden, "RETDATE")
-        assert trip.overseas == (_last_field(golden, "OVRSEA") == "Y")
+    assert trip.dest == _last_field(golden, "DEST")
+    assert trip.proj == _last_field(golden, "PROJ")
+    assert trip.purpose == _last_field(golden, "PURPOSE")
+    assert str(trip.days) == _last_field(golden, "DAYS")
+    assert trip.dept_date.strftime("%Y%m%d") == _last_field(golden, "DEPTDATE")
+    assert trip.ret_date.strftime("%Y%m%d") == _last_field(golden, "RETDATE")
+    assert trip.overseas == (_last_field(golden, "OVRSEA") == "Y")
 
-        if cid == "case_03_edge_branch_overseas":
-            assert trip.overseas is True
-        if cid == "case_05_edge_invalid_proj":
-            assert trip.proj == "P-002"
-        if cid == "case_06_edge_long_purpose":
-            assert len(trip.purpose) == 20
-        if cid == "case_07_edge_reuse_prev":
-            assert trip.proj == sm.DEFAULT_PREV_PROJ
-        if cid == "case_08_edge_days_recalc":
-            assert trip.days == 4
-    finally:
-        trip_repo.delete(db, record.trip_id)
+    if cid == "case_03_edge_branch_overseas":
+        assert trip.overseas is True
+    if cid == "case_05_edge_invalid_proj":
+        assert trip.proj == "P-002"
+    if cid == "case_06_edge_long_purpose":
+        assert len(trip.purpose) == 20
+    if cid == "case_07_edge_reuse_prev":
+        assert trip.proj == sm.DEFAULT_PREV_PROJ
+    if cid == "case_08_edge_days_recalc":
+        assert trip.days == 4
 
 
 def test_all_eight_cases_present():
