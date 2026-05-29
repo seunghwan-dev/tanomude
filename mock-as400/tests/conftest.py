@@ -4,9 +4,11 @@ import pytest
 from alembic import command
 from alembic.config import Config
 from fastapi.testclient import TestClient
+from sqlalchemy import delete
 
 from app.db import SessionLocal
 from app.main import app
+from app.models import MockSession
 
 ALEMBIC_INI = Path(__file__).resolve().parent.parent / "alembic.ini"
 
@@ -31,3 +33,11 @@ def db():
         yield session
     finally:
         session.close()
+
+
+@pytest.fixture(autouse=True)
+def clean_mock_sessions():
+    yield
+    with SessionLocal() as session:
+        session.execute(delete(MockSession))
+        session.commit()

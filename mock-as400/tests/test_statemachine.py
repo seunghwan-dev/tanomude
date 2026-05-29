@@ -139,3 +139,40 @@ def test_session_closed_after_submit():
     state = run(HAPPY)
     state = sm.apply_step(state, field("DEST", "KYOTO"))
     assert state["errors"] == ["session_closed:submitted"]
+
+
+def _filled(deptdate, retdate):
+    return [
+        nav("Enter"),
+        nav("Enter"),
+        field("DEST", "TOKYO"),
+        field("DEPTDATE", deptdate),
+        field("RETDATE", retdate),
+        field("DAYS", "1"),
+        field("PURPOSE", "確認"),
+        field("PROJ", "P-001"),
+        fkey("Enter"),
+    ]
+
+
+def test_invalid_calendar_date_blocks_without_crash():
+    state = run(_filled("20261301", "20261302"))
+    assert state["screen"] == sm.TRIP_INPUT
+    assert "DEPTDATE_format" in state["errors"]
+
+
+def test_reversed_dates_block():
+    state = run(_filled("20260611", "20260610"))
+    assert state["screen"] == sm.TRIP_INPUT
+    assert "RETDATE_before_DEPTDATE" in state["errors"]
+
+
+def test_tab_and_fieldexit_accepted_as_nav():
+    state = run([
+        nav("Enter"),
+        nav("Enter"),
+        nav("Tab"),
+        nav("FieldExit"),
+    ])
+    assert state["screen"] == sm.TRIP_INPUT
+    assert state["errors"] == []

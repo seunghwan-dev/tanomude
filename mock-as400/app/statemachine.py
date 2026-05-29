@@ -35,15 +35,31 @@ def _set_field(state, target, value):
     state["fields"][target] = text
 
 
+def _parse_date(value):
+    if not value or not DATE_PATTERN.match(value):
+        return None
+    try:
+        return dt.date(int(value[0:4]), int(value[4:6]), int(value[6:8]))
+    except ValueError:
+        return None
+
+
 def _validate(fields):
     errors = []
     for name in REQUIRED_FIELDS:
         if not fields.get(name):
             errors.append(f"{name}_required")
+    parsed = {}
     for name in ("DEPTDATE", "RETDATE"):
         value = fields.get(name)
-        if value and not DATE_PATTERN.match(value):
-            errors.append(f"{name}_format")
+        if value:
+            parsed_date = _parse_date(value)
+            if parsed_date is None:
+                errors.append(f"{name}_format")
+            else:
+                parsed[name] = parsed_date
+    if "DEPTDATE" in parsed and "RETDATE" in parsed and parsed["RETDATE"] < parsed["DEPTDATE"]:
+        errors.append("RETDATE_before_DEPTDATE")
     days = fields.get("DAYS")
     if days and not days.isdigit():
         errors.append("DAYS_numeric")
@@ -54,7 +70,7 @@ def _validate(fields):
 
 
 def _to_iso_date(yyyymmdd):
-    return dt.date(int(yyyymmdd[0:4]), int(yyyymmdd[4:6]), int(yyyymmdd[6:8])).isoformat()
+    return _parse_date(yyyymmdd).isoformat()
 
 
 def _build_trip_payload(fields):
@@ -104,7 +120,7 @@ def apply_step(state, step):
             new_state["screen"] = PROJ_PROMPT
         elif stype == "fkey" and key == "F9":
             new_state["fields"]["PROJ"] = new_state["prev_proj"]
-        elif stype == "fkey" and key in ("Tab", "FieldExit"):
+        elif key in ("Tab", "FieldExit"):
             pass
         elif stype == "fkey" and key == "F3":
             new_state["screen"] = ABORTED

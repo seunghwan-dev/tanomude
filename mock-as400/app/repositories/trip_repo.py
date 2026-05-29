@@ -17,6 +17,10 @@ def get(db: Session, trip_id: int) -> TripApplication | None:
     return db.get(TripApplication, trip_id)
 
 
+def latest_proj(db: Session) -> str | None:
+    return db.scalar(select(TripApplication.proj).order_by(TripApplication.id.desc()).limit(1))
+
+
 def list_all(db: Session) -> list[TripApplication]:
     return list(db.scalars(select(TripApplication)))
 
