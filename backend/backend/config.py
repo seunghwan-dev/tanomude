@@ -6,6 +6,7 @@ class Settings(BaseSettings):
 
     platform_database_url: str
     embedding_url: str
+    ollama_url: str = "http://localhost:11434"
 
 
 settings = Settings()
