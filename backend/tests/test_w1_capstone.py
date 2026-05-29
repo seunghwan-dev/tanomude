@@ -54,8 +54,6 @@ def _trip_count() -> int:
 @requires_models
 @pytest.mark.parametrize("case", CASES, ids=[c["case_id"] for c in CASES])
 def test_w1_capstone_full_stack(case, mock_client, db):
-    ingest_manual(db, workflow="shukko", title="出張申請 操作マニュアル",
-                  source="shukko_manual.md", markdown=load_manual("shukko_manual.md"))
     adapter = MockAdapter(mock_client)
     adapter.open()
     request = RequestInput(workflow="shukko", instruction=case["input"]["instruction"], fields=case["input"]["fields"])
@@ -69,14 +67,21 @@ def test_w1_capstone_full_stack(case, mock_client, db):
         assert _trip_count() == before
         return
 
+    ingest_manual(db, workflow="shukko", title="出張申請 操作マニュアル",
+                  source="shukko_manual.md", markdown=load_manual("shukko_manual.md"))
     context = ground(db, request.instruction)
     outcome = run_task(request, adapter, extract_slots, context)
     assert outcome.status == "submitted"
     assert outcome.trip_id is not None
 
+    if cid == "case_07_edge_reuse_prev":
+        assert outcome.executed_steps == 11
+
     trip = mock_client.get(f"/trip/{outcome.trip_id}").json()
     if cid == "case_03_edge_branch_overseas":
         assert trip["overseas"] is True
+    if cid == "case_05_edge_invalid_proj":
+        assert trip["proj"] == "P-002"
     if cid == "case_06_edge_long_purpose":
         assert len(trip["purpose"]) <= 20
     if cid == "case_07_edge_reuse_prev":
