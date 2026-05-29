@@ -28,5 +28,36 @@ services:
       mock-db:
         condition: service_healthy
 
+  # Platform side (design §10) — RAG/audit/eval store, separate from the Mock DB.
+  platform-db:
+    image: pgvector/pgvector:pg16
+    container_name: tanomude-platform-db
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${PLATFORM_DB_NAME}
+    ports:
+      - "${PLATFORM_DB_PORT}:5432"
+    volumes:
+      - platform-db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${PLATFORM_DB_NAME}"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  # tanomude-owned embedding service (design §3 — multilingual-e5-large, 1024d).
+  # CPU posture to avoid VRAM contention with the local Gemma on the 12GB GPU.
+  embedding:
+    image: ghcr.io/huggingface/text-embeddings-inference:cpu-1.6
+    container_name: tanomude-embedding
+    command: ["--model-id", "intfloat/multilingual-e5-large"]
+    ports:
+      - "${EMBEDDING_PORT}:80"
+    volumes:
+      - embedding-hf-cache:/data
+
 volumes:
   mock-db-data:
+  platform-db-data:
+  embedding-hf-cache:
