@@ -1,4 +1,5 @@
 from backend.slotfill import (
+    RESULT_ADAPTER,
     FilledKeysequence,
     RequestInput,
     Refusal,
@@ -9,15 +10,7 @@ from backend.slotfill import (
 
 
 def _slots(**overrides) -> Slots:
-    base = dict(
-        dest_code="OSAKA",
-        dept_date="20260610",
-        ret_date="20260611",
-        purpose="製品X納入調整",
-        proj_code="P-001",
-        overseas=False,
-        reuse_prev_proj=False,
-    )
+    base = dict(dest_code="OSAKA", purpose="製品X納入調整", overseas=False, reuse_prev_proj=False)
     base.update(overrides)
     return Slots(**base)
 
@@ -34,6 +27,10 @@ def _request(**field_overrides) -> RequestInput:
 
 def _tokens(steps):
     return [(s.type, s.target, s.value, s.key) for s in steps]
+
+
+def _value(result, target):
+    return next(s.value for s in result.steps if s.target == target)
 
 
 def test_required_missing_flags_empty_dest():
@@ -53,7 +50,6 @@ def test_fill_refuses_without_invoking_llm():
 
     result = fill(_request(dest=""), slot_fn)
     assert isinstance(result, Refusal)
-    assert result.kind == "refusal"
     assert result.missing_fields == ["DEST"]
     assert called == []
 
@@ -61,45 +57,68 @@ def test_fill_refuses_without_invoking_llm():
 def test_fill_normal_assembles_keysequence():
     result = fill(_request(), _constant(_slots()))
     assert isinstance(result, FilledKeysequence)
-    assert result.kind == "filled"
     tokens = _tokens(result.steps)
     assert tokens[0] == ("nav", None, None, "Enter")
     assert ("field", "DEST", "OSAKA", None) in tokens
-    assert ("fkey", None, None, "F4") in tokens
+    assert ("field", "PROJ", "P-001", None) in tokens
     assert tokens[-1] == ("fkey", None, None, "Enter")
+
+
+def test_dates_parsed_from_fields_iso_format():
+    result = fill(_request(dept_date="2026-07-01", ret_date="2026-07-04"), _constant(_slots()))
+    assert _value(result, "DEPTDATE") == "20260701"
+    assert _value(result, "RETDATE") == "20260704"
+    assert _value(result, "DAYS") == "4"
+
+
+def test_dates_parsed_from_fields_yyyymmdd_format():
+    result = fill(_request(dept_date="20260701", ret_date="20260704"), _constant(_slots()))
+    assert _value(result, "DEPTDATE") == "20260701"
+    assert _value(result, "DAYS") == "4"
+
+
+def test_malformed_date_refuses_without_crash():
+    result = fill(_request(dept_date="2026/13/40"), _constant(_slots()))
+    assert isinstance(result, Refusal)
+    assert "DEPTDATE" in result.missing_fields
+
+
+def test_proj_read_from_fields_prefers_resolved():
+    result = fill(_request(proj_hint="PX-001", proj_resolved="P-002"), _constant(_slots()))
+    assert _value(result, "PROJ") == "P-002"
+
+
+def test_days_recalculated_ignores_llm():
+    result = fill(_request(dept_date="2026-07-01", ret_date="2026-07-04"), _constant(_slots()))
+    assert _value(result, "DAYS") == "4"
 
 
 def test_purpose_truncated_to_20():
     long_purpose = "実験機B定期点検および部品交換と供給状況確認次期計画打合せ"
     result = fill(_request(), _constant(_slots(purpose=long_purpose)))
-    purpose_step = next(s for s in result.steps if s.target == "PURPOSE")
-    assert len(purpose_step.value) == 20
-    assert purpose_step.value == long_purpose[:20]
-
-
-def test_days_recalculated_from_dates():
-    result = fill(_request(), _constant(_slots(dept_date="20260701", ret_date="20260704")))
-    days_step = next(s for s in result.steps if s.target == "DAYS")
-    assert days_step.value == "4"
+    assert len(_value(result, "PURPOSE")) == 20
+    assert _value(result, "PURPOSE") == long_purpose[:20]
 
 
 def test_overseas_branch_inserts_ovrsea():
-    result = fill(_request(), _constant(_slots(overseas=True, proj_code="P-003")))
+    result = fill(_request(proj_hint="P-003"), _constant(_slots(overseas=True)))
     tokens = _tokens(result.steps)
     assert ("fkey", None, None, "Tab") in tokens
     assert ("field", "OVRSEA", "Y", None) in tokens
 
 
 def test_reuse_branch_uses_f9_not_f4():
-    result = fill(_request(), _constant(_slots(reuse_prev_proj=True, proj_code="P-002")))
+    result = fill(_request(proj_reuse=True), _constant(_slots(reuse_prev_proj=True)))
     fkeys = [s.key for s in result.steps if s.type == "fkey"]
     assert "FieldExit" in fkeys
     assert "F9" in fkeys
     assert "F4" not in fkeys
 
 
-def test_result_union_discriminators():
-    filled = fill(_request(), _constant(_slots()))
+def test_discriminated_union_roundtrips_from_json():
     refusal = fill(_request(dest=""), _constant(_slots()))
-    assert filled.kind == "filled"
-    assert refusal.kind == "refusal"
+    filled = fill(_request(), _constant(_slots()))
+    reparsed_refusal = RESULT_ADAPTER.validate_json(refusal.model_dump_json())
+    reparsed_filled = RESULT_ADAPTER.validate_json(filled.model_dump_json())
+    assert isinstance(reparsed_refusal, Refusal)
+    assert isinstance(reparsed_filled, FilledKeysequence)

@@ -28,16 +28,13 @@ def generate_json(
         data=json.dumps(body).encode("utf-8"),
         headers={"Content-Type": "application/json"},
     )
-    last_text = ""
-    for _ in range(2):
-        with urllib.request.urlopen(request, timeout=timeout) as response:
-            raw = json.loads(response.read().decode("utf-8"))
-        last_text = raw.get("response", "")
-        try:
-            return json.loads(last_text)
-        except json.JSONDecodeError:
-            continue
-    raise ValueError(f"ollama did not return valid JSON after retry: {last_text[:200]!r}")
+    with urllib.request.urlopen(request, timeout=timeout) as response:
+        raw = json.loads(response.read().decode("utf-8"))
+    text = raw.get("response", "")
+    try:
+        return json.loads(text)
+    except json.JSONDecodeError as exc:
+        raise ValueError(f"ollama returned non-JSON response: {text[:200]!r}") from exc
 
 
 def health(timeout: float = 3.0) -> bool:
