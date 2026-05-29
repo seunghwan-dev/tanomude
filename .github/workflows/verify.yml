@@ -70,7 +70,7 @@ jobs:
           python-version: "3.12"
 
       - name: Lint (ruff)
-        run: pipx run ruff@0.15.15 check .
+        run: pipx run --spec ruff==0.15.15 ruff check .
 
       - name: Install mock-as400
         working-directory: mock-as400
