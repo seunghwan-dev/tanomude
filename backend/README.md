@@ -15,6 +15,14 @@ than an approximate index. Adding a GIN index for FTS and an ANN index for the e
 column is the scale-up path when the corpus grows; it is intentionally omitted now, not an
 oversight.
 
+## Core loop screen-transition contract
+
+`coreloop.execute` and `slotfill.assemble` share an implicit screen-transition contract:
+`execute` sends one login `nav Enter` (`LOGIN → MENU`), then runs the assembled keysequence
+whose own leading `nav Enter` is `MENU → TRIP_INPUT`. The keysequence is authored to start at
+`MENU`; the orchestrator owns the login step. A real AS-400 adapter (or a W2 change to either
+side) must preserve this split — execute does login, the keysequence does menu→trip onward.
+
 ## Slot-fill engine
 
 Code owns structure, refusal (required-field absence → first-class `Refusal`), and the
