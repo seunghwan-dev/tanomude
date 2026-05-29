@@ -18,6 +18,8 @@ dev = ["pytest>=8.0"]
 [tool.hatch.build.targets.wheel]
 packages = ["adapter"]
 
+# Tests are an in-process contract test against the mock-as400 app: they import `app`
+# and require mock-as400 installed in the same env (CI installs it first). Not standalone.
 [tool.pytest.ini_options]
 pythonpath = ["."]
 testpaths = ["tests"]

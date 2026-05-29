@@ -13,6 +13,13 @@ from app.models import MockSession, TripApplication
 ALEMBIC_INI = Path(__file__).resolve().parent.parent / "alembic.ini"
 
 
+def _clean_tables() -> None:
+    with SessionLocal() as session:
+        session.execute(delete(MockSession))
+        session.execute(delete(TripApplication))
+        session.commit()
+
+
 @pytest.fixture(scope="session", autouse=True)
 def setup_schema():
     config = Config(str(ALEMBIC_INI))
@@ -23,7 +30,11 @@ def setup_schema():
 
 @pytest.fixture
 def client():
-    return TestClient(app)
+    test_client = TestClient(app)
+    try:
+        yield test_client
+    finally:
+        _clean_tables()
 
 
 @pytest.fixture
@@ -32,13 +43,8 @@ def db():
     try:
         yield session
     finally:
-        session.close()
-
-
-@pytest.fixture(autouse=True)
-def clean_tables():
-    yield
-    with SessionLocal() as session:
+        session.rollback()
         session.execute(delete(MockSession))
         session.execute(delete(TripApplication))
         session.commit()
+        session.close()

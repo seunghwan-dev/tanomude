@@ -25,6 +25,7 @@ def db():
     try:
         yield session
     finally:
+        session.rollback()
         session.execute(delete(KnowledgeChunk))
         session.execute(delete(OperationDoc))
         session.commit()
