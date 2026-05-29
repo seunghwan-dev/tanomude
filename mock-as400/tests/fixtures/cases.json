@@ -1,0 +1,230 @@
+{
+  "_note": "LAM reliability spike golden fixtures. Fully fabricated. Generic identifiers only (自社/実験機A/実験機B/Material-X/ABC商事/製品X). No real screen codes, accounts, or secrets.",
+  "schema": {
+    "step": {
+      "seq": "int",
+      "type": "field|fkey|nav",
+      "target": "field_id|null",
+      "value": "str|null",
+      "key": "F3|F4|F9|Enter|FieldExit|Tab|null"
+    }
+  },
+  "cases": [
+    {
+      "case_id": "case_01_normal_domestic",
+      "category": "normal",
+      "input": {
+        "instruction": "ABC商事との製品X納入調整のため大阪へ2日間出張する。出発は6月10日、帰着は6月11日。案件コードはP-001。",
+        "fields": {
+          "dest": "大阪",
+          "dept_date": "2026-06-10",
+          "ret_date": "2026-06-11",
+          "days": "2",
+          "purpose": "製品X納入調整",
+          "proj_hint": "P-001"
+        }
+      },
+      "golden": [
+        {"seq": 1, "type": "nav", "target": null, "value": null, "key": "Enter"},
+        {"seq": 2, "type": "field", "target": "DEST", "value": "OSAKA", "key": null},
+        {"seq": 3, "type": "field", "target": "DEPTDATE", "value": "20260610", "key": null},
+        {"seq": 4, "type": "field", "target": "RETDATE", "value": "20260611", "key": null},
+        {"seq": 5, "type": "field", "target": "DAYS", "value": "2", "key": null},
+        {"seq": 6, "type": "field", "target": "PURPOSE", "value": "製品X納入調整", "key": null},
+        {"seq": 7, "type": "fkey", "target": null, "value": null, "key": "F4"},
+        {"seq": 8, "type": "field", "target": "PROJ", "value": "P-001", "key": null},
+        {"seq": 9, "type": "fkey", "target": null, "value": null, "key": "Enter"},
+        {"seq": 10, "type": "fkey", "target": null, "value": null, "key": "Enter"}
+      ]
+    },
+    {
+      "case_id": "case_02_normal_day_trip",
+      "category": "normal",
+      "input": {
+        "instruction": "実験機Aの立会検査のため名古屋へ日帰り出張。6月12日。案件コードP-002。",
+        "fields": {
+          "dest": "名古屋",
+          "dept_date": "2026-06-12",
+          "ret_date": "2026-06-12",
+          "days": "1",
+          "purpose": "実験機A立会検査",
+          "proj_hint": "P-002"
+        }
+      },
+      "golden": [
+        {"seq": 1, "type": "nav", "target": null, "value": null, "key": "Enter"},
+        {"seq": 2, "type": "field", "target": "DEST", "value": "NAGOYA", "key": null},
+        {"seq": 3, "type": "field", "target": "DEPTDATE", "value": "20260612", "key": null},
+        {"seq": 4, "type": "field", "target": "RETDATE", "value": "20260612", "key": null},
+        {"seq": 5, "type": "field", "target": "DAYS", "value": "1", "key": null},
+        {"seq": 6, "type": "field", "target": "PURPOSE", "value": "実験機A立会検査", "key": null},
+        {"seq": 7, "type": "fkey", "target": null, "value": null, "key": "F4"},
+        {"seq": 8, "type": "field", "target": "PROJ", "value": "P-002", "key": null},
+        {"seq": 9, "type": "fkey", "target": null, "value": null, "key": "Enter"},
+        {"seq": 10, "type": "fkey", "target": null, "value": null, "key": "Enter"}
+      ]
+    },
+    {
+      "case_id": "case_03_edge_branch_overseas",
+      "category": "edge_selection_branch",
+      "input": {
+        "instruction": "ABC商事の海外拠点と製品X海外商談のためシンガポールへ4日間出張。6月15日出発、6月18日帰着。海外出張。案件コードP-003。",
+        "fields": {
+          "dest": "シンガポール",
+          "dept_date": "2026-06-15",
+          "ret_date": "2026-06-18",
+          "days": "4",
+          "purpose": "製品X海外商談",
+          "overseas": true,
+          "proj_hint": "P-003"
+        }
+      },
+      "golden": [
+        {"seq": 1, "type": "nav", "target": null, "value": null, "key": "Enter"},
+        {"seq": 2, "type": "field", "target": "DEST", "value": "SINGAPORE", "key": null},
+        {"seq": 3, "type": "field", "target": "DEPTDATE", "value": "20260615", "key": null},
+        {"seq": 4, "type": "field", "target": "RETDATE", "value": "20260618", "key": null},
+        {"seq": 5, "type": "field", "target": "DAYS", "value": "4", "key": null},
+        {"seq": 6, "type": "field", "target": "PURPOSE", "value": "製品X海外商談", "key": null},
+        {"seq": 7, "type": "fkey", "target": null, "value": null, "key": "Tab"},
+        {"seq": 8, "type": "field", "target": "OVRSEA", "value": "Y", "key": null},
+        {"seq": 9, "type": "fkey", "target": null, "value": null, "key": "F4"},
+        {"seq": 10, "type": "field", "target": "PROJ", "value": "P-003", "key": null},
+        {"seq": 11, "type": "fkey", "target": null, "value": null, "key": "Enter"},
+        {"seq": 12, "type": "fkey", "target": null, "value": null, "key": "Enter"}
+      ]
+    },
+    {
+      "case_id": "case_04_edge_empty_required",
+      "category": "edge_empty_field",
+      "input": {
+        "instruction": "出張申請を出しておいて。6月20日から1日、案件P-001の打ち合わせ。",
+        "fields": {
+          "dest": "",
+          "dept_date": "2026-06-20",
+          "ret_date": "2026-06-20",
+          "days": "1",
+          "purpose": "打ち合わせ",
+          "proj_hint": "P-001"
+        }
+      },
+      "golden": [
+        {"seq": 1, "type": "nav", "target": null, "value": null, "key": "Enter"},
+        {"seq": 2, "type": "fkey", "target": null, "value": null, "key": "F3"}
+      ]
+    },
+    {
+      "case_id": "case_05_edge_invalid_proj",
+      "category": "edge_wrong_code",
+      "input": {
+        "instruction": "東京へ2日出張、製品Xの確認。6/22出発6/23帰着。案件コードはPX-001。",
+        "fields": {
+          "dest": "東京",
+          "dept_date": "2026-06-22",
+          "ret_date": "2026-06-23",
+          "days": "2",
+          "purpose": "製品X確認",
+          "proj_hint": "PX-001",
+          "proj_resolved": "P-002"
+        }
+      },
+      "golden": [
+        {"seq": 1, "type": "nav", "target": null, "value": null, "key": "Enter"},
+        {"seq": 2, "type": "field", "target": "DEST", "value": "TOKYO", "key": null},
+        {"seq": 3, "type": "field", "target": "DEPTDATE", "value": "20260622", "key": null},
+        {"seq": 4, "type": "field", "target": "RETDATE", "value": "20260623", "key": null},
+        {"seq": 5, "type": "field", "target": "DAYS", "value": "2", "key": null},
+        {"seq": 6, "type": "field", "target": "PURPOSE", "value": "製品X確認", "key": null},
+        {"seq": 7, "type": "fkey", "target": null, "value": null, "key": "F4"},
+        {"seq": 8, "type": "field", "target": "PROJ", "value": "P-002", "key": null},
+        {"seq": 9, "type": "fkey", "target": null, "value": null, "key": "Enter"},
+        {"seq": 10, "type": "fkey", "target": null, "value": null, "key": "Enter"}
+      ]
+    },
+    {
+      "case_id": "case_06_edge_long_purpose",
+      "category": "edge_long_value",
+      "input": {
+        "instruction": "実験機Bの定期点検および部品交換と供給状況確認、次期計画打合せのため大阪へ3日間出張。6/24-6/26。案件P-001。",
+        "fields": {
+          "dest": "大阪",
+          "dept_date": "2026-06-24",
+          "ret_date": "2026-06-26",
+          "days": "3",
+          "purpose": "実験機B定期点検および部品交換と供給状況確認次期計画打合せ",
+          "proj_hint": "P-001"
+        }
+      },
+      "golden": [
+        {"seq": 1, "type": "nav", "target": null, "value": null, "key": "Enter"},
+        {"seq": 2, "type": "field", "target": "DEST", "value": "OSAKA", "key": null},
+        {"seq": 3, "type": "field", "target": "DEPTDATE", "value": "20260624", "key": null},
+        {"seq": 4, "type": "field", "target": "RETDATE", "value": "20260626", "key": null},
+        {"seq": 5, "type": "field", "target": "DAYS", "value": "3", "key": null},
+        {"seq": 6, "type": "field", "target": "PURPOSE", "value": "実験機B定期点検および部品交換と供給状況", "key": null},
+        {"seq": 7, "type": "fkey", "target": null, "value": null, "key": "F4"},
+        {"seq": 8, "type": "field", "target": "PROJ", "value": "P-001", "key": null},
+        {"seq": 9, "type": "fkey", "target": null, "value": null, "key": "Enter"},
+        {"seq": 10, "type": "fkey", "target": null, "value": null, "key": "Enter"}
+      ]
+    },
+    {
+      "case_id": "case_07_edge_reuse_prev",
+      "category": "edge_reuse_branch",
+      "input": {
+        "instruction": "前回と同じ案件で、実験機Aの追加検査のため名古屋へ日帰り出張。6/30。案件コードは前回値を再利用。",
+        "fields": {
+          "dest": "名古屋",
+          "dept_date": "2026-06-30",
+          "ret_date": "2026-06-30",
+          "days": "1",
+          "purpose": "実験機A追加検査",
+          "proj_reuse": true,
+          "proj_resolved": "P-002"
+        }
+      },
+      "golden": [
+        {"seq": 1, "type": "nav", "target": null, "value": null, "key": "Enter"},
+        {"seq": 2, "type": "field", "target": "DEST", "value": "NAGOYA", "key": null},
+        {"seq": 3, "type": "field", "target": "DEPTDATE", "value": "20260630", "key": null},
+        {"seq": 4, "type": "field", "target": "RETDATE", "value": "20260630", "key": null},
+        {"seq": 5, "type": "field", "target": "DAYS", "value": "1", "key": null},
+        {"seq": 6, "type": "fkey", "target": null, "value": null, "key": "FieldExit"},
+        {"seq": 7, "type": "field", "target": "PURPOSE", "value": "実験機A追加検査", "key": null},
+        {"seq": 8, "type": "fkey", "target": null, "value": null, "key": "F9"},
+        {"seq": 9, "type": "field", "target": "PROJ", "value": "P-002", "key": null},
+        {"seq": 10, "type": "fkey", "target": null, "value": null, "key": "Enter"},
+        {"seq": 11, "type": "fkey", "target": null, "value": null, "key": "Enter"}
+      ]
+    },
+    {
+      "case_id": "case_08_edge_days_recalc",
+      "category": "edge_days_recalc",
+      "_note": "DAYS 再計算: 帰着 2026-07-04 − 出発 2026-07-01 = 3日差。出発日・帰着日を含むため +1 = 4日（guidelines.md 指針3）。ユーザー申告『3日』は矛盾のため無視し、日付から算出した4を DAYS に採用する。",
+      "input": {
+        "instruction": "製品Xの進捗確認のため東京へ3日間出張。7月1日出発、7月4日帰着。案件コードP-001。",
+        "fields": {
+          "dest": "東京",
+          "dept_date": "2026-07-01",
+          "ret_date": "2026-07-04",
+          "days_stated": "3",
+          "days_recalc": "4",
+          "purpose": "製品X進捗確認",
+          "proj_hint": "P-001"
+        }
+      },
+      "golden": [
+        {"seq": 1, "type": "nav", "target": null, "value": null, "key": "Enter"},
+        {"seq": 2, "type": "field", "target": "DEST", "value": "TOKYO", "key": null},
+        {"seq": 3, "type": "field", "target": "DEPTDATE", "value": "20260701", "key": null},
+        {"seq": 4, "type": "field", "target": "RETDATE", "value": "20260704", "key": null},
+        {"seq": 5, "type": "field", "target": "DAYS", "value": "4", "key": null},
+        {"seq": 6, "type": "field", "target": "PURPOSE", "value": "製品X進捗確認", "key": null},
+        {"seq": 7, "type": "fkey", "target": null, "value": null, "key": "F4"},
+        {"seq": 8, "type": "field", "target": "PROJ", "value": "P-001", "key": null},
+        {"seq": 9, "type": "fkey", "target": null, "value": null, "key": "Enter"},
+        {"seq": 10, "type": "fkey", "target": null, "value": null, "key": "Enter"}
+      ]
+    }
+  ]
+}

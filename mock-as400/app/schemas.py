@@ -1,4 +1,5 @@
 import datetime as dt
+from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
@@ -31,3 +32,18 @@ class TripApplicationRead(BaseModel):
     proj: str
     overseas: bool
     created_at: dt.datetime
+
+
+class StepIn(BaseModel):
+    type: Literal["field", "fkey", "nav"]
+    target: str | None = None
+    value: str | None = None
+    key: str | None = None
+
+
+class SessionStateOut(BaseModel):
+    session_id: str
+    screen: str
+    fields: dict[str, str]
+    errors: list[str]
+    trip_id: int | None

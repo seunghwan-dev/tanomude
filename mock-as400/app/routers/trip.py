@@ -10,7 +10,7 @@ router = APIRouter(prefix="/trip", tags=["trip"])
 
 @router.post("", response_model=TripApplicationRead, status_code=status.HTTP_201_CREATED)
 def create_trip(payload: TripApplicationCreate, db: Session = Depends(get_db)) -> TripApplicationRead:
-    return trip_repo.create(db, payload)
+    return TripApplicationRead.model_validate(trip_repo.create(db, payload))
 
 
 @router.get("/{trip_id}", response_model=TripApplicationRead)
@@ -18,4 +18,4 @@ def get_trip(trip_id: int, db: Session = Depends(get_db)) -> TripApplicationRead
     record = trip_repo.get(db, trip_id)
     if record is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="trip_application not found")
-    return record
+    return TripApplicationRead.model_validate(record)
