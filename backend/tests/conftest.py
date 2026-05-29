@@ -25,13 +25,7 @@ def db():
     try:
         yield session
     finally:
-        session.close()
-
-
-@pytest.fixture(autouse=True)
-def clean_tables():
-    yield
-    with SessionLocal() as session:
         session.execute(delete(KnowledgeChunk))
         session.execute(delete(OperationDoc))
         session.commit()
+        session.close()

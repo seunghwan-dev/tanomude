@@ -28,7 +28,7 @@ class KnowledgeChunk(Base):
     __tablename__ = "knowledge_chunks"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    doc_id: Mapped[int] = mapped_column(ForeignKey("operation_docs.id"), nullable=False)
+    doc_id: Mapped[int] = mapped_column(ForeignKey("operation_docs.id", ondelete="CASCADE"), nullable=False)
     ordinal: Mapped[int] = mapped_column(Integer, nullable=False)
     section: Mapped[str] = mapped_column(String(64), nullable=False)
     heading: Mapped[str] = mapped_column(String(200), nullable=False)
