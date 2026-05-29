@@ -1,6 +1,3 @@
-from app.repositories import trip_repo
-
-
 def field(target, value):
     return {"type": "field", "target": target, "value": value, "key": None}
 
@@ -34,7 +31,7 @@ def _start(client):
     return resp.json()["session_id"]
 
 
-def test_full_flow_persists_and_saves_trip(client, db):
+def test_full_flow_persists_and_saves_trip(client):
     sid = _start(client)
     last = None
     for step in HAPPY:
@@ -45,17 +42,14 @@ def test_full_flow_persists_and_saves_trip(client, db):
     assert body["trip_id"] is not None
 
     trip_id = body["trip_id"]
-    try:
-        fetched = client.get(f"/trip/{trip_id}")
-        assert fetched.status_code == 200
-        assert fetched.json()["dest"] == "OSAKA"
-        assert fetched.json()["proj"] == "P-001"
+    fetched = client.get(f"/trip/{trip_id}")
+    assert fetched.status_code == 200
+    assert fetched.json()["dest"] == "OSAKA"
+    assert fetched.json()["proj"] == "P-001"
 
-        reloaded = client.get(f"/session/{sid}")
-        assert reloaded.json()["screen"] == "submitted"
-        assert reloaded.json()["trip_id"] == trip_id
-    finally:
-        trip_repo.delete(db, trip_id)
+    reloaded = client.get(f"/session/{sid}")
+    assert reloaded.json()["screen"] == "submitted"
+    assert reloaded.json()["trip_id"] == trip_id
 
 
 def test_abort_flow_saves_no_trip(client):
@@ -111,7 +105,7 @@ def test_invalid_date_stays_on_screen_without_500(client):
     assert body["trip_id"] is None
 
 
-def test_f9_recalls_last_submitted_proj(client, db):
+def test_f9_recalls_last_submitted_proj(client):
     sid1 = _start(client)
     seq = [
         nav("Enter"),
@@ -129,13 +123,10 @@ def test_f9_recalls_last_submitted_proj(client, db):
     last = None
     for step in seq:
         last = client.post(f"/session/{sid1}/step", json=step)
-    trip_id = last.json()["trip_id"]
+    assert last.json()["trip_id"] is not None
 
-    try:
-        sid2 = _start(client)
-        recalled = None
-        for step in [nav("Enter"), nav("Enter"), fkey("F9")]:
-            recalled = client.post(f"/session/{sid2}/step", json=step)
-        assert recalled.json()["fields"]["PROJ"] == "P-005"
-    finally:
-        trip_repo.delete(db, trip_id)
+    sid2 = _start(client)
+    recalled = None
+    for step in [nav("Enter"), nav("Enter"), fkey("F9")]:
+        recalled = client.post(f"/session/{sid2}/step", json=step)
+    assert recalled.json()["fields"]["PROJ"] == "P-005"

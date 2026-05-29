@@ -8,7 +8,7 @@ from sqlalchemy import delete
 
 from app.db import SessionLocal
 from app.main import app
-from app.models import MockSession
+from app.models import MockSession, TripApplication
 
 ALEMBIC_INI = Path(__file__).resolve().parent.parent / "alembic.ini"
 
@@ -36,8 +36,9 @@ def db():
 
 
 @pytest.fixture(autouse=True)
-def clean_mock_sessions():
+def clean_tables():
     yield
     with SessionLocal() as session:
         session.execute(delete(MockSession))
+        session.execute(delete(TripApplication))
         session.commit()
