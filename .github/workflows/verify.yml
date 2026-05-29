@@ -30,6 +30,20 @@ jobs:
           --health-interval 5s
           --health-timeout 3s
           --health-retries 10
+      platform-db:
+        # Platform RAG store (design §10) — pgvector, separate from the Mock DB.
+        image: pgvector/pgvector:pg16
+        env:
+          POSTGRES_USER: tanomude
+          POSTGRES_PASSWORD: tanomude
+          POSTGRES_DB: platform
+        ports:
+          - 5433:5432
+        options: >-
+          --health-cmd "pg_isready -U tanomude -d platform"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 10
     steps:
       - uses: actions/checkout@v4
         with:
@@ -67,4 +81,16 @@ jobs:
         working-directory: adapter
         env:
           DATABASE_URL: postgresql+psycopg://tanomude:tanomude@localhost:5432/mock_as400
+        run: pytest -q
+
+      - name: Install backend
+        working-directory: backend
+        run: pip install -e ".[dev]"
+
+      - name: Run backend tests
+        working-directory: backend
+        env:
+          PLATFORM_DATABASE_URL: postgresql+psycopg://tanomude:tanomude@localhost:5433/platform
+          # No embedding service in CI: TEI-dependent tests (ingest/embed/eval) skip; fake-embedder tests gate.
+          EMBEDDING_URL: http://localhost:8001
         run: pytest -q
