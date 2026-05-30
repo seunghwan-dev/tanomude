@@ -17,6 +17,7 @@ class Screen(BaseModel):
     errors: list[str] = Field(default_factory=list)
     trip_id: int | None = None
     ready: bool = True
+    trip_created: bool | None = None
 
 
 class AssertSpec(BaseModel):

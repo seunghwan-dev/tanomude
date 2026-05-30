@@ -19,6 +19,7 @@ class TripApplication(Base):
     purpose: Mapped[str] = mapped_column(String(20), nullable=False)
     proj: Mapped[str] = mapped_column(String(5), nullable=False)
     overseas: Mapped[bool] = mapped_column(Boolean, nullable=False, server_default="false")
+    idempotency_key: Mapped[str | None] = mapped_column(String(64), unique=True, nullable=True)
     created_at: Mapped[dt.datetime] = mapped_column(
         DateTime(timezone=True), nullable=False, server_default=func.now()
     )

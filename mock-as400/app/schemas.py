@@ -41,6 +41,10 @@ class StepIn(BaseModel):
     key: str | None = None
 
 
+class SessionCreate(BaseModel):
+    idempotency_key: str | None = None
+
+
 class SessionStateOut(BaseModel):
     session_id: str
     screen: str
@@ -48,3 +52,4 @@ class SessionStateOut(BaseModel):
     errors: list[str]
     trip_id: int | None
     ready: bool = True
+    trip_created: bool | None = None

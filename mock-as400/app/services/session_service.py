@@ -27,8 +27,11 @@ def is_ready(record: MockSession) -> bool:
     return record.payload.get(_PENDING) is None
 
 
-def start(db: Session, start_screen: str = statemachine.LOGIN) -> MockSession:
+def start(
+    db: Session, start_screen: str = statemachine.LOGIN, idempotency_key: str | None = None
+) -> MockSession:
     state = statemachine.initial_state(start_screen)
+    state["idempotency_key"] = idempotency_key
     last_proj = trip_repo.latest_proj(db)
     if last_proj:
         state["prev_proj"] = last_proj
@@ -65,9 +68,12 @@ def step(db: Session, session_id: str, step_dict: dict) -> MockSession | None:
     trip_id = record.trip_id
 
     if state["screen"] == statemachine.SUBMITTED and state.get("pending_trip") and trip_id is None:
-        created = trip_repo.create(db, TripApplicationCreate(**state["pending_trip"]))
-        trip_id = created.id
+        trip, created = trip_repo.create_idempotent(
+            db, TripApplicationCreate(**state["pending_trip"]), current.get("idempotency_key")
+        )
+        trip_id = trip.id
         state["trip_id"] = trip_id
+        state["trip_created"] = created
         state["pending_trip"] = None
 
     delay_ms = _render_delay_ms()

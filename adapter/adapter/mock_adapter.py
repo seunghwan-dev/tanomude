@@ -9,8 +9,8 @@ class MockAdapter(ScreenAdapter):
         self._client = client
         self._session_id: str | None = None
 
-    def open(self) -> Screen:
-        response = self._client.post("/session")
+    def open(self, idempotency_key: str | None = None) -> Screen:
+        response = self._client.post("/session", json={"idempotency_key": idempotency_key})
         response.raise_for_status()
         screen = Screen.model_validate(response.json())
         self._session_id = screen.session_id
