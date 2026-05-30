@@ -7,6 +7,7 @@ from adapter.types import AssertSpec, KeyStep
 from backend.slotfill import FilledKeysequence, Refusal, RequestInput, SlotExtractor, Step, fill
 
 MAX_REPLAN = 2
+ROLLBACK_MAX_NAV = 3
 TRIP_INPUT = "trip_input"
 ABORTED = "aborted"
 TARGET_SCREEN = "submitted"
@@ -101,7 +102,7 @@ def _rollback(adapter: ScreenAdapter, outcome: ExecutionOutcome, replan_count: i
     )
     screen = adapter.read_screen()
     guard = 0
-    while screen.screen != ABORTED and guard <= MAX_REPLAN:
+    while screen.screen != ABORTED and guard < ROLLBACK_MAX_NAV:
         adapter.send_keys(KeyStep(type="fkey", key="F3"))
         screen = adapter.wait_for_screen()
         guard += 1

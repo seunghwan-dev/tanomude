@@ -12,6 +12,7 @@ from app.main import app as mock_app
 from app.models import MockSession, TripApplication
 from adapter.base import ScreenAdapter
 from adapter.mock_adapter import MockAdapter
+from backend import coreloop
 from backend.coreloop import MAX_REPLAN, derive_idempotency_key, execute, run_task
 from backend.slotfill import RequestInput, Slots, fill
 
@@ -118,6 +119,16 @@ def test_replan_count_is_hard_capped(mock_client):
     assert outcome.status == "rolled_back"
     assert outcome.correction_candidate.replan_count == MAX_REPLAN
     assert spy.swallowed == MAX_REPLAN + 1
+
+
+def test_rollback_reaches_aborted_independent_of_max_replan(mock_client, monkeypatch):
+    monkeypatch.setattr(coreloop, "MAX_REPLAN", 0)
+    spy = _ConfirmStuckSpy(MockAdapter(mock_client), fail_submits=99)
+    outcome = run_task(_request(), spy, _constant(SLOTS))
+    assert outcome.status == "rolled_back"
+    assert outcome.final_screen == "aborted"
+    assert outcome.correction_candidate.replan_count == 0
+    assert _trip_count() == 0
 
 
 def test_without_replan_persistent_mismatch_is_verify_failed(mock_client):
