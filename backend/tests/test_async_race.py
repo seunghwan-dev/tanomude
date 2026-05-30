@@ -11,6 +11,7 @@ from sqlalchemy import delete
 from app.db import SessionLocal as MockSessionLocal
 from app.main import app as mock_app
 from app.models import MockSession, TripApplication
+from adapter.base import ScreenAdapter
 from adapter.mock_adapter import MockAdapter
 from backend import coreloop
 from backend.coreloop import run_task
@@ -18,6 +19,36 @@ from backend.slotfill import RequestInput, Slots
 
 MOCK_ROOT = Path(app_pkg.__file__).resolve().parent.parent
 SLOTS = Slots(dest_code="OSAKA", purpose="製品X納入調整")
+
+GUARANTEED_DELAY_MS = "800"
+RENDER_JITTER_MS = "1200"
+
+
+def _inject_guaranteed_delay(monkeypatch):
+    monkeypatch.setenv("MOCK_AS400_RENDER_DELAY_MS", GUARANTEED_DELAY_MS)
+    monkeypatch.setenv("MOCK_AS400_RENDER_JITTER_MS", RENDER_JITTER_MS)
+
+
+class _ReadySpy(ScreenAdapter):
+    def __init__(self, inner: ScreenAdapter):
+        self._inner = inner
+        self.ready_values: list[bool] = []
+
+    def read_screen(self):
+        screen = self._inner.read_screen()
+        self.ready_values.append(screen.ready)
+        return screen
+
+    def send_keys(self, step):
+        screen = self._inner.send_keys(step)
+        self.ready_values.append(screen.ready)
+        return screen
+
+    def assert_state(self, spec):
+        return self._inner.assert_state(spec)
+
+    def busy_observed(self) -> bool:
+        return any(value is False for value in self.ready_values)
 
 
 @pytest.fixture(scope="module", autouse=True)
@@ -48,22 +79,25 @@ def _request() -> RequestInput:
     )
 
 
-def _run(mock_client):
-    adapter = MockAdapter(mock_client)
-    adapter.open()
-    return run_task(_request(), adapter, lambda request, context: SLOTS)
+def _run(mock_client) -> tuple[coreloop.ExecutionOutcome, bool]:
+    inner = MockAdapter(mock_client)
+    inner.open()
+    spy = _ReadySpy(inner)
+    outcome = run_task(_request(), spy, lambda request, context: SLOTS)
+    return outcome, spy.busy_observed()
 
 
 def test_async_race_login_apply(mock_client, monkeypatch):
-    monkeypatch.setenv("MOCK_AS400_RENDER_DELAY_MS", "800")
-    monkeypatch.setenv("MOCK_AS400_RENDER_JITTER_MS", "1200")
-    outcome = _run(mock_client)
+    _inject_guaranteed_delay(monkeypatch)
+    outcome, busy_observed = _run(mock_client)
+    assert busy_observed is True
     assert outcome.status == "submitted"
     assert outcome.trip_id is not None
 
 
 def test_async_race_zero_delay_control(mock_client):
-    outcome = _run(mock_client)
+    outcome, busy_observed = _run(mock_client)
+    assert busy_observed is False
     assert outcome.status == "submitted"
     assert outcome.trip_id is not None
 
