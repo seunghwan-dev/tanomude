@@ -36,7 +36,9 @@ def upgrade() -> None:
         sa.Column("correction_candidate", JSONB(), nullable=True),
         sa.Column("started_at", sa.DateTime(timezone=True), nullable=False, server_default=sa.text("now()")),
         sa.Column("finished_at", sa.DateTime(timezone=True), nullable=True),
+        sa.UniqueConstraint("task_id", "attempt_no", name="uq_executions_task_attempt"),
     )
+    op.create_index("ix_executions_task_id", "executions", ["task_id"])
 
 
 def downgrade() -> None:

@@ -114,6 +114,25 @@ def test_delete_task_cascades_executions(platform_db):
     assert remaining == 0
 
 
+def test_attempt_no_unique_per_task(platform_db):
+    task = Task(dedup_key="task:attempts", workflow="shukko", instruction="a", fields={}, status="running")
+    platform_db.add(task)
+    platform_db.commit()
+    platform_db.add(Execution(task_id=task.id, attempt_no=1, status="verify_failed", executed_steps=5))
+    platform_db.commit()
+    platform_db.add(Execution(task_id=task.id, attempt_no=1, status="rolled_back", executed_steps=5))
+    with pytest.raises(IntegrityError):
+        platform_db.commit()
+
+
+def test_indexes_present():
+    inspector = inspect(engine)
+    task_indexed = [index["column_names"] for index in inspector.get_indexes("tasks")]
+    exec_indexed = [index["column_names"] for index in inspector.get_indexes("executions")]
+    assert ["dedup_key"] in task_indexed
+    assert ["task_id"] in exec_indexed
+
+
 def test_migration_downgrade_then_upgrade_is_clean():
     config = _alembic_config()
     command.downgrade(config, "0002")

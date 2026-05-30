@@ -1,7 +1,7 @@
 import datetime as dt
 
 from pgvector.sqlalchemy import Vector
-from sqlalchemy import Boolean, Computed, DateTime, ForeignKey, Integer, String, Text, func
+from sqlalchemy import Boolean, Computed, DateTime, ForeignKey, Integer, String, Text, UniqueConstraint, func
 from sqlalchemy.dialects.postgresql import JSONB, TSVECTOR
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
@@ -46,7 +46,7 @@ class Task(Base):
     __tablename__ = "tasks"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    dedup_key: Mapped[str | None] = mapped_column(String(200), unique=True, nullable=True)
+    dedup_key: Mapped[str | None] = mapped_column(String(200), unique=True, index=True, nullable=True)
     workflow: Mapped[str] = mapped_column(String(64), nullable=False)
     instruction: Mapped[str] = mapped_column(Text, nullable=False)
     fields: Mapped[dict] = mapped_column(JSONB, nullable=False)
@@ -61,9 +61,10 @@ class Task(Base):
 
 class Execution(Base):
     __tablename__ = "executions"
+    __table_args__ = (UniqueConstraint("task_id", "attempt_no", name="uq_executions_task_attempt"),)
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    task_id: Mapped[int] = mapped_column(ForeignKey("tasks.id", ondelete="CASCADE"), nullable=False)
+    task_id: Mapped[int] = mapped_column(ForeignKey("tasks.id", ondelete="CASCADE"), index=True, nullable=False)
     attempt_no: Mapped[int] = mapped_column(Integer, nullable=False)
     status: Mapped[str] = mapped_column(String(16), nullable=False)
     final_screen: Mapped[str | None] = mapped_column(String(64), nullable=True)
