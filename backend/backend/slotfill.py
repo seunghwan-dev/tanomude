@@ -3,7 +3,7 @@ import json
 from collections.abc import Callable
 from typing import Annotated, Literal
 
-from pydantic import BaseModel, Field, TypeAdapter
+from pydantic import BaseModel, Field, TypeAdapter, ValidationError
 from sqlalchemy.orm import Session
 
 from backend import ollama_client
@@ -11,6 +11,15 @@ from backend.retrieval import hybrid_search
 
 PURPOSE_MAX = 20
 DATE_FORMATS = ("%Y-%m-%d", "%Y%m%d")
+MAX_PARSE_RETRY = 2
+RETRY_TEMP_STEP = 0.3
+
+
+class SlotParseError(Exception):
+    def __init__(self, retry_count: int, errors: list[str]):
+        self.retry_count = retry_count
+        self.errors = errors
+        super().__init__(f"slot extraction failed after {retry_count} retries")
 
 
 class RequestInput(BaseModel):
@@ -158,5 +167,16 @@ def extract_slots(request: RequestInput, context: str = "") -> Slots:
         "# 指示\n" + request.instruction + "\n\n"
         "# フィールド値\n" + json.dumps(request.fields, ensure_ascii=False)
     )
-    data = ollama_client.generate_json(SLOT_SYSTEM, prompt)
-    return Slots(**data)
+    errors: list[str] = []
+    for attempt in range(MAX_PARSE_RETRY + 1):
+        try:
+            data = ollama_client.generate_json(
+                SLOT_SYSTEM,
+                prompt,
+                seed=ollama_client.DEFAULT_SEED + attempt,
+                temperature=RETRY_TEMP_STEP * attempt,
+            )
+            return Slots(**data)
+        except (ValueError, ValidationError) as exc:
+            errors.append(str(exc))
+    raise SlotParseError(retry_count=MAX_PARSE_RETRY, errors=errors)

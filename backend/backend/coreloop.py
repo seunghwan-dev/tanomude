@@ -4,7 +4,7 @@ from pydantic import BaseModel, Field
 
 from adapter.base import ScreenAdapter
 from adapter.types import AssertSpec, KeyStep
-from backend.slotfill import FilledKeysequence, Refusal, RequestInput, SlotExtractor, Step, fill
+from backend.slotfill import FilledKeysequence, Refusal, RequestInput, SlotExtractor, SlotParseError, Step, fill
 
 MAX_REPLAN = 2
 ROLLBACK_MAX_NAV = 3
@@ -21,7 +21,7 @@ class CorrectionCandidate(BaseModel):
 
 
 class ExecutionOutcome(BaseModel):
-    status: Literal["submitted", "refused", "verify_failed", "rolled_back"]
+    status: Literal["submitted", "refused", "verify_failed", "rolled_back", "parse_failed"]
     refusal: Refusal | None = None
     trip_id: int | None = None
     trip_created: bool | None = None
@@ -118,25 +118,28 @@ def _rollback(adapter: ScreenAdapter, outcome: ExecutionOutcome, replan_count: i
 def run_task(request: RequestInput, adapter: ScreenAdapter, slot_fn: SlotExtractor, context: str = "") -> ExecutionOutcome:
     adapter.open(derive_idempotency_key(request))
     try:
-        result = fill(request, slot_fn, context)
-        if isinstance(result, Refusal):
-            return ExecutionOutcome(status="refused", refusal=result, executed_steps=0)
-        if not auto_approve(result):
-            return ExecutionOutcome(status="verify_failed", errors=["not approved"])
-
-        outcome = execute(adapter, result)
-        replan_count = 0
-        while outcome.status == "verify_failed" and replan_count < MAX_REPLAN:
-            if not _recover_to_trip_input(adapter):
-                break
-            replan_count += 1
+        try:
             result = fill(request, slot_fn, context)
             if isinstance(result, Refusal):
-                break
-            outcome = _replan(adapter, result)
+                return ExecutionOutcome(status="refused", refusal=result, executed_steps=0)
+            if not auto_approve(result):
+                return ExecutionOutcome(status="verify_failed", errors=["not approved"])
 
-        if outcome.status == "verify_failed":
-            return _rollback(adapter, outcome, replan_count)
-        return outcome
+            outcome = execute(adapter, result)
+            replan_count = 0
+            while outcome.status == "verify_failed" and replan_count < MAX_REPLAN:
+                if not _recover_to_trip_input(adapter):
+                    break
+                replan_count += 1
+                result = fill(request, slot_fn, context)
+                if isinstance(result, Refusal):
+                    break
+                outcome = _replan(adapter, result)
+
+            if outcome.status == "verify_failed":
+                return _rollback(adapter, outcome, replan_count)
+            return outcome
+        except SlotParseError as exc:
+            return ExecutionOutcome(status="parse_failed", errors=exc.errors)
     finally:
         adapter.close()
