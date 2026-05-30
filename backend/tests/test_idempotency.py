@@ -1,4 +1,3 @@
-import hashlib
 from pathlib import Path
 
 import app as app_pkg
@@ -12,6 +11,7 @@ from app.db import SessionLocal as MockSessionLocal
 from app.main import app as mock_app
 from app.models import MockSession, TripApplication
 from adapter.mock_adapter import MockAdapter
+from backend import coreloop
 from backend.coreloop import run_task
 from backend.slotfill import RequestInput, Slots
 
@@ -50,30 +50,23 @@ def _trip_count() -> int:
         return session.scalar(select(func.count()).select_from(TripApplication))
 
 
-def _request() -> RequestInput:
+def _request(task_id: str | None) -> RequestInput:
     return RequestInput(
         workflow="shukko",
         instruction="出張申請",
         fields={"dest": "大阪", "dept_date": "2026-06-10", "ret_date": "2026-06-11", "proj_hint": "P-001"},
+        task_id=task_id,
     )
 
 
-def _key(request: RequestInput) -> str:
-    raw = repr([request.workflow, sorted(request.fields.items())])
-    return hashlib.sha256(raw.encode()).hexdigest()[:32]
+def _run(mock_client, task_id):
+    return run_task(_request(task_id), MockAdapter(mock_client), lambda request, context: SLOTS)
 
 
-def _run(mock_client, key):
-    adapter = MockAdapter(mock_client)
-    adapter.open(idempotency_key=key)
-    return run_task(_request(), adapter, lambda request, context: SLOTS)
-
-
-def test_same_task_submits_once(mock_client):
-    key = _key(_request())
+def test_same_task_id_submits_once(mock_client):
     before = _trip_count()
-    first = _run(mock_client, key)
-    second = _run(mock_client, key)
+    first = _run(mock_client, "task-osaka-001")
+    second = _run(mock_client, "task-osaka-001")
     assert first.status == "submitted"
     assert second.status == "submitted"
     assert _trip_count() == before + 1
@@ -81,18 +74,30 @@ def test_same_task_submits_once(mock_client):
     assert second.trip_id == first.trip_id
 
 
-def test_missing_key_submits_twice(mock_client):
+def test_disabled_key_derivation_submits_twice(mock_client, monkeypatch):
+    monkeypatch.setattr(coreloop, "derive_idempotency_key", lambda request: None)
     before = _trip_count()
-    first = _run(mock_client, None)
-    second = _run(mock_client, None)
+    first = _run(mock_client, "task-osaka-001")
+    second = _run(mock_client, "task-osaka-001")
     assert _trip_count() == before + 2
     assert first.trip_id is not None
     assert second.trip_id != first.trip_id
 
 
-def test_duplicate_submission_is_observable(mock_client):
-    key = _key(_request())
-    first = _run(mock_client, key)
-    second = _run(mock_client, key)
+def test_duplicate_task_is_observable(mock_client):
+    first = _run(mock_client, "task-observe")
+    second = _run(mock_client, "task-observe")
     assert first.trip_created is True
     assert second.trip_created is False
+
+
+def test_idempotent_under_render_delay(mock_client, monkeypatch):
+    monkeypatch.setenv("MOCK_AS400_RENDER_DELAY_MS", "800")
+    monkeypatch.setenv("MOCK_AS400_RENDER_JITTER_MS", "1200")
+    before = _trip_count()
+    first = _run(mock_client, "task-delay")
+    second = _run(mock_client, "task-delay")
+    assert first.status == "submitted"
+    assert second.status == "submitted"
+    assert _trip_count() == before + 1
+    assert second.trip_id == first.trip_id

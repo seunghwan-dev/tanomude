@@ -55,7 +55,6 @@ def _trip_count() -> int:
 @pytest.mark.parametrize("case", CASES, ids=[c["case_id"] for c in CASES])
 def test_w1_capstone_full_stack(case, mock_client, db):
     adapter = MockAdapter(mock_client)
-    adapter.open()
     request = RequestInput(workflow="shukko", instruction=case["input"]["instruction"], fields=case["input"]["fields"])
     cid = case["case_id"]
 

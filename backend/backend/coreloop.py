@@ -21,6 +21,12 @@ def auto_approve(filled: FilledKeysequence) -> bool:
     return True
 
 
+def derive_idempotency_key(request: RequestInput) -> str | None:
+    if request.task_id is None:
+        return None
+    return f"task:{request.task_id}"
+
+
 def _to_keystep(step: Step) -> KeyStep:
     return KeyStep(type=step.type, target=step.target, value=step.value, key=step.key)
 
@@ -60,6 +66,7 @@ def execute(adapter: ScreenAdapter, filled: FilledKeysequence) -> ExecutionOutco
 
 
 def run_task(request: RequestInput, adapter: ScreenAdapter, slot_fn: SlotExtractor, context: str = "") -> ExecutionOutcome:
+    adapter.open(derive_idempotency_key(request))
     result = fill(request, slot_fn, context)
     if isinstance(result, Refusal):
         return ExecutionOutcome(status="refused", refusal=result, executed_steps=0)

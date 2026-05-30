@@ -34,7 +34,9 @@ def create_idempotent(
         db.commit()
     except IntegrityError:
         db.rollback()
-        return _by_key(db, key), False
+        winner = _by_key(db, key)
+        assert winner is not None
+        return winner, False
     db.refresh(record)
     return record, True
 

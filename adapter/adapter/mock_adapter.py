@@ -31,6 +31,9 @@ class MockAdapter(ScreenAdapter):
     def assert_state(self, spec: AssertSpec) -> AssertResult:
         return evaluate_assert(self.read_screen(), spec)
 
+    def close(self) -> None:
+        self._session_id = None
+
     def _require_session(self) -> None:
         if self._session_id is None:
             raise RuntimeError("adapter session not opened")

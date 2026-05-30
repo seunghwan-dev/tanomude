@@ -64,7 +64,7 @@ SLOTS = Slots(dest_code="OSAKA", purpose="製品X納入調整")
 
 
 def test_valid_runs_to_submitted_and_creates_trip(mock_client):
-    outcome = run_task(_request(), _opened(mock_client), _constant(SLOTS))
+    outcome = run_task(_request(), MockAdapter(mock_client), _constant(SLOTS))
     assert outcome.status == "submitted"
     assert outcome.trip_id is not None
     fetched = mock_client.get(f"/trip/{outcome.trip_id}")
@@ -81,7 +81,7 @@ def test_refusal_skips_execution_and_creates_no_trip(mock_client):
         called.append(1)
         return SLOTS
 
-    outcome = run_task(_request(dest=""), _opened(mock_client), slot_fn)
+    outcome = run_task(_request(dest=""), MockAdapter(mock_client), slot_fn)
     assert outcome.status == "refused"
     assert outcome.refusal.missing_fields == ["DEST"]
     assert outcome.executed_steps == 0
@@ -133,6 +133,6 @@ def test_full_stack_smoke_reaches_submitted(mock_client, db):
                   source="shukko_manual.md", markdown=load_manual("shukko_manual.md"))
     request = _request()
     context = ground(db, request.instruction)
-    outcome = run_task(request, _opened(mock_client), extract_slots, context)
+    outcome = run_task(request, MockAdapter(mock_client), extract_slots, context)
     assert outcome.status == "submitted"
     assert outcome.trip_id is not None

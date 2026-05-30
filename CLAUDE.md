@@ -69,3 +69,17 @@ line of defense — these keep less from ever reaching it.
 Build, test, and prepare changes autonomously — but nothing reaches `main` without a
 human's review and merge (the ringi stamp). Optimize for making that human decision easy
 and well-informed, not for bypassing it.
+
+## Decisions
+
+Decision records for design choices made during tracked work. Earlier records ([D-1]
+through [D-53]) live in the design master; new decisions are recorded here.
+
+- **[D-54]** §2-1 seam extended to own session lifecycle: `ScreenAdapter` gains
+  `open(idempotency_key=None)` and `close()` as abstract methods alongside
+  `read_screen`/`send_keys`/`assert_state`. `run_task` takes an unopened adapter and opens
+  the session itself as its first action, deriving the idempotency key from
+  `RequestInput.task_id` via `derive_idempotency_key` (`task:{task_id}`, `None` when there
+  is no task id). This makes duplicate-submission defense active on the production
+  core-loop path; the real AS-400 adapter will implement open/close as its connect/login
+  and disconnect.

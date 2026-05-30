@@ -84,6 +84,12 @@ class _StuckAdapter(base.ScreenAdapter):
     def assert_state(self, spec):
         return evaluate_assert(self.read_screen(), spec)
 
+    def open(self, idempotency_key=None):
+        return None
+
+    def close(self) -> None:
+        return None
+
 
 def test_wait_for_screen_raises_on_timeout_without_silent_pass():
     with pytest.raises(base.ScreenTimeoutError):
