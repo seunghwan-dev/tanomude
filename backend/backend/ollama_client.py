@@ -4,12 +4,13 @@ import urllib.request
 from backend.config import settings
 
 MODEL = "gemma4:e4b"
+DEFAULT_SEED = 42
 
 
 def _generate_text(
     system: str,
     prompt: str,
-    seed: int = 42,
+    seed: int = DEFAULT_SEED,
     temperature: float = 0.0,
     num_predict: int = 512,
     timeout: float = 120.0,
@@ -36,7 +37,7 @@ def _generate_text(
 def generate_json(
     system: str,
     prompt: str,
-    seed: int = 42,
+    seed: int = DEFAULT_SEED,
     temperature: float = 0.0,
     num_predict: int = 512,
     timeout: float = 120.0,

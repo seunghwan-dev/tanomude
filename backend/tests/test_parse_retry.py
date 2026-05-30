@@ -14,7 +14,15 @@ from app.models import MockSession, TripApplication
 from adapter.mock_adapter import MockAdapter
 from backend import ollama_client
 from backend.coreloop import run_task
-from backend.slotfill import MAX_PARSE_RETRY, SLOT_SYSTEM, RequestInput, SlotParseError, Slots, extract_slots
+from backend.slotfill import (
+    MAX_PARSE_RETRY,
+    RETRY_TEMP_STEP,
+    SLOT_SYSTEM,
+    RequestInput,
+    SlotParseError,
+    Slots,
+    extract_slots,
+)
 
 MOCK_ROOT = Path(app_pkg.__file__).resolve().parent.parent
 VALID_TEXT = '{"dest_code":"OSAKA","purpose":"製品X納入調整","overseas":false,"reuse_prev_proj":false}'
@@ -94,6 +102,33 @@ def test_persistent_invalid_fails_safely(mock_client, monkeypatch):
     assert outcome.trip_id is None
     assert state["calls"] == MAX_PARSE_RETRY + 1
     assert _trip_count() == 0
+
+
+def test_persistent_schema_violation_fails_safely(mock_client, monkeypatch):
+    source, state = _text_source([WRONG_SHAPE])
+    monkeypatch.setattr(ollama_client, "_generate_text", source)
+    outcome = run_task(_request(), MockAdapter(mock_client), extract_slots)
+    assert outcome.status == "parse_failed"
+    assert outcome.trip_id is None
+    assert state["calls"] == MAX_PARSE_RETRY + 1
+    assert _trip_count() == 0
+
+
+def test_retries_escalate_sampling_params(mock_client, monkeypatch):
+    seen: list[tuple] = []
+
+    def source(system, prompt, **kwargs):
+        seen.append((kwargs.get("seed"), kwargs.get("temperature")))
+        return NON_JSON
+
+    monkeypatch.setattr(ollama_client, "_generate_text", source)
+    outcome = run_task(_request(), MockAdapter(mock_client), extract_slots)
+    assert outcome.status == "parse_failed"
+    temperatures = [temperature for _, temperature in seen]
+    seeds = [seed for seed, _ in seen]
+    assert temperatures == [RETRY_TEMP_STEP * attempt for attempt in range(MAX_PARSE_RETRY + 1)]
+    assert len(set(temperatures)) == len(temperatures)
+    assert len(set(seeds)) == len(seeds)
 
 
 def test_retry_count_is_hard_capped(monkeypatch):

@@ -12,6 +12,7 @@ from backend.retrieval import hybrid_search
 PURPOSE_MAX = 20
 DATE_FORMATS = ("%Y-%m-%d", "%Y%m%d")
 MAX_PARSE_RETRY = 2
+RETRY_TEMP_STEP = 0.3
 
 
 class SlotParseError(Exception):
@@ -167,10 +168,15 @@ def extract_slots(request: RequestInput, context: str = "") -> Slots:
         "# フィールド値\n" + json.dumps(request.fields, ensure_ascii=False)
     )
     errors: list[str] = []
-    for _ in range(MAX_PARSE_RETRY + 1):
+    for attempt in range(MAX_PARSE_RETRY + 1):
         try:
-            data = ollama_client.generate_json(SLOT_SYSTEM, prompt)
+            data = ollama_client.generate_json(
+                SLOT_SYSTEM,
+                prompt,
+                seed=ollama_client.DEFAULT_SEED + attempt,
+                temperature=RETRY_TEMP_STEP * attempt,
+            )
             return Slots(**data)
         except (ValueError, ValidationError) as exc:
             errors.append(str(exc))
-    raise SlotParseError(retry_count=len(errors) - 1, errors=errors)
+    raise SlotParseError(retry_count=MAX_PARSE_RETRY, errors=errors)
