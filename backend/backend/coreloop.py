@@ -25,13 +25,15 @@ def _to_keystep(step: Step) -> KeyStep:
 
 
 def execute(adapter: ScreenAdapter, filled: FilledKeysequence) -> ExecutionOutcome:
-    screen = adapter.send_keys(KeyStep(type="nav", key="Enter"))
+    adapter.send_keys(KeyStep(type="nav", key="Enter"))
+    screen = adapter.wait_for_screen()
     executed = 0
     if screen.errors:
         return ExecutionOutcome(status="verify_failed", final_screen=screen.screen, errors=screen.errors)
 
     for step in filled.steps:
-        screen = adapter.send_keys(_to_keystep(step))
+        adapter.send_keys(_to_keystep(step))
+        screen = adapter.wait_for_screen()
         executed += 1
         if screen.errors:
             return ExecutionOutcome(

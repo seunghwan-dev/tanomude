@@ -47,3 +47,4 @@ class SessionStateOut(BaseModel):
     fields: dict[str, str]
     errors: list[str]
     trip_id: int | None
+    ready: bool = True
