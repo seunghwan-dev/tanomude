@@ -67,9 +67,12 @@ def execute(adapter: ScreenAdapter, filled: FilledKeysequence) -> ExecutionOutco
 
 def run_task(request: RequestInput, adapter: ScreenAdapter, slot_fn: SlotExtractor, context: str = "") -> ExecutionOutcome:
     adapter.open(derive_idempotency_key(request))
-    result = fill(request, slot_fn, context)
-    if isinstance(result, Refusal):
-        return ExecutionOutcome(status="refused", refusal=result, executed_steps=0)
-    if not auto_approve(result):
-        return ExecutionOutcome(status="verify_failed", errors=["not approved"])
-    return execute(adapter, result)
+    try:
+        result = fill(request, slot_fn, context)
+        if isinstance(result, Refusal):
+            return ExecutionOutcome(status="refused", refusal=result, executed_steps=0)
+        if not auto_approve(result):
+            return ExecutionOutcome(status="verify_failed", errors=["not approved"])
+        return execute(adapter, result)
+    finally:
+        adapter.close()
