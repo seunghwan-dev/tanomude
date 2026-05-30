@@ -6,14 +6,14 @@ from backend.config import settings
 MODEL = "gemma4:e4b"
 
 
-def generate_json(
+def _generate_text(
     system: str,
     prompt: str,
     seed: int = 42,
     temperature: float = 0.0,
     num_predict: int = 512,
     timeout: float = 120.0,
-) -> dict:
+) -> str:
     body = {
         "model": MODEL,
         "system": system,
@@ -30,7 +30,20 @@ def generate_json(
     )
     with urllib.request.urlopen(request, timeout=timeout) as response:
         raw = json.loads(response.read().decode("utf-8"))
-    text = raw.get("response", "")
+    return raw.get("response", "")
+
+
+def generate_json(
+    system: str,
+    prompt: str,
+    seed: int = 42,
+    temperature: float = 0.0,
+    num_predict: int = 512,
+    timeout: float = 120.0,
+) -> dict:
+    text = _generate_text(
+        system, prompt, seed=seed, temperature=temperature, num_predict=num_predict, timeout=timeout
+    )
     try:
         return json.loads(text)
     except json.JSONDecodeError as exc:
