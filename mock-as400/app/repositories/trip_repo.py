@@ -1,4 +1,5 @@
 from sqlalchemy import select
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app.models import TripApplication
@@ -11,6 +12,33 @@ def create(db: Session, data: TripApplicationCreate) -> TripApplication:
     db.commit()
     db.refresh(record)
     return record
+
+
+def _by_key(db: Session, key: str) -> TripApplication | None:
+    return db.scalar(select(TripApplication).where(TripApplication.idempotency_key == key))
+
+
+def create_idempotent(
+    db: Session, data: TripApplicationCreate, key: str | None
+) -> tuple[TripApplication, bool]:
+    if key is None:
+        return create(db, data), True
+
+    existing = _by_key(db, key)
+    if existing is not None:
+        return existing, False
+
+    record = TripApplication(**data.model_dump(), idempotency_key=key)
+    db.add(record)
+    try:
+        db.commit()
+    except IntegrityError:
+        db.rollback()
+        winner = _by_key(db, key)
+        assert winner is not None
+        return winner, False
+    db.refresh(record)
+    return record, True
 
 
 def get(db: Session, trip_id: int) -> TripApplication | None:

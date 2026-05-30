@@ -11,6 +11,7 @@ class ExecutionOutcome(BaseModel):
     status: Literal["submitted", "refused", "verify_failed"]
     refusal: Refusal | None = None
     trip_id: int | None = None
+    trip_created: bool | None = None
     executed_steps: int = 0
     final_screen: str | None = None
     errors: list[str] = Field(default_factory=list)
@@ -18,6 +19,12 @@ class ExecutionOutcome(BaseModel):
 
 def auto_approve(filled: FilledKeysequence) -> bool:
     return True
+
+
+def derive_idempotency_key(request: RequestInput) -> str | None:
+    if request.task_id is None:
+        return None
+    return f"task:{request.task_id}"
 
 
 def _to_keystep(step: Step) -> KeyStep:
@@ -50,11 +57,16 @@ def execute(adapter: ScreenAdapter, filled: FilledKeysequence) -> ExecutionOutco
         )
 
     return ExecutionOutcome(
-        status="submitted", trip_id=screen.trip_id, executed_steps=executed, final_screen=screen.screen
+        status="submitted",
+        trip_id=screen.trip_id,
+        trip_created=screen.trip_created,
+        executed_steps=executed,
+        final_screen=screen.screen,
     )
 
 
 def run_task(request: RequestInput, adapter: ScreenAdapter, slot_fn: SlotExtractor, context: str = "") -> ExecutionOutcome:
+    adapter.open(derive_idempotency_key(request))
     result = fill(request, slot_fn, context)
     if isinstance(result, Refusal):
         return ExecutionOutcome(status="refused", refusal=result, executed_steps=0)

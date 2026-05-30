@@ -17,6 +17,7 @@ class RequestInput(BaseModel):
     workflow: str
     instruction: str
     fields: dict[str, str | bool]
+    task_id: str | None = None
 
 
 class Slots(BaseModel):

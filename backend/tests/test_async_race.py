@@ -34,6 +34,12 @@ class _ReadySpy(ScreenAdapter):
         self._inner = inner
         self.ready_values: list[bool] = []
 
+    def open(self, idempotency_key=None):
+        return self._inner.open(idempotency_key)
+
+    def close(self) -> None:
+        self._inner.close()
+
     def read_screen(self):
         screen = self._inner.read_screen()
         self.ready_values.append(screen.ready)
@@ -81,7 +87,6 @@ def _request() -> RequestInput:
 
 def _run(mock_client) -> tuple[coreloop.ExecutionOutcome, bool]:
     inner = MockAdapter(mock_client)
-    inner.open()
     spy = _ReadySpy(inner)
     outcome = run_task(_request(), spy, lambda request, context: SLOTS)
     return outcome, spy.busy_observed()

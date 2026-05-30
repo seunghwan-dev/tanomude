@@ -24,6 +24,14 @@ class ScreenAdapter(ABC):
     def assert_state(self, spec: AssertSpec) -> AssertResult:
         ...
 
+    @abstractmethod
+    def open(self, idempotency_key: str | None = None) -> Screen | None:
+        ...
+
+    @abstractmethod
+    def close(self) -> None:
+        ...
+
     def wait_for_screen(
         self,
         expected: str | None = None,
