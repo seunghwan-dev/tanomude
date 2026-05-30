@@ -38,20 +38,23 @@ def start(
     return session_repo.create(db, state["screen"], state)
 
 
-def _settle(db: Session, record: MockSession) -> MockSession:
+def _settled(record: MockSession) -> tuple[str, dict, int | None]:
     pending = record.payload.get(_PENDING)
     if pending is None:
-        return record
+        return record.screen, record.payload, record.trip_id
     if time.time() < record.payload.get(_READY_AT, 0):
-        return record
-    return session_repo.save(db, record, pending["screen"], pending, pending.get("trip_id"))
+        return record.screen, record.payload, record.trip_id
+    return pending["screen"], pending, pending.get("trip_id")
 
 
 def read(db: Session, session_id: str) -> MockSession | None:
     record = session_repo.get(db, session_id)
     if record is None:
         return None
-    return _settle(db, record)
+    screen, payload, trip_id = _settled(record)
+    if payload is record.payload:
+        return record
+    return MockSession(id=record.id, screen=screen, payload=payload, trip_id=trip_id)
 
 
 def step(db: Session, session_id: str, step_dict: dict) -> MockSession | None:
@@ -59,13 +62,13 @@ def step(db: Session, session_id: str, step_dict: dict) -> MockSession | None:
     if record is None:
         return None
 
-    record = _settle(db, record)
-    if not is_ready(record):
+    screen, payload, settled_trip_id = _settled(record)
+    if payload.get(_PENDING) is not None:
         return record
 
-    current = record.payload
+    current = payload
     state = statemachine.apply_step(dict(current), step_dict)
-    trip_id = record.trip_id
+    trip_id = settled_trip_id
 
     if state["screen"] == statemachine.SUBMITTED and state.get("pending_trip") and trip_id is None:
         trip, created = trip_repo.create_idempotent(
@@ -80,6 +83,6 @@ def step(db: Session, session_id: str, step_dict: dict) -> MockSession | None:
     if delay_ms > 0 and state["screen"] != current["screen"]:
         state["trip_id"] = trip_id
         held = {**current, _PENDING: state, _READY_AT: time.time() + delay_ms / 1000.0}
-        return session_repo.save(db, record, current["screen"], held, record.trip_id)
+        return session_repo.save(db, record, current["screen"], held, settled_trip_id)
 
     return session_repo.save(db, record, state["screen"], state, trip_id)
