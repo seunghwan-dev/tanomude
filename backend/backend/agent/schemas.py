@@ -27,8 +27,6 @@ class ExecutionView(BaseModel):
 
 
 class TaskView(BaseModel):
-    model_config = ConfigDict(from_attributes=True)
-
     id: int
     dedup_key: str | None
     workflow: str

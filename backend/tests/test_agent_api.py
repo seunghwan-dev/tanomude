@@ -126,5 +126,21 @@ def test_hydration_orders_multiple_executions(client):
     assert [execution["attempt_no"] for execution in body["executions"]] == [1, 2, 3]
 
 
+def test_runner_exception_finalizes_rows(client):
+    def _raising_runner(request):
+        raise RuntimeError("boom")
+
+    app.dependency_overrides[get_runner] = lambda: _raising_runner
+    with pytest.raises(RuntimeError):
+        client.post("/tasks", json=_body())
+
+    with SessionLocal() as session:
+        task = session.scalars(select(Task)).one()
+        execution = session.scalars(select(Execution)).one()
+    assert task.status == "failed"
+    assert execution.status == "errored"
+    assert execution.finished_at is not None
+
+
 def test_get_missing_task_returns_404(client):
     assert client.get("/tasks/999999").status_code == 404

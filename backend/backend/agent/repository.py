@@ -44,6 +44,16 @@ def finalize_execution(
     db.refresh(task)
 
 
+def fail_execution(db: Session, execution: Execution, task: Task, error_message: str, task_status: str) -> None:
+    execution.status = "errored"
+    execution.errors = [error_message]
+    execution.finished_at = dt.datetime.now(dt.timezone.utc)
+    task.status = task_status
+    db.commit()
+    db.refresh(execution)
+    db.refresh(task)
+
+
 def get_task(db: Session, task_id: int) -> Task | None:
     return db.get(Task, task_id)
 

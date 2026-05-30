@@ -35,9 +35,13 @@ async def create_task(
     )
     execution = repository.create_execution(db, task.id, attempt_no=1, status="running")
     request = RequestInput(
-        workflow=body.workflow, instruction=body.instruction, fields=body.fields, task_id=body.dedup_key
+        workflow=body.workflow, instruction=body.instruction, fields=body.fields, task_id=str(task.id)
     )
-    outcome = await to_thread.run_sync(runner, request)
+    try:
+        outcome = await to_thread.run_sync(runner, request)
+    except Exception as exc:
+        repository.fail_execution(db, execution, task, repr(exc), rollup_status("errored"))
+        raise
     repository.finalize_execution(db, execution, task, outcome, rollup_status(outcome.status))
     return _to_view(task, repository.list_executions(db, task.id))
 
