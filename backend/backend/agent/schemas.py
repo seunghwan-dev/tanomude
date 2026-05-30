@@ -11,8 +11,11 @@ class TaskCreate(BaseModel):
     dedup_key: str | None = None
 
 
+EventType = Literal["task_created", "execution_started", "execution_finished", "status_changed"]
+
+
 class Envelope(BaseModel):
-    type: Literal["task_created", "execution_started", "execution_finished", "status_changed"]
+    type: EventType
     task_id: int
     seq: int
     ts: dt.datetime

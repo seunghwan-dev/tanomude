@@ -12,4 +12,6 @@ async def agent_ws(websocket: WebSocket) -> None:
         while True:
             await websocket.receive_text()
     except WebSocketDisconnect:
+        pass
+    finally:
         manager.disconnect(websocket)
