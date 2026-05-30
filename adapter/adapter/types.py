@@ -16,6 +16,7 @@ class Screen(BaseModel):
     fields: dict[str, str] = Field(default_factory=dict)
     errors: list[str] = Field(default_factory=list)
     trip_id: int | None = None
+    ready: bool = True
 
 
 class AssertSpec(BaseModel):
