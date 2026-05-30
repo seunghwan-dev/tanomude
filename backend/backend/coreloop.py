@@ -6,15 +6,28 @@ from adapter.base import ScreenAdapter
 from adapter.types import AssertSpec, KeyStep
 from backend.slotfill import FilledKeysequence, Refusal, RequestInput, SlotExtractor, Step, fill
 
+MAX_REPLAN = 2
+TRIP_INPUT = "trip_input"
+ABORTED = "aborted"
+TARGET_SCREEN = "submitted"
+
+
+class CorrectionCandidate(BaseModel):
+    screen: str | None = None
+    expected: str
+    diffs: list[str] = Field(default_factory=list)
+    replan_count: int
+
 
 class ExecutionOutcome(BaseModel):
-    status: Literal["submitted", "refused", "verify_failed"]
+    status: Literal["submitted", "refused", "verify_failed", "rolled_back"]
     refusal: Refusal | None = None
     trip_id: int | None = None
     trip_created: bool | None = None
     executed_steps: int = 0
     final_screen: str | None = None
     errors: list[str] = Field(default_factory=list)
+    correction_candidate: CorrectionCandidate | None = None
 
 
 def auto_approve(filled: FilledKeysequence) -> bool:
@@ -31,14 +44,10 @@ def _to_keystep(step: Step) -> KeyStep:
     return KeyStep(type=step.type, target=step.target, value=step.value, key=step.key)
 
 
-def execute(adapter: ScreenAdapter, filled: FilledKeysequence) -> ExecutionOutcome:
-    adapter.send_keys(KeyStep(type="nav", key="Enter"))
-    screen = adapter.wait_for_screen()
+def _drive(adapter: ScreenAdapter, steps: list[Step]) -> ExecutionOutcome:
     executed = 0
-    if screen.errors:
-        return ExecutionOutcome(status="verify_failed", final_screen=screen.screen, errors=screen.errors)
-
-    for step in filled.steps:
+    screen = adapter.read_screen()
+    for step in steps:
         adapter.send_keys(_to_keystep(step))
         screen = adapter.wait_for_screen()
         executed += 1
@@ -47,7 +56,7 @@ def execute(adapter: ScreenAdapter, filled: FilledKeysequence) -> ExecutionOutco
                 status="verify_failed", final_screen=screen.screen, errors=screen.errors, executed_steps=executed
             )
 
-    verdict = adapter.assert_state(AssertSpec(screen="submitted", trip_saved=True))
+    verdict = adapter.assert_state(AssertSpec(screen=TARGET_SCREEN, trip_saved=True))
     if not verdict.ok:
         return ExecutionOutcome(
             status="verify_failed",
@@ -65,6 +74,46 @@ def execute(adapter: ScreenAdapter, filled: FilledKeysequence) -> ExecutionOutco
     )
 
 
+def execute(adapter: ScreenAdapter, filled: FilledKeysequence) -> ExecutionOutcome:
+    adapter.send_keys(KeyStep(type="nav", key="Enter"))
+    screen = adapter.wait_for_screen()
+    if screen.errors:
+        return ExecutionOutcome(status="verify_failed", final_screen=screen.screen, errors=screen.errors)
+    return _drive(adapter, filled.steps)
+
+
+def _recover_to_trip_input(adapter: ScreenAdapter) -> bool:
+    adapter.send_keys(KeyStep(type="fkey", key="F3"))
+    screen = adapter.wait_for_screen()
+    return screen.screen == TRIP_INPUT
+
+
+def _replan(adapter: ScreenAdapter, filled: FilledKeysequence) -> ExecutionOutcome:
+    return _drive(adapter, filled.steps[1:])
+
+
+def _rollback(adapter: ScreenAdapter, outcome: ExecutionOutcome, replan_count: int) -> ExecutionOutcome:
+    candidate = CorrectionCandidate(
+        screen=outcome.final_screen,
+        expected=TARGET_SCREEN,
+        diffs=outcome.errors,
+        replan_count=replan_count,
+    )
+    screen = adapter.read_screen()
+    guard = 0
+    while screen.screen != ABORTED and guard <= MAX_REPLAN:
+        adapter.send_keys(KeyStep(type="fkey", key="F3"))
+        screen = adapter.wait_for_screen()
+        guard += 1
+    return ExecutionOutcome(
+        status="rolled_back",
+        final_screen=screen.screen,
+        executed_steps=outcome.executed_steps,
+        errors=outcome.errors,
+        correction_candidate=candidate,
+    )
+
+
 def run_task(request: RequestInput, adapter: ScreenAdapter, slot_fn: SlotExtractor, context: str = "") -> ExecutionOutcome:
     adapter.open(derive_idempotency_key(request))
     try:
@@ -73,6 +122,20 @@ def run_task(request: RequestInput, adapter: ScreenAdapter, slot_fn: SlotExtract
             return ExecutionOutcome(status="refused", refusal=result, executed_steps=0)
         if not auto_approve(result):
             return ExecutionOutcome(status="verify_failed", errors=["not approved"])
-        return execute(adapter, result)
+
+        outcome = execute(adapter, result)
+        replan_count = 0
+        while outcome.status == "verify_failed" and replan_count < MAX_REPLAN:
+            if not _recover_to_trip_input(adapter):
+                break
+            replan_count += 1
+            result = fill(request, slot_fn, context)
+            if isinstance(result, Refusal):
+                break
+            outcome = _replan(adapter, result)
+
+        if outcome.status == "verify_failed":
+            return _rollback(adapter, outcome, replan_count)
+        return outcome
     finally:
         adapter.close()
