@@ -86,6 +86,8 @@ def test_status_server_default_active(platform_db):
 
 def test_self_fk_supersedes_chain(platform_db):
     base = _correction(platform_db)
+    base.status = "superseded"
+    platform_db.commit()
     revised = _correction(
         platform_db, version=2, supersedes_id=base.id, source="human_revise", approver="suzuki"
     )
