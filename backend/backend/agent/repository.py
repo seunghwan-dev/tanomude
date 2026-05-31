@@ -89,28 +89,45 @@ def get_plan(db: Session, task_id: int) -> Plan | None:
     ).first()
 
 
-def create_approval(
-    db: Session, task_id: int, plan_id: int, decision: str, approver: str, decision_text: str | None
-) -> Approval:
-    approval = Approval(
-        task_id=task_id, plan_id=plan_id, decision=decision, approver=approver, decision_text=decision_text
+def _stage_decision(
+    db: Session, task: Task, plan_id: int, decision: str, approver: str, decision_text: str | None
+) -> None:
+    db.add(
+        Approval(
+            task_id=task.id, plan_id=plan_id, decision=decision, approver=approver, decision_text=decision_text
+        )
     )
-    db.add(approval)
-    db.commit()
-    db.refresh(approval)
-    return approval
+    db.add(
+        AuditLog(
+            task_id=task.id, plan_id=plan_id, approver=approver, decision=decision, decision_text=decision_text
+        )
+    )
 
 
-def append_audit(
-    db: Session, task_id: int, plan_id: int, approver: str, decision: str, decision_text: str | None
-) -> AuditLog:
-    entry = AuditLog(
-        task_id=task_id, plan_id=plan_id, approver=approver, decision=decision, decision_text=decision_text
-    )
-    db.add(entry)
+def record_reject(db: Session, task: Task, plan_id: int, approver: str, decision_text: str | None) -> None:
+    _stage_decision(db, task, plan_id, "reject", approver, decision_text)
+    task.status = "refused"
     db.commit()
-    db.refresh(entry)
-    return entry
+    db.refresh(task)
+
+
+def record_revise(db: Session, task: Task, plan_id: int, approver: str, decision_text: str | None) -> None:
+    _stage_decision(db, task, plan_id, "revise", approver, decision_text)
+    db.commit()
+    db.refresh(task)
+
+
+def record_approve(
+    db: Session, task: Task, plan_id: int, approver: str, decision_text: str | None
+) -> Execution:
+    _stage_decision(db, task, plan_id, "approve", approver, decision_text)
+    task.status = "running"
+    execution = Execution(task_id=task.id, attempt_no=1, status="running", executed_steps=0)
+    db.add(execution)
+    db.commit()
+    db.refresh(task)
+    db.refresh(execution)
+    return execution
 
 
 def get_task(db: Session, task_id: int) -> Task | None:
