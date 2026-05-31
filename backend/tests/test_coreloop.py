@@ -12,9 +12,9 @@ from app.main import app as mock_app
 from app.models import MockSession, TripApplication
 from adapter.mock_adapter import MockAdapter
 from backend import embedding, ollama_client
-from backend.coreloop import execute, run_task
+from backend.coreloop import _attempt, execute, plan, run_task
 from backend.ingest import ingest_manual, load_manual
-from backend.slotfill import FilledKeysequence, RequestInput, Slots, Step, extract_slots, ground
+from backend.slotfill import FilledKeysequence, Refusal, RequestInput, Slots, Step, extract_slots, fill, ground
 
 MOCK_ROOT = Path(app_pkg.__file__).resolve().parent.parent
 
@@ -63,6 +63,25 @@ def _constant(slots: Slots):
 SLOTS = Slots(dest_code="OSAKA", purpose="製品X納入調整")
 
 
+def test_plan_produces_keysequence_without_adapter():
+    result = plan(_request(), _constant(SLOTS))
+    assert isinstance(result, FilledKeysequence)
+    assert result.steps
+
+
+def test_plan_refuses_on_missing_field_without_adapter():
+    result = plan(_request(dest=""), _constant(SLOTS))
+    assert isinstance(result, Refusal)
+    assert result.missing_fields == ["DEST"]
+
+
+def test_execute_opens_drives_and_submits(mock_client):
+    filled = fill(_request(), _constant(SLOTS))
+    outcome = execute(_request(), filled, MockAdapter(mock_client), _constant(SLOTS))
+    assert outcome.status == "submitted"
+    assert outcome.trip_id is not None
+
+
 def test_valid_runs_to_submitted_and_creates_trip(mock_client):
     outcome = run_task(_request(), MockAdapter(mock_client), _constant(SLOTS))
     assert outcome.status == "submitted"
@@ -99,7 +118,7 @@ def test_verify_gate_halts_on_unfinished_sequence(mock_client):
             Step(seq=2, type="field", target="DEST", value="OSAKA"),
         ],
     )
-    outcome = execute(_opened(mock_client), incomplete)
+    outcome = _attempt(_opened(mock_client), incomplete)
     assert outcome.status == "verify_failed"
     assert outcome.final_screen != "submitted"
     assert _trip_count() == before
@@ -115,7 +134,7 @@ def test_verify_gate_halts_on_error_screen(mock_client):
             Step(seq=2, type="fkey", key="Enter"),
         ],
     )
-    outcome = execute(_opened(mock_client), premature)
+    outcome = _attempt(_opened(mock_client), premature)
     assert outcome.status == "verify_failed"
     assert outcome.errors
     assert _trip_count() == before

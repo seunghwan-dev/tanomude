@@ -13,7 +13,7 @@ from app.models import MockSession, TripApplication
 from adapter.base import ScreenAdapter
 from adapter.mock_adapter import MockAdapter
 from backend import coreloop
-from backend.coreloop import MAX_REPLAN, derive_idempotency_key, execute, run_task
+from backend.coreloop import MAX_REPLAN, _attempt, derive_idempotency_key, run_task
 from backend.slotfill import RequestInput, Slots, fill
 
 MOCK_ROOT = Path(app_pkg.__file__).resolve().parent.parent
@@ -135,7 +135,7 @@ def test_without_replan_persistent_mismatch_is_verify_failed(mock_client):
     spy = _ConfirmStuckSpy(MockAdapter(mock_client), fail_submits=99)
     spy.open(derive_idempotency_key(_request()))
     filled = fill(_request(), _constant(SLOTS))
-    outcome = execute(spy, filled)
+    outcome = _attempt(spy, filled)
     spy.close()
     assert outcome.status == "verify_failed"
     assert outcome.final_screen == "confirm"

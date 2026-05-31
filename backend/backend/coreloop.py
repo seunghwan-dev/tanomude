@@ -75,7 +75,7 @@ def _drive(adapter: ScreenAdapter, steps: list[Step]) -> ExecutionOutcome:
     )
 
 
-def execute(adapter: ScreenAdapter, filled: FilledKeysequence) -> ExecutionOutcome:
+def _attempt(adapter: ScreenAdapter, filled: FilledKeysequence) -> ExecutionOutcome:
     adapter.send_keys(KeyStep(type="nav", key="Enter"))
     screen = adapter.wait_for_screen()
     if screen.errors:
@@ -115,31 +115,44 @@ def _rollback(adapter: ScreenAdapter, outcome: ExecutionOutcome, replan_count: i
     )
 
 
-def run_task(request: RequestInput, adapter: ScreenAdapter, slot_fn: SlotExtractor, context: str = "") -> ExecutionOutcome:
+def plan(request: RequestInput, slot_fn: SlotExtractor, context: str = "") -> FilledKeysequence | Refusal:
+    return fill(request, slot_fn, context)
+
+
+def execute(
+    request: RequestInput,
+    filled: FilledKeysequence,
+    adapter: ScreenAdapter,
+    slot_fn: SlotExtractor,
+    context: str = "",
+) -> ExecutionOutcome:
     adapter.open(derive_idempotency_key(request))
     try:
-        try:
+        outcome = _attempt(adapter, filled)
+        replan_count = 0
+        while outcome.status == "verify_failed" and replan_count < MAX_REPLAN:
+            if not _recover_to_trip_input(adapter):
+                break
+            replan_count += 1
             result = fill(request, slot_fn, context)
             if isinstance(result, Refusal):
-                return ExecutionOutcome(status="refused", refusal=result, executed_steps=0)
-            if not auto_approve(result):
-                return ExecutionOutcome(status="verify_failed", errors=["not approved"])
+                break
+            outcome = _replan(adapter, result)
 
-            outcome = execute(adapter, result)
-            replan_count = 0
-            while outcome.status == "verify_failed" and replan_count < MAX_REPLAN:
-                if not _recover_to_trip_input(adapter):
-                    break
-                replan_count += 1
-                result = fill(request, slot_fn, context)
-                if isinstance(result, Refusal):
-                    break
-                outcome = _replan(adapter, result)
-
-            if outcome.status == "verify_failed":
-                return _rollback(adapter, outcome, replan_count)
-            return outcome
-        except SlotParseError as exc:
-            return ExecutionOutcome(status="parse_failed", errors=exc.errors)
+        if outcome.status == "verify_failed":
+            return _rollback(adapter, outcome, replan_count)
+        return outcome
     finally:
         adapter.close()
+
+
+def run_task(request: RequestInput, adapter: ScreenAdapter, slot_fn: SlotExtractor, context: str = "") -> ExecutionOutcome:
+    try:
+        result = plan(request, slot_fn, context)
+        if isinstance(result, Refusal):
+            return ExecutionOutcome(status="refused", refusal=result, executed_steps=0)
+        if not auto_approve(result):
+            return ExecutionOutcome(status="verify_failed", errors=["not approved"])
+        return execute(request, result, adapter, slot_fn, context)
+    except SlotParseError as exc:
+        return ExecutionOutcome(status="parse_failed", errors=exc.errors)
