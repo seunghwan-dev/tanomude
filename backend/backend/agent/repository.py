@@ -4,7 +4,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from backend.coreloop import ExecutionOutcome
-from backend.models import Execution, Task
+from backend.models import Execution, Plan, Task
 
 
 def create_task(
@@ -42,6 +42,35 @@ def finalize_execution(
     db.commit()
     db.refresh(execution)
     db.refresh(task)
+
+
+def set_task_status(db: Session, task: Task, status: str) -> None:
+    task.status = status
+    db.commit()
+    db.refresh(task)
+
+
+def create_plan(
+    db: Session,
+    task_id: int,
+    analysis: dict,
+    keysequence: list,
+    grounding: list,
+    version: int = 1,
+    status: str = "proposed",
+) -> Plan:
+    plan = Plan(
+        task_id=task_id,
+        version=version,
+        analysis=analysis,
+        keysequence=keysequence,
+        grounding=grounding,
+        status=status,
+    )
+    db.add(plan)
+    db.commit()
+    db.refresh(plan)
+    return plan
 
 
 def fail_execution(db: Session, execution: Execution, task: Task, error_message: str, task_status: str) -> None:

@@ -4,11 +4,13 @@ import httpx
 
 from adapter.mock_adapter import MockAdapter
 from backend.config import settings
-from backend.coreloop import ExecutionOutcome, run_task
+from backend.coreloop import ExecutionOutcome, plan, run_task
 from backend.db import SessionLocal
-from backend.slotfill import RequestInput, extract_slots, ground
+from backend.retrieval import RetrievedChunk, hybrid_search
+from backend.slotfill import FilledKeysequence, Refusal, RequestInput, extract_slots, ground
 
 Runner = Callable[[RequestInput], ExecutionOutcome]
+PlanRunner = Callable[[RequestInput], tuple[FilledKeysequence | Refusal, list[RetrievedChunk]]]
 
 _ROLLUP = {
     "submitted": "submitted",
@@ -35,3 +37,17 @@ def _production_runner(request: RequestInput) -> ExecutionOutcome:
 
 def get_runner() -> Runner:
     return _production_runner
+
+
+def _production_plan_runner(
+    request: RequestInput,
+) -> tuple[FilledKeysequence | Refusal, list[RetrievedChunk]]:
+    with SessionLocal() as db:
+        grounds = hybrid_search(db, request.instruction)
+    context = "\n\n".join(chunk.text for chunk in grounds)
+    result = plan(request, extract_slots, context)
+    return result, grounds
+
+
+def get_plan_runner() -> PlanRunner:
+    return _production_plan_runner
