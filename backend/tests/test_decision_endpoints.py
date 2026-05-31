@@ -2,6 +2,7 @@ import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import delete, func, select
 
+from backend.agent import repository
 from backend.agent.app import app
 from backend.agent.manager import manager
 from backend.agent.service import get_execute_runner, get_plan_runner
@@ -182,6 +183,68 @@ def test_reject_commit_precedes_broadcast(client, monkeypatch):
     monkeypatch.setattr(manager, "broadcast", spy)
     client.post(f"/tasks/{task_id}/reject", json={"approver": "tanaka", "decision_text": "x"})
     assert observations == ["refused"]
+
+
+def _raise_after_staging(monkeypatch):
+    real_stage = repository._stage_decision
+
+    def boom(db, task, plan_id, decision, approver, decision_text):
+        real_stage(db, task, plan_id, decision, approver, decision_text)
+        raise RuntimeError("mid-decision crash")
+
+    monkeypatch.setattr(repository, "_stage_decision", boom)
+
+
+def test_approve_rolls_back_entirely_on_midwrite_failure(client, monkeypatch):
+    task_id = _seed_awaiting(client)
+    _raise_after_staging(monkeypatch)
+    with pytest.raises(RuntimeError):
+        client.post(f"/tasks/{task_id}/approve", json={"approver": "tanaka"})
+    with SessionLocal() as session:
+        assert session.scalar(
+            select(func.count()).select_from(Approval).where(Approval.task_id == task_id)
+        ) == 0
+        assert session.scalar(
+            select(func.count()).select_from(AuditLog).where(AuditLog.task_id == task_id)
+        ) == 0
+        assert session.scalar(
+            select(func.count()).select_from(Execution).where(Execution.task_id == task_id)
+        ) == 0
+        assert session.get(Task, task_id).status == "awaiting_approval"
+
+
+def test_reject_rolls_back_entirely_on_midwrite_failure(client, monkeypatch):
+    task_id = _seed_awaiting(client)
+    _raise_after_staging(monkeypatch)
+    with pytest.raises(RuntimeError):
+        client.post(f"/tasks/{task_id}/reject", json={"approver": "tanaka", "decision_text": "x"})
+    with SessionLocal() as session:
+        assert session.scalar(
+            select(func.count()).select_from(Approval).where(Approval.task_id == task_id)
+        ) == 0
+        assert session.scalar(
+            select(func.count()).select_from(AuditLog).where(AuditLog.task_id == task_id)
+        ) == 0
+        assert session.get(Task, task_id).status == "awaiting_approval"
+
+
+@pytest.mark.parametrize("exec_status", ["verify_failed", "rolled_back"])
+def test_approve_failed_outcome_rolls_up_to_failed(client, exec_status):
+    task_id = _seed_awaiting(client)
+    _use_execute_runner(
+        ExecutionOutcome(status=exec_status, executed_steps=3, final_screen="confirm", errors=["x"])
+    )
+    with client.websocket_connect("/ws/agent") as ws:
+        response = client.post(f"/tasks/{task_id}/approve", json={"approver": "tanaka"})
+        events = [ws.receive_json() for _ in range(4)]
+    assert response.status_code == 200
+    body = response.json()
+    assert body["status"] == "failed"
+    assert body["executions"][0]["status"] == exec_status
+    assert events[3]["type"] == "status_changed"
+    assert events[3]["payload"]["status"] == "failed"
+    with SessionLocal() as session:
+        assert session.get(Task, task_id).status == "failed"
 
 
 def test_get_after_decision_is_read_only(client):

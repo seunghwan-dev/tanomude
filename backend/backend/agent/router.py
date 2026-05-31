@@ -149,10 +149,13 @@ async def approve_task(
     execute_runner: ExecuteRunner = Depends(get_execute_runner),
 ) -> TaskView:
     task, plan = _decision_target(db, task_id)
-    repository.create_approval(db, task.id, plan.id, "approve", body.approver, body.decision_text)
-    repository.append_audit(db, task.id, plan.id, body.approver, "approve", body.decision_text)
-    repository.set_task_status(db, task, "running")
+    execution = repository.record_approve(db, task, plan.id, body.approver, body.decision_text)
     await manager.broadcast("approved", task.id, {"status": task.status, "plan_id": plan.id})
+    await manager.broadcast(
+        "execution_started",
+        task.id,
+        {"execution_id": execution.id, "attempt_no": execution.attempt_no, "status": execution.status},
+    )
     request = RequestInput(
         workflow=task.workflow, instruction=task.instruction, fields=task.fields, task_id=str(task.id)
     )
@@ -160,12 +163,6 @@ async def approve_task(
         workflow=task.workflow,
         slots=Slots(**plan.analysis),
         steps=[Step(**step) for step in plan.keysequence],
-    )
-    execution = repository.create_execution(db, task.id, attempt_no=1, status="running")
-    await manager.broadcast(
-        "execution_started",
-        task.id,
-        {"execution_id": execution.id, "attempt_no": execution.attempt_no, "status": execution.status},
     )
     try:
         outcome = await to_thread.run_sync(execute_runner, request, filled)
@@ -196,9 +193,7 @@ async def reject_task(
     task_id: int, body: DecisionInput, db: Session = Depends(get_db)
 ) -> TaskView:
     task, plan = _decision_target(db, task_id)
-    repository.create_approval(db, task.id, plan.id, "reject", body.approver, body.decision_text)
-    repository.append_audit(db, task.id, plan.id, body.approver, "reject", body.decision_text)
-    repository.set_task_status(db, task, "refused")
+    repository.record_reject(db, task, plan.id, body.approver, body.decision_text)
     await manager.broadcast(
         "rejected", task.id, {"status": task.status, "reason": body.decision_text}
     )
@@ -210,8 +205,7 @@ async def revise_task(
     task_id: int, body: DecisionInput, db: Session = Depends(get_db)
 ) -> TaskView:
     task, plan = _decision_target(db, task_id)
-    repository.create_approval(db, task.id, plan.id, "revise", body.approver, body.decision_text)
-    repository.append_audit(db, task.id, plan.id, body.approver, "revise", body.decision_text)
+    repository.record_revise(db, task, plan.id, body.approver, body.decision_text)
     await manager.broadcast(
         "revised", task.id, {"status": task.status, "decision_text": body.decision_text}
     )
