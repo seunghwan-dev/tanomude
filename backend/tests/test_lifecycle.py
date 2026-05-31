@@ -13,7 +13,7 @@ from app.models import MockSession, TripApplication
 from adapter.base import ScreenAdapter
 from adapter.mock_adapter import MockAdapter
 from backend.coreloop import run_task
-from backend.slotfill import RequestInput, Slots
+from backend.slotfill import RequestInput, SlotParseError, Slots
 
 MOCK_ROOT = Path(app_pkg.__file__).resolve().parent.parent
 SLOTS = Slots(dest_code="OSAKA", purpose="製品X納入調整")
@@ -88,12 +88,23 @@ def test_close_called_on_submitted_path(mock_client):
     assert spy.closed == 1
 
 
-def test_close_called_on_refusal_path(mock_client):
+def test_refusal_path_never_opens_adapter(mock_client):
     spy = _LifecycleSpy(MockAdapter(mock_client))
     outcome = run_task(_request(dest=""), spy, _constant(SLOTS))
     assert outcome.status == "refused"
-    assert spy.opened == 1
-    assert spy.closed == 1
+    assert spy.opened == 0
+    assert spy.closed == 0
+
+
+def test_parse_failed_path_never_opens_adapter(mock_client):
+    def failing(request, context):
+        raise SlotParseError(retry_count=2, errors=["unparseable"])
+
+    spy = _LifecycleSpy(MockAdapter(mock_client))
+    outcome = run_task(_request(), spy, failing)
+    assert outcome.status == "parse_failed"
+    assert spy.opened == 0
+    assert spy.closed == 0
 
 
 def test_close_called_on_error_path(mock_client):
