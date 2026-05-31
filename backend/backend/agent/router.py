@@ -4,11 +4,11 @@ from sqlalchemy.orm import Session
 
 from backend.agent import repository
 from backend.agent.manager import manager
-from backend.agent.schemas import ExecutionView, TaskCreate, TaskView
-from backend.agent.service import Runner, get_runner, rollup_status
+from backend.agent.schemas import ExecutionView, PlanView, RefusalView, TaskCreate, TaskPlanView, TaskView
+from backend.agent.service import PlanRunner, Runner, get_plan_runner, get_runner, rollup_status
 from backend.db import get_db
 from backend.models import Execution, Task
-from backend.slotfill import RequestInput
+from backend.slotfill import Refusal, RequestInput
 
 router = APIRouter(prefix="/tasks", tags=["tasks"])
 
@@ -66,6 +66,44 @@ async def create_task(
     )
     await manager.broadcast("status_changed", task.id, {"status": task.status})
     return _to_view(task, repository.list_executions(db, task.id))
+
+
+@router.post("/plan", response_model=TaskPlanView, status_code=status.HTTP_201_CREATED)
+async def create_plan_task(
+    body: TaskCreate, db: Session = Depends(get_db), plan_runner: PlanRunner = Depends(get_plan_runner)
+) -> TaskPlanView:
+    task = repository.create_task(
+        db, body.workflow, body.instruction, body.fields, body.dedup_key, status="awaiting_approval"
+    )
+    await manager.broadcast("task_created", task.id, {"status": task.status})
+    request = RequestInput(
+        workflow=body.workflow, instruction=body.instruction, fields=body.fields, task_id=str(task.id)
+    )
+    try:
+        result, grounds = await to_thread.run_sync(plan_runner, request)
+    except Exception:
+        repository.set_task_status(db, task, "errored")
+        await manager.broadcast("status_changed", task.id, {"status": task.status})
+        raise
+    if isinstance(result, Refusal):
+        repository.set_task_status(db, task, "refused")
+        await manager.broadcast(
+            "status_changed", task.id, {"status": task.status, "reason": result.reason}
+        )
+        return TaskPlanView(
+            task=_to_view(task, []),
+            refusal=RefusalView(reason=result.reason, missing_fields=result.missing_fields),
+        )
+    plan = repository.create_plan(
+        db,
+        task.id,
+        analysis=result.slots.model_dump(),
+        keysequence=[step.model_dump() for step in result.steps],
+        grounding=[chunk.model_dump() for chunk in grounds],
+    )
+    plan_view = PlanView.model_validate(plan)
+    await manager.broadcast("plan_ready", task.id, plan_view.model_dump(mode="json"))
+    return TaskPlanView(task=_to_view(task, []), plan=plan_view)
 
 
 @router.get("", response_model=list[TaskView])

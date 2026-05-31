@@ -11,7 +11,9 @@ class TaskCreate(BaseModel):
     dedup_key: str | None = None
 
 
-EventType = Literal["task_created", "execution_started", "execution_finished", "status_changed"]
+EventType = Literal[
+    "task_created", "execution_started", "execution_finished", "status_changed", "plan_ready"
+]
 
 
 class Envelope(BaseModel):
@@ -48,3 +50,27 @@ class TaskView(BaseModel):
     created_at: dt.datetime
     updated_at: dt.datetime
     executions: list[ExecutionView]
+
+
+class PlanView(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    task_id: int
+    version: int
+    analysis: dict
+    keysequence: list
+    grounding: list
+    status: str
+    created_at: dt.datetime
+
+
+class RefusalView(BaseModel):
+    reason: str
+    missing_fields: list[str]
+
+
+class TaskPlanView(BaseModel):
+    task: TaskView
+    plan: PlanView | None = None
+    refusal: RefusalView | None = None
