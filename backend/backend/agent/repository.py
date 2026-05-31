@@ -4,7 +4,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from backend.coreloop import ExecutionOutcome
-from backend.models import Execution, Plan, Task
+from backend.models import Approval, AuditLog, Execution, Plan, Task
 
 
 def create_task(
@@ -81,6 +81,36 @@ def fail_execution(db: Session, execution: Execution, task: Task, error_message:
     db.commit()
     db.refresh(execution)
     db.refresh(task)
+
+
+def get_plan(db: Session, task_id: int) -> Plan | None:
+    return db.scalars(
+        select(Plan).where(Plan.task_id == task_id, Plan.status == "proposed").order_by(Plan.version.desc())
+    ).first()
+
+
+def create_approval(
+    db: Session, task_id: int, plan_id: int, decision: str, approver: str, decision_text: str | None
+) -> Approval:
+    approval = Approval(
+        task_id=task_id, plan_id=plan_id, decision=decision, approver=approver, decision_text=decision_text
+    )
+    db.add(approval)
+    db.commit()
+    db.refresh(approval)
+    return approval
+
+
+def append_audit(
+    db: Session, task_id: int, plan_id: int, approver: str, decision: str, decision_text: str | None
+) -> AuditLog:
+    entry = AuditLog(
+        task_id=task_id, plan_id=plan_id, approver=approver, decision=decision, decision_text=decision_text
+    )
+    db.add(entry)
+    db.commit()
+    db.refresh(entry)
+    return entry
 
 
 def get_task(db: Session, task_id: int) -> Task | None:
