@@ -4,7 +4,7 @@ from sqlalchemy import delete, func, select
 
 from backend.agent.app import app
 from backend.agent.manager import manager
-from backend.agent.service import get_plan_runner
+from backend.agent.service import ParseFailure, get_plan_runner
 from backend.db import SessionLocal
 from backend.models import Approval, AuditLog, Execution, Plan, Task
 from backend.retrieval import RetrievedChunk
@@ -93,6 +93,32 @@ def test_plan_refusal_marks_refused_without_persisting_plan(client):
     assert body["refusal"]["missing_fields"] == ["DEST"]
     with SessionLocal() as session:
         assert session.scalar(select(func.count()).select_from(Plan)) == 0
+
+
+def test_parse_failure_marks_failed_without_persisting_plan(client):
+    app.dependency_overrides[get_plan_runner] = lambda: (
+        lambda request: (ParseFailure(errors=["unparseable slots"]), GROUNDS)
+    )
+    response = client.post("/tasks/plan", json=_body())
+    assert response.status_code == 201
+    body = response.json()
+    assert body["task"]["status"] == "failed"
+    assert body["plan"] is None
+    assert body["refusal"] is None
+    with SessionLocal() as session:
+        assert session.scalar(select(func.count()).select_from(Plan)) == 0
+
+
+def test_parse_failure_broadcasts_parse_failed_reason(client):
+    app.dependency_overrides[get_plan_runner] = lambda: (
+        lambda request: (ParseFailure(errors=["unparseable slots"]), GROUNDS)
+    )
+    with client.websocket_connect("/ws/agent") as ws:
+        client.post("/tasks/plan", json=_body())
+        events = [ws.receive_json() for _ in range(2)]
+    assert [event["type"] for event in events] == ["task_created", "status_changed"]
+    assert events[1]["payload"]["status"] == "failed"
+    assert events[1]["payload"]["reason"] == "parse_failed"
 
 
 def test_plan_runner_exception_marks_task_errored_not_orphan(client):

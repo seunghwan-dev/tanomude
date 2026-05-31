@@ -11,8 +11,20 @@ class TaskCreate(BaseModel):
     dedup_key: str | None = None
 
 
+class DecisionInput(BaseModel):
+    approver: str
+    decision_text: str | None = None
+
+
 EventType = Literal[
-    "task_created", "execution_started", "execution_finished", "status_changed", "plan_ready"
+    "task_created",
+    "execution_started",
+    "execution_finished",
+    "status_changed",
+    "plan_ready",
+    "approved",
+    "rejected",
+    "revised",
 ]
 
 
