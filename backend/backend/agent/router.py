@@ -3,6 +3,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 from backend.agent import repository
+from backend.agent.manager import manager
 from backend.agent.schemas import ExecutionView, TaskCreate, TaskView
 from backend.agent.service import Runner, get_runner, rollup_status
 from backend.db import get_db
@@ -33,7 +34,13 @@ async def create_task(
     task = repository.create_task(
         db, body.workflow, body.instruction, body.fields, body.dedup_key, status="running"
     )
+    await manager.broadcast("task_created", task.id, {"status": task.status})
     execution = repository.create_execution(db, task.id, attempt_no=1, status="running")
+    await manager.broadcast(
+        "execution_started",
+        task.id,
+        {"execution_id": execution.id, "attempt_no": execution.attempt_no, "status": execution.status},
+    )
     request = RequestInput(
         workflow=body.workflow, instruction=body.instruction, fields=body.fields, task_id=str(task.id)
     )
@@ -41,8 +48,23 @@ async def create_task(
         outcome = await to_thread.run_sync(runner, request)
     except Exception as exc:
         repository.fail_execution(db, execution, task, repr(exc), rollup_status("errored"))
+        await manager.broadcast(
+            "execution_finished", task.id, {"execution_id": execution.id, "status": execution.status}
+        )
+        await manager.broadcast("status_changed", task.id, {"status": task.status})
         raise
     repository.finalize_execution(db, execution, task, outcome, rollup_status(outcome.status))
+    await manager.broadcast(
+        "execution_finished",
+        task.id,
+        {
+            "execution_id": execution.id,
+            "status": execution.status,
+            "trip_id": execution.trip_id,
+            "trip_created": execution.trip_created,
+        },
+    )
+    await manager.broadcast("status_changed", task.id, {"status": task.status})
     return _to_view(task, repository.list_executions(db, task.id))
 
 

@@ -1,4 +1,5 @@
 import datetime as dt
+from typing import Literal
 
 from pydantic import BaseModel, ConfigDict
 
@@ -8,6 +9,17 @@ class TaskCreate(BaseModel):
     instruction: str
     fields: dict
     dedup_key: str | None = None
+
+
+EventType = Literal["task_created", "execution_started", "execution_finished", "status_changed"]
+
+
+class Envelope(BaseModel):
+    type: EventType
+    task_id: int
+    seq: int
+    ts: dt.datetime
+    payload: dict
 
 
 class ExecutionView(BaseModel):
