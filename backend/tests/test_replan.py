@@ -141,3 +141,19 @@ def test_without_replan_persistent_mismatch_is_verify_failed(mock_client):
     assert outcome.final_screen == "confirm"
     assert spy.f3_sent == 0
     assert _trip_count() == 0
+
+
+def test_replan_redrives_approved_plan_without_reinvoking_slot_fn(mock_client):
+    calls: list[Slots] = []
+
+    def counting_slot_fn(request, context):
+        calls.append(SLOTS)
+        return SLOTS
+
+    spy = _ConfirmStuckSpy(MockAdapter(mock_client), fail_submits=1)
+    outcome = run_task(_request(), spy, counting_slot_fn)
+
+    assert outcome.status == "submitted"
+    assert spy.swallowed == 1
+    assert spy.f3_sent == 1
+    assert len(calls) == 1

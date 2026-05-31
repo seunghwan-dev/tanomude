@@ -77,7 +77,7 @@ def test_plan_refuses_on_missing_field_without_adapter():
 
 def test_execute_opens_drives_and_submits(mock_client):
     filled = fill(_request(), _constant(SLOTS))
-    outcome = execute(_request(), filled, MockAdapter(mock_client), _constant(SLOTS))
+    outcome = execute(_request(), filled, MockAdapter(mock_client))
     assert outcome.status == "submitted"
     assert outcome.trip_id is not None
 

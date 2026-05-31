@@ -123,8 +123,6 @@ def execute(
     request: RequestInput,
     filled: FilledKeysequence,
     adapter: ScreenAdapter,
-    slot_fn: SlotExtractor,
-    context: str = "",
 ) -> ExecutionOutcome:
     adapter.open(derive_idempotency_key(request))
     try:
@@ -134,10 +132,7 @@ def execute(
             if not _recover_to_trip_input(adapter):
                 break
             replan_count += 1
-            result = fill(request, slot_fn, context)
-            if isinstance(result, Refusal):
-                break
-            outcome = _replan(adapter, result)
+            outcome = _replan(adapter, filled)
 
         if outcome.status == "verify_failed":
             return _rollback(adapter, outcome, replan_count)
@@ -153,6 +148,6 @@ def run_task(request: RequestInput, adapter: ScreenAdapter, slot_fn: SlotExtract
             return ExecutionOutcome(status="refused", refusal=result, executed_steps=0)
         if not auto_approve(result):
             return ExecutionOutcome(status="verify_failed", errors=["not approved"])
-        return execute(request, result, adapter, slot_fn, context)
+        return execute(request, result, adapter)
     except SlotParseError as exc:
         return ExecutionOutcome(status="parse_failed", errors=exc.errors)
