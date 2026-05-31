@@ -6,6 +6,7 @@ from pydantic import BaseModel
 from adapter.mock_adapter import MockAdapter
 from backend.config import settings
 from backend.coreloop import ExecutionOutcome, execute, plan, run_task
+from backend.corrections import apply_corrections
 from backend.db import SessionLocal
 from backend.retrieval import RetrievedChunk, hybrid_search
 from backend.slotfill import (
@@ -72,7 +73,8 @@ def _production_plan_runner(
 ) -> tuple[FilledKeysequence | Refusal | ParseFailure, list[RetrievedChunk]]:
     with SessionLocal() as db:
         grounds = hybrid_search(db, request.instruction)
-    context = "\n\n".join(chunk.text for chunk in grounds)
+        rag_context = "\n\n".join(chunk.text for chunk in grounds)
+        context = apply_corrections(db, request.workflow, request.fields, rag_context)
     try:
         result = plan(request, extract_slots, context)
     except SlotParseError as exc:
