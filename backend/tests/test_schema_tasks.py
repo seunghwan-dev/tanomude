@@ -140,7 +140,7 @@ def test_migration_downgrade_then_upgrade_is_clean():
     assert not inspector.has_table("tasks")
     assert not inspector.has_table("executions")
 
-    command.upgrade(config, "0003")
+    command.upgrade(config, "head")
     inspector = inspect(engine)
     assert inspector.has_table("tasks")
     assert inspector.has_table("executions")

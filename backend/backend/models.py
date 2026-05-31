@@ -50,7 +50,7 @@ class Task(Base):
     workflow: Mapped[str] = mapped_column(String(64), nullable=False)
     instruction: Mapped[str] = mapped_column(Text, nullable=False)
     fields: Mapped[dict] = mapped_column(JSONB, nullable=False)
-    status: Mapped[str] = mapped_column(String(16), nullable=False)
+    status: Mapped[str] = mapped_column(String(24), nullable=False)
     created_at: Mapped[dt.datetime] = mapped_column(
         DateTime(timezone=True), nullable=False, server_default=func.now()
     )
@@ -77,3 +77,47 @@ class Execution(Base):
         DateTime(timezone=True), nullable=False, server_default=func.now()
     )
     finished_at: Mapped[dt.datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+
+
+class Plan(Base):
+    __tablename__ = "plans"
+    __table_args__ = (UniqueConstraint("task_id", "version", name="uq_plans_task_version"),)
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    task_id: Mapped[int] = mapped_column(ForeignKey("tasks.id", ondelete="CASCADE"), index=True, nullable=False)
+    version: Mapped[int] = mapped_column(Integer, nullable=False)
+    analysis: Mapped[dict] = mapped_column(JSONB, nullable=False)
+    keysequence: Mapped[list] = mapped_column(JSONB, nullable=False)
+    grounding: Mapped[list] = mapped_column(JSONB, nullable=False)
+    status: Mapped[str] = mapped_column(String(24), nullable=False)
+    created_at: Mapped[dt.datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, server_default=func.now()
+    )
+
+
+class Approval(Base):
+    __tablename__ = "approvals"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    task_id: Mapped[int] = mapped_column(ForeignKey("tasks.id", ondelete="CASCADE"), index=True, nullable=False)
+    plan_id: Mapped[int] = mapped_column(ForeignKey("plans.id", ondelete="CASCADE"), index=True, nullable=False)
+    decision: Mapped[str] = mapped_column(String(16), nullable=False)
+    approver: Mapped[str] = mapped_column(String(64), nullable=False)
+    decision_text: Mapped[str | None] = mapped_column(Text, nullable=True)
+    created_at: Mapped[dt.datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, server_default=func.now()
+    )
+
+
+class AuditLog(Base):
+    __tablename__ = "audit_log"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    task_id: Mapped[int] = mapped_column(Integer, index=True, nullable=False)
+    plan_id: Mapped[int] = mapped_column(Integer, index=True, nullable=False)
+    approver: Mapped[str] = mapped_column(String(64), nullable=False)
+    decision: Mapped[str] = mapped_column(String(16), nullable=False)
+    decision_text: Mapped[str | None] = mapped_column(Text, nullable=True)
+    ts: Mapped[dt.datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, server_default=func.now()
+    )
