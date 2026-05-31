@@ -26,3 +26,50 @@ def apply_corrections(db: Session, workflow: str, fields: dict, base_context: st
         return base_context
     corrections = "\n".join(row.correction_text for row in matched)
     return f"{OVERRIDE_HEADER}\n{corrections}\n{RAG_HEADER}\n{base_context}"
+
+
+def create_correction(
+    db: Session,
+    workflow: str,
+    trigger: dict,
+    correction_text: str,
+    source: str,
+    approver: str | None = None,
+) -> PersonalCorrection:
+    existing = db.scalars(
+        select(PersonalCorrection).where(
+            PersonalCorrection.workflow == workflow,
+            PersonalCorrection.status == "active",
+            PersonalCorrection.trigger == trigger,
+        )
+    ).first()
+    if existing is not None:
+        existing.status = "superseded"
+        version = existing.version + 1
+        supersedes_id = existing.id
+        db.flush()
+    else:
+        version = 1
+        supersedes_id = None
+    correction = PersonalCorrection(
+        workflow=workflow,
+        trigger=trigger,
+        correction_text=correction_text,
+        status="active",
+        version=version,
+        supersedes_id=supersedes_id,
+        source=source,
+        approver=approver,
+    )
+    db.add(correction)
+    db.commit()
+    db.refresh(correction)
+    return correction
+
+
+def deactivate_correction(db: Session, correction_id: int) -> PersonalCorrection:
+    correction = db.get(PersonalCorrection, correction_id)
+    correction.status = "retired"
+    db.commit()
+    db.refresh(correction)
+    return correction

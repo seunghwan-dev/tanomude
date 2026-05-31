@@ -1,7 +1,7 @@
 import datetime as dt
 
 from pgvector.sqlalchemy import Vector
-from sqlalchemy import Boolean, Computed, DateTime, ForeignKey, Index, Integer, String, Text, UniqueConstraint, func
+from sqlalchemy import Boolean, Computed, DateTime, ForeignKey, Index, Integer, String, Text, UniqueConstraint, func, text
 from sqlalchemy.dialects.postgresql import JSONB, TSVECTOR
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
@@ -125,7 +125,16 @@ class AuditLog(Base):
 
 class PersonalCorrection(Base):
     __tablename__ = "personal_corrections"
-    __table_args__ = (Index("ix_personal_corrections_workflow_status", "workflow", "status"),)
+    __table_args__ = (
+        Index("ix_personal_corrections_workflow_status", "workflow", "status"),
+        Index(
+            "uq_personal_corrections_active_lineage",
+            "workflow",
+            "trigger",
+            unique=True,
+            postgresql_where=text("status = 'active'"),
+        ),
+    )
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     workflow: Mapped[str] = mapped_column(String(64), nullable=False)
