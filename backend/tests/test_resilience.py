@@ -57,12 +57,12 @@ def test_progress_during_disconnect_is_not_replayed_on_reconnect(client):
 
 
 def test_hydration_restores_state_changed_while_disconnected(client):
-    with client.websocket_connect("/ws/agent") as ws:
+    with client.websocket_connect("/ws/agent"):
         pass
 
     missed_task = _create(client, "task:B")
 
-    with client.websocket_connect("/ws/agent") as ws:
+    with client.websocket_connect("/ws/agent"):
         hydrated = client.get(f"/tasks/{missed_task['id']}").json()
 
     assert hydrated["id"] == missed_task["id"]
