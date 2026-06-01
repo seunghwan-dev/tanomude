@@ -1,3 +1,5 @@
+from typing import NamedTuple
+
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
@@ -5,6 +7,12 @@ from backend.models import PersonalCorrection
 
 OVERRIDE_HEADER = "【個人教正・最優先（手順書より優先）】"
 RAG_HEADER = "【手順書】"
+MAX_CORRECTION_LENGTH = 2000
+
+
+class ExcludedCorrection(NamedTuple):
+    id: int
+    reason: str
 
 
 def _trigger_matches(trigger: dict, fields: dict) -> bool:
@@ -20,12 +28,38 @@ def match_corrections(db: Session, workflow: str, fields: dict) -> list[Personal
     return [row for row in rows if _trigger_matches(row.trigger, fields)]
 
 
-def apply_corrections(db: Session, workflow: str, fields: dict, base_context: str) -> str:
+def _validation_reason(correction: PersonalCorrection) -> str | None:
+    text = correction.correction_text
+    if not text.strip():
+        return "empty"
+    if len(text) > MAX_CORRECTION_LENGTH:
+        return "too_long"
+    if not text.isprintable():
+        return "non_printable"
+    return None
+
+
+def validate_correction(correction: PersonalCorrection) -> bool:
+    return _validation_reason(correction) is None
+
+
+def apply_corrections(
+    db: Session, workflow: str, fields: dict, base_context: str
+) -> tuple[str, list[ExcludedCorrection]]:
     matched = match_corrections(db, workflow, fields)
-    if not matched:
-        return base_context
-    corrections = "\n".join(row.correction_text for row in matched)
-    return f"{OVERRIDE_HEADER}\n{corrections}\n{RAG_HEADER}\n{base_context}"
+    valid = []
+    fallback = []
+    for row in matched:
+        reason = _validation_reason(row)
+        if reason is None:
+            valid.append(row)
+        else:
+            fallback.append(ExcludedCorrection(id=row.id, reason=reason))
+    if not valid:
+        return base_context, fallback
+    corrections = "\n".join(row.correction_text for row in valid)
+    context = f"{OVERRIDE_HEADER}\n{corrections}\n{RAG_HEADER}\n{base_context}"
+    return context, fallback
 
 
 def create_correction(
@@ -70,6 +104,14 @@ def create_correction(
 def deactivate_correction(db: Session, correction_id: int) -> PersonalCorrection:
     correction = db.get(PersonalCorrection, correction_id)
     correction.status = "retired"
+    db.commit()
+    db.refresh(correction)
+    return correction
+
+
+def quarantine_correction(db: Session, correction_id: int) -> PersonalCorrection:
+    correction = db.get(PersonalCorrection, correction_id)
+    correction.status = "quarantined"
     db.commit()
     db.refresh(correction)
     return correction

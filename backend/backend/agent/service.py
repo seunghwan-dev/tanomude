@@ -74,7 +74,7 @@ def _production_plan_runner(
     with SessionLocal() as db:
         grounds = hybrid_search(db, request.instruction)
         rag_context = "\n\n".join(chunk.text for chunk in grounds)
-        context = apply_corrections(db, request.workflow, request.fields, rag_context)
+        context, _fallback = apply_corrections(db, request.workflow, request.fields, rag_context)
     try:
         result = plan(request, extract_slots, context)
     except SlotParseError as exc:

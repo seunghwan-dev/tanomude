@@ -84,7 +84,7 @@ def platform_db():
 def test_correction_overrides_rag(case, platform_db):
     create_correction(platform_db, WORKFLOW, case["trigger"], case["correction_text"], "seed")
     request = RequestInput(workflow=WORKFLOW, instruction=case["instruction"], fields=case["fields"])
-    augmented = apply_corrections(platform_db, WORKFLOW, case["fields"], case["rag_line"])
+    augmented, _ = apply_corrections(platform_db, WORKFLOW, case["fields"], case["rag_line"])
 
     slots = extract_slots(request, augmented)
 
