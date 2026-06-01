@@ -1,0 +1,15 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    color-scheme: light;
+  }
+
+  body {
+    @apply bg-paper text-ink font-sans antialiased;
+    background-image: radial-gradient(rgba(28, 26, 23, 0.035) 1px, transparent 1px);
+    background-size: 22px 22px;
+  }
+}
