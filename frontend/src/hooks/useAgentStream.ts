@@ -85,6 +85,14 @@ export function useAgentStream(taskId: number | null, initialStatus: string | nu
         }
         return;
       }
+      if (envelope.type === "execution_started") {
+        setExecution(null);
+        const status = envelope.payload.status as string | undefined;
+        if (status) {
+          setTaskStatus(status);
+        }
+        return;
+      }
       if (envelope.type === "status_changed") {
         const status = envelope.payload.status as string | undefined;
         if (status) {

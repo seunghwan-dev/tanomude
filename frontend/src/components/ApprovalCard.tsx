@@ -2,7 +2,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { useState } from "react";
 
 import type { TaskPlan } from "../api";
-import ActionBar from "./ActionBar";
+import ActionBar, { type DecisionKind } from "./ActionBar";
 import AnalysisTab from "./AnalysisTab";
 import GroundsTab from "./GroundsTab";
 import PlanTab from "./PlanTab";
@@ -19,12 +19,13 @@ const STATUS_LABELS: Record<string, string> = {
   awaiting_approval: "承認待ち",
   refused: "却下",
   failed: "失敗",
+  errored: "エラー",
   running: "実行中",
   submitted: "送信済",
 };
 
 function StatusBadge({ status }: { status: string }) {
-  const danger = status === "refused" || status === "failed";
+  const danger = status === "refused" || status === "failed" || status === "errored";
   return (
     <span
       className={
@@ -38,7 +39,25 @@ function StatusBadge({ status }: { status: string }) {
   );
 }
 
-export default function ApprovalCard({ result }: { result: TaskPlan }) {
+export default function ApprovalCard({
+  result,
+  status,
+  pending,
+  decided,
+  error,
+  onApprove,
+  onRevise,
+  onReject,
+}: {
+  result: TaskPlan;
+  status: string;
+  pending: DecisionKind | null;
+  decided: "approved" | "rejected" | null;
+  error: string | null;
+  onApprove: () => void;
+  onRevise: (text: string) => void;
+  onReject: (reason: string) => void;
+}) {
   const [tab, setTab] = useState<TabKey>("analysis");
   const { task, plan, refusal } = result;
 
@@ -55,7 +74,7 @@ export default function ApprovalCard({ result }: { result: TaskPlan }) {
           </div>
         </div>
         <div className="ml-auto">
-          <StatusBadge status={task.status} />
+          <StatusBadge status={status} />
         </div>
       </header>
 
@@ -107,7 +126,14 @@ export default function ApprovalCard({ result }: { result: TaskPlan }) {
             </AnimatePresence>
           </div>
 
-          <ActionBar />
+          <ActionBar
+            onApprove={onApprove}
+            onRevise={onRevise}
+            onReject={onReject}
+            pending={pending}
+            decided={decided}
+            error={error}
+          />
         </>
       ) : refusal ? (
         <div className="px-5 pb-6">
