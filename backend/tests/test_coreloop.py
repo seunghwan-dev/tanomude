@@ -108,6 +108,15 @@ def test_refusal_skips_execution_and_creates_no_trip(mock_client):
     assert _trip_count() == before
 
 
+def test_empty_purpose_refuses_after_extraction(mock_client):
+    before = _trip_count()
+    outcome = run_task(_request(), MockAdapter(mock_client), _constant(Slots(dest_code="OSAKA", purpose="")))
+    assert outcome.status == "refused"
+    assert outcome.refusal.missing_fields == ["PURPOSE"]
+    assert outcome.executed_steps == 0
+    assert _trip_count() == before
+
+
 def test_verify_gate_halts_on_unfinished_sequence(mock_client):
     before = _trip_count()
     incomplete = FilledKeysequence(
@@ -150,7 +159,11 @@ requires_models = pytest.mark.skipif(
 def test_full_stack_smoke_reaches_submitted(mock_client, db):
     ingest_manual(db, workflow="shukko", title="出張申請 操作マニュアル",
                   source="shukko_manual.md", markdown=load_manual("shukko_manual.md"))
-    request = _request()
+    request = RequestInput(
+        workflow="shukko",
+        instruction="製品Xの納入調整のため大阪へ出張する。",
+        fields={"dest": "大阪", "dept_date": "2026-06-10", "ret_date": "2026-06-11", "proj_hint": "P-001"},
+    )
     context = ground(db, request.instruction)
     outcome = run_task(request, MockAdapter(mock_client), extract_slots, context)
     assert outcome.status == "submitted"
