@@ -1,3 +1,4 @@
+import asyncio
 from pathlib import Path
 
 import app as app_pkg
@@ -11,7 +12,9 @@ from app.db import SessionLocal as MockSessionLocal
 from app.main import app as mock_app
 from app.models import MockSession, TripApplication
 from adapter.mock_adapter import MockAdapter
+from backend.agent import manager as manager_module
 from backend.agent.app import app
+from backend.agent.manager import ConnectionManager
 from backend.agent.observer import build_step_observer, derive_intent
 from backend.agent.service import get_runner
 from backend.coreloop import plan, run_task
@@ -100,6 +103,21 @@ def test_derive_intent_japanese_labels():
     assert derive_intent({"type": "fkey", "key": "F4"}) == "案件コード選択"
     assert derive_intent({"type": "nav", "key": "Enter"}) == "画面遷移"
     assert derive_intent({"type": "fkey", "key": "Enter"}) == "確定"
+
+
+def test_emit_threadsafe_skips_closed_loop(monkeypatch):
+    warnings: list[tuple] = []
+    monkeypatch.setattr(manager_module.logger, "warning", lambda *args, **kwargs: warnings.append(args))
+
+    loop = asyncio.new_event_loop()
+    loop.close()
+    manager = ConnectionManager()
+    manager.bind_loop(loop)
+
+    manager.emit_threadsafe("step_executed", 1, {"ordinal": 1})
+
+    assert warnings
+    assert "event loop unavailable" in warnings[0][0]
 
 
 def test_observer_persists_steps_in_order(mock_client):

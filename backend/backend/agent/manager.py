@@ -35,8 +35,8 @@ class ConnectionManager:
             self._connections.remove(websocket)
 
     def emit_threadsafe(self, event_type: EventType, task_id: int, payload: dict) -> None:
-        if self._loop is None:
-            logger.warning("step emit skipped: event loop not bound (event=%s task=%s)", event_type, task_id)
+        if self._loop is None or self._loop.is_closed():
+            logger.warning("step emit skipped: event loop unavailable (event=%s task=%s)", event_type, task_id)
             return
         future = asyncio.run_coroutine_threadsafe(
             self.broadcast(event_type, task_id, payload), self._loop
