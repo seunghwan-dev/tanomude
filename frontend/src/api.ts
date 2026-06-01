@@ -151,14 +151,29 @@ const DECISION_LABELS: Record<string, string> = {
   revise: "修正",
 };
 
+export class DecisionError extends Error {
+  readonly responded: boolean;
+
+  constructor(message: string, responded: boolean) {
+    super(message);
+    this.responded = responded;
+  }
+}
+
 async function postDecision(taskId: number, action: string, body: DecisionRequest): Promise<TaskDetail> {
-  const response = await fetch(`/api/tasks/${taskId}/${action}`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(body),
-  });
+  const label = DECISION_LABELS[action] ?? action;
+  let response: Response;
+  try {
+    response = await fetch(`/api/tasks/${taskId}/${action}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    });
+  } catch {
+    throw new DecisionError(`${label}に失敗しました（通信エラー）`, false);
+  }
   if (!response.ok) {
-    throw new Error(`${DECISION_LABELS[action] ?? action}に失敗しました (HTTP ${response.status})`);
+    throw new DecisionError(`${label}に失敗しました (HTTP ${response.status})`, true);
   }
   return (await response.json()) as TaskDetail;
 }

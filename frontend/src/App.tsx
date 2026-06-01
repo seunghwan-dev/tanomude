@@ -1,6 +1,6 @@
 import { useMemo, useRef, useState } from "react";
 
-import { approveTask, planTask, rejectTask, reviseTask, type PlanRequest, type TaskPlan } from "./api";
+import { approveTask, DecisionError, planTask, rejectTask, reviseTask, type PlanRequest, type TaskPlan } from "./api";
 import type { DecisionKind } from "./components/ActionBar";
 import ApprovalCard from "./components/ApprovalCard";
 import ExecutionPanel from "./components/ExecutionPanel";
@@ -98,7 +98,12 @@ export default function App() {
       }
     } catch (err) {
       setDecisionError(err instanceof Error ? err.message : "承認に失敗しました");
-      setLiveStatus("failed");
+      if (err instanceof DecisionError && err.responded) {
+        setLiveStatus("failed");
+        setDecided("approved");
+      } else {
+        setLiveStatus(null);
+      }
     } finally {
       setPending(null);
     }
