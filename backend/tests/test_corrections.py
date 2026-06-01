@@ -150,6 +150,13 @@ def test_validate_rejects_over_length():
 
 def test_validate_rejects_control_characters():
     assert validate_correction(_correction("汚染\x00注入")) is False
+    assert validate_correction(_correction("汚染\x07注入")) is False
+    assert validate_correction(_correction("汚染\x7f注入")) is False
+
+
+def test_validate_accepts_multiline_and_tab():
+    assert validate_correction(_correction("手順1\n手順2")) is True
+    assert validate_correction(_correction("col1\tcol2")) is True
 
 
 def test_apply_excludes_contaminated_keeps_valid(platform_db):

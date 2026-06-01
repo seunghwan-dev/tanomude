@@ -28,13 +28,19 @@ def match_corrections(db: Session, workflow: str, fields: dict) -> list[Personal
     return [row for row in rows if _trigger_matches(row.trigger, fields)]
 
 
+def _has_control_chars(text: str) -> bool:
+    return any(
+        ch not in "\t\n\r" and (ord(ch) < 0x20 or 0x7F <= ord(ch) <= 0x9F) for ch in text
+    )
+
+
 def _validation_reason(correction: PersonalCorrection) -> str | None:
     text = correction.correction_text
     if not text.strip():
         return "empty"
     if len(text) > MAX_CORRECTION_LENGTH:
         return "too_long"
-    if not text.isprintable():
+    if _has_control_chars(text):
         return "non_printable"
     return None
 
