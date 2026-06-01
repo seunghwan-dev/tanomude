@@ -18,6 +18,7 @@ class CorrectionCandidate(BaseModel):
     expected: str
     diffs: list[str] = Field(default_factory=list)
     replan_count: int
+    bad_data: bool = False
 
 
 class ExecutionOutcome(BaseModel):
@@ -28,6 +29,7 @@ class ExecutionOutcome(BaseModel):
     executed_steps: int = 0
     final_screen: str | None = None
     errors: list[str] = Field(default_factory=list)
+    bad_data: bool = False
     correction_candidate: CorrectionCandidate | None = None
 
 
@@ -54,7 +56,8 @@ def _drive(adapter: ScreenAdapter, steps: list[Step]) -> ExecutionOutcome:
         executed += 1
         if screen.errors:
             return ExecutionOutcome(
-                status="verify_failed", final_screen=screen.screen, errors=screen.errors, executed_steps=executed
+                status="verify_failed", final_screen=screen.screen, errors=screen.errors,
+                executed_steps=executed, bad_data=True,
             )
 
     verdict = adapter.assert_state(AssertSpec(screen=TARGET_SCREEN, trip_saved=True))
@@ -99,6 +102,7 @@ def _rollback(adapter: ScreenAdapter, outcome: ExecutionOutcome, replan_count: i
         expected=TARGET_SCREEN,
         diffs=outcome.errors,
         replan_count=replan_count,
+        bad_data=outcome.bad_data,
     )
     screen = adapter.read_screen()
     guard = 0
@@ -128,7 +132,7 @@ def execute(
     try:
         outcome = _attempt(adapter, filled)
         replan_count = 0
-        while outcome.status == "verify_failed" and replan_count < MAX_REPLAN:
+        while outcome.status == "verify_failed" and not outcome.bad_data and replan_count < MAX_REPLAN:
             if not _recover_to_trip_input(adapter):
                 break
             replan_count += 1

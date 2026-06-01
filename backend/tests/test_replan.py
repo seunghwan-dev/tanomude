@@ -75,12 +75,10 @@ def _trip_count() -> int:
         return session.scalar(select(func.count()).select_from(TripApplication))
 
 
-def _request() -> RequestInput:
-    return RequestInput(
-        workflow="shukko",
-        instruction="出張申請",
-        fields={"dest": "大阪", "dept_date": "2026-06-10", "ret_date": "2026-06-11", "proj_hint": "P-001"},
-    )
+def _request(**field_overrides) -> RequestInput:
+    fields = {"dest": "大阪", "dept_date": "2026-06-10", "ret_date": "2026-06-11", "proj_hint": "P-001"}
+    fields.update(field_overrides)
+    return RequestInput(workflow="shukko", instruction="出張申請", fields=fields)
 
 
 def _constant(slots: Slots):
@@ -98,6 +96,27 @@ def test_transient_mismatch_recovers_via_replan(mock_client):
     assert _trip_count() == 1
 
 
+def test_bad_data_routes_to_rollback_without_replay(mock_client, monkeypatch):
+    calls = []
+    real_recover = coreloop._recover_to_trip_input
+
+    def spy_recover(adapter):
+        calls.append(1)
+        return real_recover(adapter)
+
+    monkeypatch.setattr(coreloop, "_recover_to_trip_input", spy_recover)
+    outcome = run_task(_request(proj_hint="PX-001"), MockAdapter(mock_client), _constant(SLOTS))
+    assert outcome.status == "rolled_back"
+    assert outcome.final_screen == "aborted"
+    candidate = outcome.correction_candidate
+    assert candidate is not None
+    assert candidate.bad_data is True
+    assert candidate.replan_count == 0
+    assert "PROJ_format" in candidate.diffs
+    assert calls == []
+    assert _trip_count() == 0
+
+
 def test_persistent_mismatch_rolls_back_with_correction_candidate(mock_client):
     spy = _ConfirmStuckSpy(MockAdapter(mock_client), fail_submits=99)
     outcome = run_task(_request(), spy, _constant(SLOTS))
@@ -110,6 +129,7 @@ def test_persistent_mismatch_rolls_back_with_correction_candidate(mock_client):
     assert candidate.screen == "confirm"
     assert candidate.diffs
     assert candidate.replan_count == MAX_REPLAN
+    assert candidate.bad_data is False
     assert _trip_count() == 0
 
 
