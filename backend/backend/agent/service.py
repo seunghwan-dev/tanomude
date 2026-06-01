@@ -5,7 +5,7 @@ from pydantic import BaseModel
 
 from adapter.mock_adapter import MockAdapter
 from backend.config import settings
-from backend.coreloop import ExecutionOutcome, execute, plan, run_task
+from backend.coreloop import ExecutionOutcome, StepObserver, execute, plan, run_task
 from backend.corrections import apply_corrections
 from backend.db import SessionLocal
 from backend.retrieval import RetrievedChunk, hybrid_search
@@ -23,8 +23,8 @@ class ParseFailure(BaseModel):
     errors: list[str]
 
 
-Runner = Callable[[RequestInput], ExecutionOutcome]
-ExecuteRunner = Callable[[RequestInput, FilledKeysequence], ExecutionOutcome]
+Runner = Callable[[RequestInput, StepObserver | None], ExecutionOutcome]
+ExecuteRunner = Callable[[RequestInput, FilledKeysequence, StepObserver | None], ExecutionOutcome]
 PlanRunner = Callable[
     [RequestInput], tuple[FilledKeysequence | Refusal | ParseFailure, list[RetrievedChunk]]
 ]
@@ -42,12 +42,12 @@ def rollup_status(execution_status: str) -> str:
     return _ROLLUP.get(execution_status, "failed")
 
 
-def _production_runner(request: RequestInput) -> ExecutionOutcome:
+def _production_runner(request: RequestInput, observer: StepObserver | None = None) -> ExecutionOutcome:
     client = httpx.Client(base_url=settings.mock_as400_url)
     try:
         with SessionLocal() as db:
             context = ground(db, request.instruction)
-        return run_task(request, MockAdapter(client), extract_slots, context)
+        return run_task(request, MockAdapter(client), extract_slots, context, observer=observer)
     finally:
         client.close()
 
@@ -56,10 +56,12 @@ def get_runner() -> Runner:
     return _production_runner
 
 
-def _production_execute_runner(request: RequestInput, filled: FilledKeysequence) -> ExecutionOutcome:
+def _production_execute_runner(
+    request: RequestInput, filled: FilledKeysequence, observer: StepObserver | None = None
+) -> ExecutionOutcome:
     client = httpx.Client(base_url=settings.mock_as400_url)
     try:
-        return execute(request, filled, MockAdapter(client))
+        return execute(request, filled, MockAdapter(client), observer=observer)
     finally:
         client.close()
 

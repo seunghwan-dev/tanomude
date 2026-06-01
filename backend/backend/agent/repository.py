@@ -1,7 +1,7 @@
 import datetime as dt
 
 from sqlalchemy import select
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, selectinload
 
 from backend.coreloop import ExecutionOutcome
 from backend.models import Approval, AuditLog, Execution, Plan, Task
@@ -140,5 +140,10 @@ def list_tasks(db: Session) -> list[Task]:
 
 def list_executions(db: Session, task_id: int) -> list[Execution]:
     return list(
-        db.scalars(select(Execution).where(Execution.task_id == task_id).order_by(Execution.attempt_no))
+        db.scalars(
+            select(Execution)
+            .where(Execution.task_id == task_id)
+            .order_by(Execution.attempt_no)
+            .options(selectinload(Execution.steps))
+        )
     )

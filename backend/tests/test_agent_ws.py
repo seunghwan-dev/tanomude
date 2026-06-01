@@ -29,7 +29,7 @@ def client():
 
 
 def _use_runner(outcome: ExecutionOutcome) -> None:
-    app.dependency_overrides[get_runner] = lambda: (lambda request: outcome)
+    app.dependency_overrides[get_runner] = lambda: (lambda request, observer=None: outcome)
 
 
 def _body() -> dict:

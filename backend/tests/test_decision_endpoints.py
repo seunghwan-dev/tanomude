@@ -49,7 +49,7 @@ def _seed_awaiting(client) -> int:
 
 
 def _use_execute_runner(outcome: ExecutionOutcome) -> None:
-    app.dependency_overrides[get_execute_runner] = lambda: (lambda request, filled: outcome)
+    app.dependency_overrides[get_execute_runner] = lambda: (lambda request, filled, observer=None: outcome)
 
 
 def test_approve_records_decision_and_executes(client):
@@ -89,7 +89,7 @@ def test_approve_broadcasts_approved_then_execution_events(client):
 def test_approve_execute_exception_marks_errored_not_orphan(client):
     task_id = _seed_awaiting(client)
 
-    def _raising(request, filled):
+    def _raising(request, filled, observer=None):
         raise RuntimeError("boom")
 
     app.dependency_overrides[get_execute_runner] = lambda: _raising

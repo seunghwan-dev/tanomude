@@ -1,9 +1,19 @@
 import asyncio
 import datetime as dt
+import logging
+from concurrent.futures import Future
 
 from fastapi import WebSocket
 
 from backend.agent.schemas import Envelope, EventType
+
+logger = logging.getLogger(__name__)
+
+
+def _log_emit_result(future: Future) -> None:
+    exc = future.exception()
+    if exc is not None:
+        logger.warning("step broadcast failed: %r", exc)
 
 
 class ConnectionManager:
@@ -11,6 +21,10 @@ class ConnectionManager:
         self._connections: list[WebSocket] = []
         self._seq = 0
         self._lock = asyncio.Lock()
+        self._loop: asyncio.AbstractEventLoop | None = None
+
+    def bind_loop(self, loop: asyncio.AbstractEventLoop) -> None:
+        self._loop = loop
 
     async def connect(self, websocket: WebSocket) -> None:
         await websocket.accept()
@@ -19,6 +33,15 @@ class ConnectionManager:
     def disconnect(self, websocket: WebSocket) -> None:
         if websocket in self._connections:
             self._connections.remove(websocket)
+
+    def emit_threadsafe(self, event_type: EventType, task_id: int, payload: dict) -> None:
+        if self._loop is None or self._loop.is_closed():
+            logger.warning("step emit skipped: event loop unavailable (event=%s task=%s)", event_type, task_id)
+            return
+        future = asyncio.run_coroutine_threadsafe(
+            self.broadcast(event_type, task_id, payload), self._loop
+        )
+        future.add_done_callback(_log_emit_result)
 
     async def broadcast(self, event_type: EventType, task_id: int, payload: dict) -> None:
         async with self._lock:

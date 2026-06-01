@@ -1,3 +1,4 @@
+from collections.abc import Callable
 from typing import Literal
 
 from pydantic import BaseModel, Field
@@ -33,6 +34,17 @@ class ExecutionOutcome(BaseModel):
     correction_candidate: CorrectionCandidate | None = None
 
 
+class StepRecord(BaseModel):
+    action: dict
+    screen: str | None = None
+    screen_fields: dict = Field(default_factory=dict)
+    status: str
+    errors: list | None = None
+
+
+StepObserver = Callable[[StepRecord], None]
+
+
 def auto_approve(filled: FilledKeysequence) -> bool:
     return True
 
@@ -47,13 +59,23 @@ def _to_keystep(step: Step) -> KeyStep:
     return KeyStep(type=step.type, target=step.target, value=step.value, key=step.key)
 
 
-def _drive(adapter: ScreenAdapter, steps: list[Step]) -> ExecutionOutcome:
+def _drive(adapter: ScreenAdapter, steps: list[Step], observer: StepObserver | None = None) -> ExecutionOutcome:
     executed = 0
     screen = adapter.read_screen()
     for step in steps:
         adapter.send_keys(_to_keystep(step))
         screen = adapter.wait_for_screen()
         executed += 1
+        if observer is not None:
+            observer(
+                StepRecord(
+                    action=step.model_dump(),
+                    screen=screen.screen,
+                    screen_fields=screen.fields,
+                    status="error" if screen.errors else "ok",
+                    errors=screen.errors or None,
+                )
+            )
         if screen.errors:
             return ExecutionOutcome(
                 status="verify_failed", final_screen=screen.screen, errors=screen.errors,
@@ -78,12 +100,12 @@ def _drive(adapter: ScreenAdapter, steps: list[Step]) -> ExecutionOutcome:
     )
 
 
-def _attempt(adapter: ScreenAdapter, filled: FilledKeysequence) -> ExecutionOutcome:
+def _attempt(adapter: ScreenAdapter, filled: FilledKeysequence, observer: StepObserver | None = None) -> ExecutionOutcome:
     adapter.send_keys(KeyStep(type="nav", key="Enter"))
     screen = adapter.wait_for_screen()
     if screen.errors:
         return ExecutionOutcome(status="verify_failed", final_screen=screen.screen, errors=screen.errors)
-    return _drive(adapter, filled.steps)
+    return _drive(adapter, filled.steps, observer)
 
 
 def _recover_to_trip_input(adapter: ScreenAdapter) -> bool:
@@ -92,8 +114,8 @@ def _recover_to_trip_input(adapter: ScreenAdapter) -> bool:
     return screen.screen == TRIP_INPUT
 
 
-def _replan(adapter: ScreenAdapter, filled: FilledKeysequence) -> ExecutionOutcome:
-    return _drive(adapter, filled.steps[1:])
+def _replan(adapter: ScreenAdapter, filled: FilledKeysequence, observer: StepObserver | None = None) -> ExecutionOutcome:
+    return _drive(adapter, filled.steps[1:], observer)
 
 
 def _rollback(adapter: ScreenAdapter, outcome: ExecutionOutcome, replan_count: int) -> ExecutionOutcome:
@@ -127,16 +149,17 @@ def execute(
     request: RequestInput,
     filled: FilledKeysequence,
     adapter: ScreenAdapter,
+    observer: StepObserver | None = None,
 ) -> ExecutionOutcome:
     adapter.open(derive_idempotency_key(request))
     try:
-        outcome = _attempt(adapter, filled)
+        outcome = _attempt(adapter, filled, observer)
         replan_count = 0
         while outcome.status == "verify_failed" and not outcome.bad_data and replan_count < MAX_REPLAN:
             if not _recover_to_trip_input(adapter):
                 break
             replan_count += 1
-            outcome = _replan(adapter, filled)
+            outcome = _replan(adapter, filled, observer)
 
         if outcome.status == "verify_failed":
             return _rollback(adapter, outcome, replan_count)
@@ -145,13 +168,19 @@ def execute(
         adapter.close()
 
 
-def run_task(request: RequestInput, adapter: ScreenAdapter, slot_fn: SlotExtractor, context: str = "") -> ExecutionOutcome:
+def run_task(
+    request: RequestInput,
+    adapter: ScreenAdapter,
+    slot_fn: SlotExtractor,
+    context: str = "",
+    observer: StepObserver | None = None,
+) -> ExecutionOutcome:
     try:
         result = plan(request, slot_fn, context)
         if isinstance(result, Refusal):
             return ExecutionOutcome(status="refused", refusal=result, executed_steps=0)
         if not auto_approve(result):
             return ExecutionOutcome(status="verify_failed", errors=["not approved"])
-        return execute(request, result, adapter)
+        return execute(request, result, adapter, observer)
     except SlotParseError as exc:
         return ExecutionOutcome(status="parse_failed", errors=exc.errors)

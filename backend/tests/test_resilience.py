@@ -17,7 +17,7 @@ _ORDER = ["task_created", "execution_started", "execution_finished", "status_cha
 @pytest.fixture
 def client():
     test_client = TestClient(app)
-    app.dependency_overrides[get_runner] = lambda: (lambda request: _OUTCOME)
+    app.dependency_overrides[get_runner] = lambda: (lambda request, observer=None: _OUTCOME)
     try:
         yield test_client
     finally:
