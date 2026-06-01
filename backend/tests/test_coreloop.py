@@ -117,6 +117,15 @@ def test_empty_purpose_refuses_after_extraction(mock_client):
     assert _trip_count() == before
 
 
+def test_empty_dest_code_refuses_after_extraction(mock_client):
+    before = _trip_count()
+    outcome = run_task(_request(), MockAdapter(mock_client), _constant(Slots(dest_code="", purpose="製品X納入調整")))
+    assert outcome.status == "refused"
+    assert outcome.refusal.missing_fields == ["DEST"]
+    assert outcome.executed_steps == 0
+    assert _trip_count() == before
+
+
 def test_verify_gate_halts_on_unfinished_sequence(mock_client):
     before = _trip_count()
     incomplete = FilledKeysequence(
