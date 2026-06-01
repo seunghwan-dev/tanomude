@@ -52,10 +52,79 @@ export interface TaskPlan {
   refusal: Refusal | null;
 }
 
+export interface TaskStep {
+  id: number;
+  execution_id: number;
+  ordinal: number;
+  intent: string;
+  action: Step;
+  screen: string | null;
+  screen_fields: Record<string, string>;
+  status: "ok" | "error";
+  errors: string[] | null;
+  created_at: string;
+}
+
+export interface CorrectionCandidate {
+  screen: string | null;
+  expected: string;
+  diffs: string[];
+  replan_count: number;
+  bad_data: boolean;
+}
+
+export interface Execution {
+  id: number;
+  attempt_no: number;
+  status: string;
+  final_screen: string | null;
+  trip_id: number | null;
+  trip_created: boolean | null;
+  executed_steps: number;
+  errors: string[] | null;
+  correction_candidate: CorrectionCandidate | null;
+  steps: TaskStep[];
+}
+
+export interface TaskDetail {
+  id: number;
+  workflow: string;
+  instruction: string;
+  status: string;
+  executions: Execution[];
+}
+
+export type EventType =
+  | "task_created"
+  | "execution_started"
+  | "execution_finished"
+  | "status_changed"
+  | "step_executed"
+  | "plan_ready"
+  | "approved"
+  | "rejected"
+  | "revised";
+
+export interface Envelope {
+  type: EventType;
+  task_id: number;
+  seq: number;
+  ts: string;
+  payload: Record<string, unknown>;
+}
+
 export interface PlanRequest {
   workflow: string;
   instruction: string;
   fields: Record<string, string>;
+}
+
+export async function getTask(taskId: number): Promise<TaskDetail> {
+  const response = await fetch(`/api/tasks/${taskId}`);
+  if (!response.ok) {
+    throw new Error(`タスク取得に失敗しました (HTTP ${response.status})`);
+  }
+  return (await response.json()) as TaskDetail;
 }
 
 export async function planTask(request: PlanRequest): Promise<TaskPlan> {

@@ -2,6 +2,7 @@ import { useState } from "react";
 
 import { planTask, type TaskPlan } from "./api";
 import ApprovalCard from "./components/ApprovalCard";
+import ExecutionPanel from "./components/ExecutionPanel";
 
 function TextField(props: { label: string; value: string; onChange: (value: string) => void; mono?: boolean }) {
   return (
@@ -91,7 +92,12 @@ export default function App() {
       </form>
 
       {result ? (
-        <ApprovalCard result={result} />
+        <>
+          <ApprovalCard result={result} />
+          {result.plan ? (
+            <ExecutionPanel taskId={result.task.id} initialStatus={result.task.status} />
+          ) : null}
+        </>
       ) : (
         <div className="rounded-card border border-dashed border-line bg-paper-panel/50 px-5 py-16 text-center text-sm text-ink-faint">
           指示を入力し「計画を生成」を押すと、承認カードが表示されます。
