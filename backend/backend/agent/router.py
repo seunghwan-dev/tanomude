@@ -1,5 +1,3 @@
-import asyncio
-
 from anyio import to_thread
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
@@ -64,7 +62,6 @@ async def create_task(
     request = RequestInput(
         workflow=body.workflow, instruction=body.instruction, fields=body.fields, task_id=str(task.id)
     )
-    manager.bind_loop(asyncio.get_running_loop())
     observer = build_step_observer(execution.id, task.id)
     try:
         outcome = await to_thread.run_sync(runner, request, observer)
@@ -169,7 +166,6 @@ async def approve_task(
         slots=Slots(**plan.analysis),
         steps=[Step(**step) for step in plan.keysequence],
     )
-    manager.bind_loop(asyncio.get_running_loop())
     observer = build_step_observer(execution.id, task.id)
     try:
         outcome = await to_thread.run_sync(execute_runner, request, filled, observer)

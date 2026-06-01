@@ -167,16 +167,15 @@ def test_hydration_includes_steps_so_far(mock_client):
         return run_task(request, MockAdapter(mock_client), _constant(SLOTS), observer=observer)
 
     app.dependency_overrides[get_runner] = lambda: stepping_runner
-    api_client = TestClient(app)
     body = {
         "workflow": "shukko",
         "instruction": "出張申請",
         "fields": {"dest": "大阪", "dept_date": "2026-06-10", "ret_date": "2026-06-11", "proj_hint": "P-001"},
         "dedup_key": "task:steps",
     }
-    task_id = api_client.post("/tasks", json=body).json()["id"]
-
-    hydrated = api_client.get(f"/tasks/{task_id}").json()
+    with TestClient(app) as api_client:
+        task_id = api_client.post("/tasks", json=body).json()["id"]
+        hydrated = api_client.get(f"/tasks/{task_id}").json()
     steps = hydrated["executions"][0]["steps"]
     assert [step["ordinal"] for step in steps] == list(range(1, 11))
     assert steps[1]["intent"] == "目的地コード入力"
@@ -188,14 +187,13 @@ def test_step_executed_broadcast_over_ws(mock_client):
         return run_task(request, MockAdapter(mock_client), _constant(SLOTS), observer=observer)
 
     app.dependency_overrides[get_runner] = lambda: stepping_runner
-    api_client = TestClient(app)
     body = {
         "workflow": "shukko",
         "instruction": "出張申請",
         "fields": {"dest": "大阪", "dept_date": "2026-06-10", "ret_date": "2026-06-11", "proj_hint": "P-001"},
         "dedup_key": "task:ws",
     }
-    with api_client.websocket_connect("/ws/agent") as ws:
+    with TestClient(app) as api_client, api_client.websocket_connect("/ws/agent") as ws:
         api_client.post("/tasks", json=body)
         events = []
         while True:
