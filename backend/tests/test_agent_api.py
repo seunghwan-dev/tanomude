@@ -23,7 +23,7 @@ def client():
 
 
 def _use_runner(outcome: ExecutionOutcome) -> None:
-    app.dependency_overrides[get_runner] = lambda: (lambda request: outcome)
+    app.dependency_overrides[get_runner] = lambda: (lambda request, observer=None: outcome)
 
 
 def _body(**overrides) -> dict:
@@ -127,7 +127,7 @@ def test_hydration_orders_multiple_executions(client):
 
 
 def test_runner_exception_finalizes_rows(client):
-    def _raising_runner(request):
+    def _raising_runner(request, observer=None):
         raise RuntimeError("boom")
 
     app.dependency_overrides[get_runner] = lambda: _raising_runner

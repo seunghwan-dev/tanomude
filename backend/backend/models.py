@@ -3,7 +3,7 @@ import datetime as dt
 from pgvector.sqlalchemy import Vector
 from sqlalchemy import Boolean, Computed, DateTime, ForeignKey, Index, Integer, String, Text, UniqueConstraint, func, text
 from sqlalchemy.dialects.postgresql import JSONB, TSVECTOR
-from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
+from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
 EMBEDDING_DIM = 1024
 
@@ -78,6 +78,10 @@ class Execution(Base):
     )
     finished_at: Mapped[dt.datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
 
+    steps: Mapped[list["TaskStep"]] = relationship(
+        order_by="TaskStep.ordinal", passive_deletes=True
+    )
+
 
 class Plan(Base):
     __tablename__ = "plans"
@@ -147,6 +151,27 @@ class PersonalCorrection(Base):
     )
     source: Mapped[str] = mapped_column(String(16), nullable=False)
     approver: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    created_at: Mapped[dt.datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, server_default=func.now()
+    )
+
+
+class TaskStep(Base):
+    __tablename__ = "task_steps"
+    __table_args__ = (UniqueConstraint("execution_id", "ordinal", name="uq_task_steps_execution_ordinal"),)
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    task_id: Mapped[int] = mapped_column(ForeignKey("tasks.id", ondelete="CASCADE"), index=True, nullable=False)
+    execution_id: Mapped[int] = mapped_column(
+        ForeignKey("executions.id", ondelete="CASCADE"), index=True, nullable=False
+    )
+    ordinal: Mapped[int] = mapped_column(Integer, nullable=False)
+    intent: Mapped[str] = mapped_column(String(128), nullable=False)
+    action: Mapped[dict] = mapped_column(JSONB, nullable=False)
+    screen: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    screen_fields: Mapped[dict] = mapped_column(JSONB, nullable=False)
+    status: Mapped[str] = mapped_column(String(16), nullable=False)
+    errors: Mapped[list | None] = mapped_column(JSONB, nullable=True)
     created_at: Mapped[dt.datetime] = mapped_column(
         DateTime(timezone=True), nullable=False, server_default=func.now()
     )

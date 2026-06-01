@@ -1,9 +1,12 @@
+import asyncio
+
 from anyio import to_thread
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 from backend.agent import repository
 from backend.agent.manager import manager
+from backend.agent.observer import build_step_observer
 from backend.agent.schemas import (
     DecisionInput,
     ExecutionView,
@@ -61,8 +64,10 @@ async def create_task(
     request = RequestInput(
         workflow=body.workflow, instruction=body.instruction, fields=body.fields, task_id=str(task.id)
     )
+    manager.bind_loop(asyncio.get_running_loop())
+    observer = build_step_observer(execution.id, task.id)
     try:
-        outcome = await to_thread.run_sync(runner, request)
+        outcome = await to_thread.run_sync(runner, request, observer)
     except Exception as exc:
         repository.fail_execution(db, execution, task, repr(exc), rollup_status("errored"))
         await manager.broadcast(
@@ -164,8 +169,10 @@ async def approve_task(
         slots=Slots(**plan.analysis),
         steps=[Step(**step) for step in plan.keysequence],
     )
+    manager.bind_loop(asyncio.get_running_loop())
+    observer = build_step_observer(execution.id, task.id)
     try:
-        outcome = await to_thread.run_sync(execute_runner, request, filled)
+        outcome = await to_thread.run_sync(execute_runner, request, filled, observer)
     except Exception as exc:
         repository.fail_execution(db, execution, task, repr(exc), rollup_status("errored"))
         await manager.broadcast(

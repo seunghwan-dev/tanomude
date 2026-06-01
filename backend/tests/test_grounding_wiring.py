@@ -26,7 +26,7 @@ def test_production_runner_grounds_and_threads_context(monkeypatch):
         captured["query"] = query
         return "GROUNDED-CONTEXT"
 
-    def fake_run_task(request, adapter, slot_fn, context=""):
+    def fake_run_task(request, adapter, slot_fn, context="", observer=None):
         captured["context"] = context
         return ExecutionOutcome(status="submitted", executed_steps=1)
 
