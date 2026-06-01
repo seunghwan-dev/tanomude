@@ -153,6 +153,8 @@ def fill(request: RequestInput, slot_fn: SlotExtractor, context: str = "") -> Fi
     slots = slot_fn(request, context)
     slots.dest_code = slots.dest_code.upper()
     slots.purpose = slots.purpose[:PURPOSE_MAX]
+    if not _present(slots.purpose):
+        return Refusal(reason="required field missing after extraction", missing_fields=["PURPOSE"])
     return FilledKeysequence(workflow=request.workflow, steps=assemble(slots, dept, ret, proj), slots=slots)
 
 
