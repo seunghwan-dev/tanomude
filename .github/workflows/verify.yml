@@ -105,3 +105,20 @@ jobs:
           # In-process Mock (core-loop test) drives the mock-as400 app against the mock_as400 DB.
           DATABASE_URL: postgresql+psycopg://tanomude:tanomude@localhost:5432/mock_as400
         run: pytest -q
+
+      # Frontend has no test suite yet, so the type-check + production build is the
+      # gate that catches TS/React regressions before the human merge (design section 23).
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install frontend
+        working-directory: frontend
+        run: npm ci
+
+      - name: Build frontend
+        working-directory: frontend
+        run: npm run build
