@@ -151,7 +151,14 @@ export function useAgentStream(taskId: number | null, initialStatus: string | nu
       if (reconnectTimer) {
         window.clearTimeout(reconnectTimer);
       }
-      socket?.close();
+      if (socket) {
+        const current = socket;
+        if (current.readyState === WebSocket.CONNECTING) {
+          current.onopen = () => current.close();
+        } else {
+          current.close();
+        }
+      }
     };
   }, [taskId]);
 

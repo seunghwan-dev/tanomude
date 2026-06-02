@@ -201,7 +201,7 @@ export default function App() {
       {result ? (
         <>
           <ApprovalCard
-            key={result.task.id}
+            key={`card-${result.task.id}`}
             result={result}
             status={cardStatus}
             pending={pending}
@@ -212,7 +212,7 @@ export default function App() {
             onReject={onReject}
           />
           {showPanel ? (
-            <ExecutionPanel key={result.task.id} taskId={result.task.id} initialStatus={result.task.status} />
+            <ExecutionPanel key={`panel-${result.task.id}`} taskId={result.task.id} initialStatus={result.task.status} />
           ) : null}
         </>
       ) : (
