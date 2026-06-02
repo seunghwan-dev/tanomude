@@ -117,6 +117,12 @@ export interface PlanRequest {
   workflow: string;
   instruction: string;
   fields: Record<string, string>;
+  dedup_key?: string;
+}
+
+export interface DecisionRequest {
+  approver: string;
+  decision_text?: string;
 }
 
 export async function getTask(taskId: number): Promise<TaskDetail> {
@@ -137,4 +143,49 @@ export async function planTask(request: PlanRequest): Promise<TaskPlan> {
     throw new Error(`計画リクエストに失敗しました (HTTP ${response.status})`);
   }
   return (await response.json()) as TaskPlan;
+}
+
+const DECISION_LABELS: Record<string, string> = {
+  approve: "承認",
+  reject: "却下",
+  revise: "修正",
+};
+
+export class DecisionError extends Error {
+  readonly responded: boolean;
+
+  constructor(message: string, responded: boolean) {
+    super(message);
+    this.responded = responded;
+  }
+}
+
+async function postDecision(taskId: number, action: string, body: DecisionRequest): Promise<TaskDetail> {
+  const label = DECISION_LABELS[action] ?? action;
+  let response: Response;
+  try {
+    response = await fetch(`/api/tasks/${taskId}/${action}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    });
+  } catch {
+    throw new DecisionError(`${label}に失敗しました（通信エラー）`, false);
+  }
+  if (!response.ok) {
+    throw new DecisionError(`${label}に失敗しました (HTTP ${response.status})`, true);
+  }
+  return (await response.json()) as TaskDetail;
+}
+
+export function approveTask(taskId: number, body: DecisionRequest): Promise<TaskDetail> {
+  return postDecision(taskId, "approve", body);
+}
+
+export function rejectTask(taskId: number, body: DecisionRequest): Promise<TaskDetail> {
+  return postDecision(taskId, "reject", body);
+}
+
+export function reviseTask(taskId: number, body: DecisionRequest): Promise<TaskDetail> {
+  return postDecision(taskId, "revise", body);
 }
