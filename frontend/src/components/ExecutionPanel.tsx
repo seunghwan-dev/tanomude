@@ -155,7 +155,7 @@ export default function ExecutionPanel({ taskId, initialStatus }: { taskId: numb
           {execution.badData ? (
             <p className="text-sm text-seal-deep">
               <span className="font-semibold">育成候補：</span>
-              不正データのため差し戻されました。ここでの人手の修正は、次回の同種作業の個人教正（personal_correction）として育成に活かされます。
+              不正データのため差し戻されました。ここでの人手の修正は、次回の同種作業の個人修正（personal_correction）として育成に活かされます。
             </p>
           ) : (
             <p className="text-sm text-ink-soft">
