@@ -6,7 +6,7 @@ from sqlalchemy import delete, func, select
 from backend.agent import repository
 from backend.agent.app import app
 from backend.agent.manager import manager
-from backend.agent.service import get_execute_runner, get_plan_runner
+from backend.agent.service import get_execute_runner, get_plan_runner, get_runner
 from backend.coreloop import ExecutionOutcome
 from backend.db import SessionLocal
 from backend.models import Approval, AuditLog, Execution, Plan, Task
@@ -104,7 +104,7 @@ def test_approve_execute_exception_marks_errored_not_orphan(client):
         assert execution.finished_at is not None
 
 
-def test_approve_maps_mock_http_error_to_502(client):
+def test_approve_maps_upstream_http_error_to_502(client):
     task_id = _seed_awaiting(client)
 
     def _raising(request, filled, observer=None):
@@ -116,14 +116,14 @@ def test_approve_maps_mock_http_error_to_502(client):
     app.dependency_overrides[get_execute_runner] = lambda: _raising
     response = client.post(f"/tasks/{task_id}/approve", json={"approver": "tanaka"})
     assert response.status_code == 502
-    assert response.json()["detail"] == "mock 404 at http://localhost:8400/session"
+    assert response.json()["detail"] == "upstream 404 at http://localhost:8400/session"
     with SessionLocal() as session:
         assert session.get(Task, task_id).status == "failed"
         execution = session.scalars(select(Execution).where(Execution.task_id == task_id)).one()
         assert execution.status == "errored"
 
 
-def test_approve_maps_mock_connect_error_to_502(client):
+def test_approve_maps_upstream_connect_error_to_502(client):
     task_id = _seed_awaiting(client)
 
     def _raising(request, filled, observer=None):
@@ -133,7 +133,21 @@ def test_approve_maps_mock_connect_error_to_502(client):
     app.dependency_overrides[get_execute_runner] = lambda: _raising
     response = client.post(f"/tasks/{task_id}/approve", json={"approver": "tanaka"})
     assert response.status_code == 502
-    assert response.json()["detail"] == "mock unreachable at http://localhost:8400/session"
+    assert response.json()["detail"] == "upstream unreachable at http://localhost:8400/session"
+
+
+def test_create_task_maps_upstream_http_error_to_502(client):
+    def _raising(request, observer=None):
+        http_request = httpx.Request("POST", "http://localhost:8001/embed")
+        raise httpx.HTTPStatusError(
+            "down", request=http_request, response=httpx.Response(503, request=http_request)
+        )
+
+    app.dependency_overrides[get_runner] = lambda: _raising
+    body = {"workflow": "shukko", "instruction": "出張申請", "fields": {"dest": "大阪"}, "dedup_key": "task:create:err"}
+    response = client.post("/tasks", json=body)
+    assert response.status_code == 502
+    assert response.json()["detail"] == "upstream 503 at http://localhost:8001/embed"
 
 
 def test_approve_non_mock_error_is_not_mapped_to_gateway(client):

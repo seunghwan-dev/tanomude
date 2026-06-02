@@ -46,16 +46,16 @@ def _to_view(task: Task, executions: list[Execution]) -> TaskView:
     )
 
 
-def _mock_gateway_error(exc: Exception) -> HTTPException | None:
+def _upstream_gateway_error(exc: Exception) -> HTTPException | None:
     if isinstance(exc, httpx.HTTPStatusError):
         return HTTPException(
             status_code=status.HTTP_502_BAD_GATEWAY,
-            detail=f"mock {exc.response.status_code} at {exc.request.url}",
+            detail=f"upstream {exc.response.status_code} at {exc.request.url}",
         )
     if isinstance(exc, httpx.RequestError):
         return HTTPException(
             status_code=status.HTTP_502_BAD_GATEWAY,
-            detail=f"mock unreachable at {exc.request.url}",
+            detail=f"upstream unreachable at {exc.request.url}",
         )
     return None
 
@@ -86,7 +86,7 @@ async def create_task(
             "execution_finished", task.id, {"execution_id": execution.id, "status": execution.status}
         )
         await manager.broadcast("status_changed", task.id, {"status": task.status})
-        mapped = _mock_gateway_error(exc)
+        mapped = _upstream_gateway_error(exc)
         if mapped is not None:
             raise mapped from exc
         raise
@@ -193,7 +193,7 @@ async def approve_task(
             "execution_finished", task.id, {"execution_id": execution.id, "status": execution.status}
         )
         await manager.broadcast("status_changed", task.id, {"status": task.status})
-        mapped = _mock_gateway_error(exc)
+        mapped = _upstream_gateway_error(exc)
         if mapped is not None:
             raise mapped from exc
         raise
