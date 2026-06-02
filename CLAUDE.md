@@ -83,3 +83,14 @@ through [D-53]) live in the design master; new decisions are recorded here.
   is no task id). This makes duplicate-submission defense active on the production
   core-loop path; the real AS-400 adapter will implement open/close as its connect/login
   and disconnect.
+
+- **[D-55]** The frontend approval card separates the 承認済 seal from the execution
+  outcome. The seal marks the approval act: it renders for every approved task regardless
+  of how execution ends, and never renders while a task is awaiting approval. The execution
+  result is surfaced independently as a four-way outcome on the timeline — submitted shows
+  the trip id; a rolled-back execution flagged as bad data is surfaced as a growth candidate
+  (育成候補) whose human correction is destined to become the next task's personal
+  correction; a rolled-back execution that is not bad data (transient retries exhausted) is
+  surfaced as needing investigation (要調査); a refused plan shows its reason. A
+  non-submitted but approved outcome is no longer reported as a card-level error — the
+  timeline outcome carries the result.

@@ -93,16 +93,13 @@ export default function App() {
       const detail = await approveTask(result.task.id, { approver: APPROVER });
       setLiveStatus(detail.status);
       setDecided("approved");
-      if (detail.status !== "submitted") {
-        setDecisionError("実行は成功しませんでした。下のタイムラインで結果をご確認ください。");
-      }
     } catch (err) {
-      setDecisionError(err instanceof Error ? err.message : "承認に失敗しました");
       if (err instanceof DecisionError && err.responded) {
         setLiveStatus("failed");
         setDecided("approved");
       } else {
         setLiveStatus(null);
+        setDecisionError(err instanceof Error ? err.message : "承認に失敗しました");
       }
     } finally {
       setPending(null);

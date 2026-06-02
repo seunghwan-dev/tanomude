@@ -96,15 +96,19 @@ export default function ExecutionPanel({ taskId, initialStatus }: { taskId: numb
           {STATUS_LABELS[taskStatus ?? ""] ?? taskStatus ?? "—"}
         </span>
         {execution?.finished ? (
-          execution.badData ? (
-            <span className="rounded-full bg-seal-wash px-3 py-1 text-xs font-semibold text-seal-deep">
-              不正データ・育成候補
-            </span>
-          ) : execution.tripId !== null ? (
+          execution.tripId !== null ? (
             <span className="rounded-full bg-phosphor/10 px-3 py-1 font-mono text-xs font-semibold text-phosphor">
               trip #{execution.tripId}
             </span>
-          ) : null
+          ) : execution.badData ? (
+            <span className="rounded-full bg-seal-wash px-3 py-1 text-xs font-semibold text-seal-deep">
+              不正データ・育成候補
+            </span>
+          ) : (
+            <span className="rounded-full border border-line bg-paper px-3 py-1 text-xs font-semibold text-ink-soft">
+              要調査
+            </span>
+          )
         ) : null}
 
         <div className="ml-auto flex items-center gap-1">
@@ -139,6 +143,28 @@ export default function ExecutionPanel({ taskId, initialStatus }: { taskId: numb
           </span>
         </div>
       </header>
+
+      {execution?.finished && execution.tripId === null ? (
+        <div
+          className={
+            execution.badData
+              ? "border-b border-line bg-seal-wash/40 px-5 py-3"
+              : "border-b border-line bg-paper-sunk px-5 py-3"
+          }
+        >
+          {execution.badData ? (
+            <p className="text-sm text-seal-deep">
+              <span className="font-semibold">育成候補：</span>
+              不正データのため差し戻されました。ここでの人手の修正は、次回の同種作業の個人修正（personal_correction）として育成に活かされます。
+            </p>
+          ) : (
+            <p className="text-sm text-ink-soft">
+              <span className="font-semibold">要調査：</span>
+              再試行を尽くしても画面状態が整合せず差し戻されました。データの誤りではなく、一時的・実行環境側の事象として調査が必要です。
+            </p>
+          )}
+        </div>
+      ) : null}
 
       <div className="grid gap-4 p-5 md:grid-cols-12">
         <div className="max-h-[24rem] overflow-y-auto md:col-span-5">
