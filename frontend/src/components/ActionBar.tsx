@@ -70,7 +70,7 @@ export default function ActionBar({
         </motion.button>
 
         <AnimatePresence>
-          {decided === "approved" && !error ? (
+          {decided === "approved" ? (
             <motion.span
               key="stamp"
               initial={{ opacity: 0, scale: 0.6, rotate: -12 }}
