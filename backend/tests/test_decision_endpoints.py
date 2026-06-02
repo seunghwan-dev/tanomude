@@ -1,3 +1,4 @@
+import httpx
 import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import delete, func, select
@@ -101,6 +102,49 @@ def test_approve_execute_exception_marks_errored_not_orphan(client):
         execution = session.scalars(select(Execution).where(Execution.task_id == task_id)).one()
         assert execution.status == "errored"
         assert execution.finished_at is not None
+
+
+def test_approve_maps_mock_http_error_to_502(client):
+    task_id = _seed_awaiting(client)
+
+    def _raising(request, filled, observer=None):
+        http_request = httpx.Request("POST", "http://localhost:8400/session")
+        raise httpx.HTTPStatusError(
+            "not found", request=http_request, response=httpx.Response(404, request=http_request)
+        )
+
+    app.dependency_overrides[get_execute_runner] = lambda: _raising
+    response = client.post(f"/tasks/{task_id}/approve", json={"approver": "tanaka"})
+    assert response.status_code == 502
+    assert response.json()["detail"] == "mock 404 at http://localhost:8400/session"
+    with SessionLocal() as session:
+        assert session.get(Task, task_id).status == "failed"
+        execution = session.scalars(select(Execution).where(Execution.task_id == task_id)).one()
+        assert execution.status == "errored"
+
+
+def test_approve_maps_mock_connect_error_to_502(client):
+    task_id = _seed_awaiting(client)
+
+    def _raising(request, filled, observer=None):
+        http_request = httpx.Request("POST", "http://localhost:8400/session")
+        raise httpx.ConnectError("connection refused", request=http_request)
+
+    app.dependency_overrides[get_execute_runner] = lambda: _raising
+    response = client.post(f"/tasks/{task_id}/approve", json={"approver": "tanaka"})
+    assert response.status_code == 502
+    assert response.json()["detail"] == "mock unreachable at http://localhost:8400/session"
+
+
+def test_approve_non_mock_error_is_not_mapped_to_gateway(client):
+    task_id = _seed_awaiting(client)
+
+    def _raising(request, filled, observer=None):
+        raise RuntimeError("boom")
+
+    app.dependency_overrides[get_execute_runner] = lambda: _raising
+    with pytest.raises(RuntimeError):
+        client.post(f"/tasks/{task_id}/approve", json={"approver": "tanaka"})
 
 
 def test_reject_records_correction_and_refuses_without_executing(client):

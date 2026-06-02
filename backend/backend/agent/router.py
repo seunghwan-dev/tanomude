@@ -1,3 +1,4 @@
+import httpx
 from anyio import to_thread
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
@@ -45,6 +46,20 @@ def _to_view(task: Task, executions: list[Execution]) -> TaskView:
     )
 
 
+def _mock_gateway_error(exc: Exception) -> HTTPException | None:
+    if isinstance(exc, httpx.HTTPStatusError):
+        return HTTPException(
+            status_code=status.HTTP_502_BAD_GATEWAY,
+            detail=f"mock {exc.response.status_code} at {exc.request.url}",
+        )
+    if isinstance(exc, httpx.RequestError):
+        return HTTPException(
+            status_code=status.HTTP_502_BAD_GATEWAY,
+            detail=f"mock unreachable at {exc.request.url}",
+        )
+    return None
+
+
 @router.post("", response_model=TaskView, status_code=status.HTTP_201_CREATED)
 async def create_task(
     body: TaskCreate, db: Session = Depends(get_db), runner: Runner = Depends(get_runner)
@@ -71,6 +86,9 @@ async def create_task(
             "execution_finished", task.id, {"execution_id": execution.id, "status": execution.status}
         )
         await manager.broadcast("status_changed", task.id, {"status": task.status})
+        mapped = _mock_gateway_error(exc)
+        if mapped is not None:
+            raise mapped from exc
         raise
     repository.finalize_execution(db, execution, task, outcome, rollup_status(outcome.status))
     await manager.broadcast(
@@ -175,6 +193,9 @@ async def approve_task(
             "execution_finished", task.id, {"execution_id": execution.id, "status": execution.status}
         )
         await manager.broadcast("status_changed", task.id, {"status": task.status})
+        mapped = _mock_gateway_error(exc)
+        if mapped is not None:
+            raise mapped from exc
         raise
     repository.finalize_execution(db, execution, task, outcome, rollup_status(outcome.status))
     await manager.broadcast(
