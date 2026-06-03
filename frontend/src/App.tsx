@@ -1,10 +1,11 @@
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 import { approveTask, DecisionError, planTask, rejectTask, reviseTask, type PlanRequest, type TaskPlan } from "./api";
 import type { DecisionKind } from "./components/ActionBar";
 import ApprovalCard from "./components/ApprovalCard";
 import ExecutionPanel from "./components/ExecutionPanel";
 import { planDedupKey, sessionNonce } from "./lib/dedup";
+import { isVoiceSupported, setVoiceMuted, voicePlanReady, voicePlanRefused, voicePlanUnreadable } from "./lib/voice";
 
 const APPROVER = "operator";
 
@@ -40,9 +41,31 @@ export default function App() {
   const [decided, setDecided] = useState<"approved" | "rejected" | null>(null);
   const [decisionError, setDecisionError] = useState<string | null>(null);
   const [liveStatus, setLiveStatus] = useState<string | null>(null);
+  const [muted, setMuted] = useState(false);
 
   const nonce = useMemo(() => sessionNonce(), []);
+  const voiceSupported = useMemo(() => isVoiceSupported(), []);
   const generatedKeys = useRef<Set<string>>(new Set());
+
+  useEffect(() => {
+    if (!result) {
+      return;
+    }
+    const taskId = result.task.id;
+    if (result.plan) {
+      voicePlanReady(taskId);
+    } else if (result.refusal) {
+      voicePlanRefused(taskId);
+    } else {
+      voicePlanUnreadable(taskId);
+    }
+  }, [result]);
+
+  function toggleMute() {
+    const next = !muted;
+    setMuted(next);
+    setVoiceMuted(next);
+  }
 
   async function generate(request: PlanRequest): Promise<TaskPlan | null> {
     const dedupKey = planDedupKey(nonce, request);
@@ -161,9 +184,22 @@ export default function App() {
           </h1>
           <p className="text-sm text-ink-faint">基幹系オペレーション 承認コンソール</p>
         </div>
-        <div className="flex items-center gap-2 font-mono text-[11px] text-ink-faint">
-          <span className="h-2 w-2 rounded-full bg-phosphor" />
-          AS-400 / 出張申請
+        <div className="flex items-center gap-3">
+          {voiceSupported ? (
+            <button
+              type="button"
+              onClick={toggleMute}
+              aria-pressed={muted}
+              className="flex items-center gap-1.5 rounded-md border border-line bg-paper px-2.5 py-1 font-mono text-[11px] text-ink-faint transition-colors hover:bg-paper-sunk hover:text-ink"
+            >
+              <span className={`h-1.5 w-1.5 rounded-full ${muted ? "bg-ink-faint" : "bg-phosphor"}`} />
+              {muted ? "音声 OFF" : "音声 ON"}
+            </button>
+          ) : null}
+          <div className="flex items-center gap-2 font-mono text-[11px] text-ink-faint">
+            <span className="h-2 w-2 rounded-full bg-phosphor" />
+            AS-400 / 出張申請
+          </div>
         </div>
       </header>
 

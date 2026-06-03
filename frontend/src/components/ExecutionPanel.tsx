@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 
 import type { TaskStep } from "../api";
 import { useAgentStream } from "../hooks/useAgentStream";
+import { voiceOutcome } from "../lib/voice";
 import Inspector from "./Inspector";
 import Timeline from "./Timeline";
 
@@ -26,6 +27,13 @@ export default function ExecutionPanel({ taskId, initialStatus }: { taskId: numb
   const [pinned, setPinned] = useState(false);
   const lengthRef = useRef(0);
   lengthRef.current = steps.length;
+
+  useEffect(() => {
+    if (!execution?.finished) {
+      return;
+    }
+    voiceOutcome(taskId, execution.tripId, execution.badData);
+  }, [taskId, execution]);
 
   useEffect(() => {
     setCursor((current) => Math.min(current, Math.max(steps.length - 1, 0)));
