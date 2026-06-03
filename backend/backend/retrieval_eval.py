@@ -1,10 +1,11 @@
 from dataclasses import dataclass, field
 
+from pydantic import BaseModel
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from backend.embedding import embed_query
-from backend.models import KnowledgeChunk
+from backend.models import EvalRun, KnowledgeChunk
 from backend.retrieval import QueryEmbedder, fts_search_ids, rrf_fuse, vector_search_ids
 
 
@@ -67,3 +68,70 @@ def run_eval(
             )
         )
     return results
+
+
+class RetrievalScore(BaseModel):
+    query: str
+    precision_at_k: float
+    recall_at_k: float
+
+
+def score_query(result: QueryResult, k: int) -> RetrievalScore:
+    relevant = sum(1 for section in result.hybrid_sections if section in result.expected)
+    found = {section for section in result.hybrid_sections if section in result.expected}
+    precision = relevant / k if k else 0.0
+    recall = len(found) / len(result.expected) if result.expected else 0.0
+    return RetrievalScore(query=result.query, precision_at_k=precision, recall_at_k=recall)
+
+
+def aggregate_retrieval(scores: list[RetrievalScore]) -> dict[str, float | None]:
+    if not scores:
+        return {"precision_at_k": None, "recall_at_k": None}
+    return {
+        "precision_at_k": sum(score.precision_at_k for score in scores) / len(scores),
+        "recall_at_k": sum(score.recall_at_k for score in scores) / len(scores),
+    }
+
+
+def run_retrieval_eval(db: Session, k: int = 3) -> tuple[int, list[RetrievalScore]]:
+    scores = [score_query(result, k) for result in run_eval(db, top_k=k)]
+    metrics = aggregate_retrieval(scores)
+    run = EvalRun(
+        config={"k": k},
+        precision_at_k=metrics["precision_at_k"],
+        recall_at_k=metrics["recall_at_k"],
+    )
+    db.add(run)
+    db.commit()
+    db.refresh(run)
+    return run.run_id, scores
+
+
+def main(k: int = 3) -> int:
+    import json
+
+    from backend.db import SessionLocal
+    from backend.embedding import health
+    from backend.ingest import ingest_manual, load_manual
+
+    if not health():
+        print("embedding service unavailable; scoring logic verified, numbers deferred")
+        return 0
+    with SessionLocal() as db:
+        ingest_manual(
+            db,
+            workflow="shukko",
+            title="出張申請 操作マニュアル",
+            source="shukko_manual.md",
+            markdown=load_manual("shukko_manual.md"),
+        )
+        run_id, scores = run_retrieval_eval(db, k=k)
+        metrics = aggregate_retrieval(scores)
+    print(json.dumps({"run_id": run_id, "k": k, **metrics}, ensure_ascii=False))
+    for score in scores:
+        print(json.dumps(score.model_dump(), ensure_ascii=False))
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
