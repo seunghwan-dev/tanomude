@@ -1,3 +1,4 @@
+import logging
 import time
 from uuid import uuid4
 
@@ -13,6 +14,8 @@ from backend.eval_dataset import EVAL_CASES, EvalCaseSeed, seed_eval_cases
 from backend.models import EvalCase, EvalResult, EvalRun
 from backend.ollama_client import MODEL, health
 from backend.slotfill import PURPOSE_MAX, parse_date, recalc_days, resolve_proj
+
+logger = logging.getLogger(__name__)
 
 DEST_GOLDEN = {
     "大阪": "OSAKA",
@@ -184,6 +187,7 @@ def run_eval(plat, db: Session, mock_base: str, run_nonce: str) -> tuple[int, li
         try:
             result = run_case(plat, mock_base, case, dedup_key)
         except Exception:
+            logger.warning("eval case %s errored", case.case_id, exc_info=True)
             result = CaseResult(
                 case_id=case.case_id,
                 category=case.category,
