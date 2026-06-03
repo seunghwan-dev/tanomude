@@ -78,15 +78,21 @@ def test_distinct_dedup_keys_both_create_without_conflict(client):
     assert _counts() == (2, 2)
 
 
-def test_duplicate_plan_returns_409_with_existing_task(client):
+def test_duplicate_plan_returns_409_with_existing_task_and_plan(client):
     app.dependency_overrides[get_plan_runner] = lambda: (lambda request: (FILLED, GROUNDS))
     first = client.post("/tasks/plan", json=_body(dedup_key="task:plan:dup"))
     assert first.status_code == 201
-    first_task_id = first.json()["task"]["id"]
+    first_body = first.json()
+    first_task_id = first_body["task"]["id"]
+    first_plan_id = first_body["plan"]["id"]
 
     second = client.post("/tasks/plan", json=_body(dedup_key="task:plan:dup"))
     assert second.status_code == 409
-    assert second.json()["task"]["id"] == first_task_id
+    second_body = second.json()
+    assert second_body["task"]["id"] == first_task_id
+    assert second_body["plan"] is not None
+    assert second_body["plan"]["id"] == first_plan_id
+    assert second_body["plan"]["analysis"]["dest_code"] == "OSAKA"
     with SessionLocal() as session:
         assert session.scalar(select(func.count()).select_from(Task)) == 1
         assert session.scalar(select(func.count()).select_from(Plan)) == 1

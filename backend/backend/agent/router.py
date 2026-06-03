@@ -141,7 +141,11 @@ async def create_plan_task(
     except repository.DuplicateDedupKey as conflict:
         response.status_code = status.HTTP_409_CONFLICT
         existing = conflict.existing
-        return TaskPlanView(task=_to_view(existing, repository.list_executions(db, existing.id)))
+        existing_plan = repository.get_plan(db, existing.id)
+        return TaskPlanView(
+            task=_to_view(existing, repository.list_executions(db, existing.id)),
+            plan=PlanView.model_validate(existing_plan) if existing_plan is not None else None,
+        )
     await manager.broadcast("task_created", task.id, {"status": task.status})
     request = RequestInput(
         workflow=body.workflow, instruction=body.instruction, fields=body.fields, task_id=str(task.id)
