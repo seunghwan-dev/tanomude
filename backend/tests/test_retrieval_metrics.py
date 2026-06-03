@@ -42,20 +42,48 @@ def test_score_query_no_relevant():
     assert score.recall_at_k == 0.0
 
 
+def test_precision_at_expected_perfect_and_pushed():
+    perfect = score_query(_result({"4", "1"}, ["4", "1", "9"]), k=3)
+    assert perfect.precision_at_expected == 1.0
+    pushed = score_query(_result({"4", "1"}, ["9", "4", "1"]), k=3)
+    assert pushed.precision_at_expected == pytest.approx(0.5)
+
+
+def test_precision_at_expected_size_one():
+    assert score_query(_result({"4"}, ["4", "9", "8"]), k=3).precision_at_expected == 1.0
+    assert score_query(_result({"4"}, ["9", "4", "8"]), k=3).precision_at_expected == 0.0
+
+
+def test_precision_at_expected_when_fewer_retrieved_than_expected():
+    score = score_query(_result({"a", "b", "c"}, ["a", "b"]), k=3)
+    assert score.precision_at_expected == pytest.approx(2 / 3)
+
+
+def test_mrr_ranks():
+    assert score_query(_result({"4"}, ["4", "9", "8"]), k=3).mrr == 1.0
+    assert score_query(_result({"4"}, ["9", "4", "8"]), k=3).mrr == pytest.approx(0.5)
+    assert score_query(_result({"4"}, ["9", "8", "4"]), k=3).mrr == pytest.approx(1 / 3)
+    assert score_query(_result({"2.1"}, ["9", "8", "7"]), k=3).mrr == 0.0
+
+
 def test_aggregate_retrieval_means():
     scores = [
-        RetrievalScore(query="a", precision_at_k=2 / 3, recall_at_k=1.0),
-        RetrievalScore(query="b", precision_at_k=1 / 3, recall_at_k=0.5),
+        RetrievalScore(query="a", precision_at_k=2 / 3, recall_at_k=1.0, precision_at_expected=1.0, mrr=1.0),
+        RetrievalScore(query="b", precision_at_k=1 / 3, recall_at_k=0.5, precision_at_expected=0.5, mrr=0.5),
     ]
     metrics = aggregate_retrieval(scores)
     assert metrics["precision_at_k"] == pytest.approx(0.5)
     assert metrics["recall_at_k"] == pytest.approx(0.75)
+    assert metrics["precision_at_expected"] == pytest.approx(0.75)
+    assert metrics["mrr"] == pytest.approx(0.75)
 
 
 def test_aggregate_retrieval_empty_is_null():
     metrics = aggregate_retrieval([])
     assert metrics["precision_at_k"] is None
     assert metrics["recall_at_k"] is None
+    assert metrics["precision_at_expected"] is None
+    assert metrics["mrr"] is None
 
 
 def test_queryset_labels_exist_in_manual():
@@ -77,5 +105,7 @@ def test_run_retrieval_eval_persists_precision_recall(db, monkeypatch):
     assert run.config == {"k": 3}
     assert run.precision_at_k == pytest.approx(1 / 3)
     assert run.recall_at_k == 1.0
+    assert run.precision_at_expected == 1.0
+    assert run.mrr == 1.0
     db.delete(run)
     db.commit()
