@@ -1,7 +1,7 @@
 import datetime as dt
 
 from pgvector.sqlalchemy import Vector
-from sqlalchemy import Boolean, Computed, DateTime, ForeignKey, Index, Integer, String, Text, UniqueConstraint, func, text
+from sqlalchemy import Boolean, Computed, DateTime, Float, ForeignKey, Index, Integer, String, Text, UniqueConstraint, func, text
 from sqlalchemy.dialects.postgresql import JSONB, TSVECTOR
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
@@ -175,3 +175,59 @@ class TaskStep(Base):
     created_at: Mapped[dt.datetime] = mapped_column(
         DateTime(timezone=True), nullable=False, server_default=func.now()
     )
+
+
+class EvalCase(Base):
+    __tablename__ = "eval_cases"
+
+    case_id: Mapped[str] = mapped_column(String(64), primary_key=True)
+    category: Mapped[str] = mapped_column(String(16), nullable=False)
+    input: Mapped[dict] = mapped_column(JSONB, nullable=False)
+    expected_outcome: Mapped[str] = mapped_column(String(16), nullable=False)
+    expected_docs: Mapped[list | None] = mapped_column(JSONB, nullable=True)
+
+    results: Mapped[list["EvalResult"]] = relationship(back_populates="case", passive_deletes=True)
+
+
+class EvalRun(Base):
+    __tablename__ = "eval_runs"
+
+    run_id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    ts: Mapped[dt.datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, server_default=func.now()
+    )
+    config: Mapped[dict] = mapped_column(JSONB, nullable=False)
+    success_rate: Mapped[float | None] = mapped_column(Float, nullable=True)
+    field_accuracy: Mapped[float | None] = mapped_column(Float, nullable=True)
+    routing_accuracy: Mapped[float | None] = mapped_column(Float, nullable=True)
+    recovery_rate: Mapped[float | None] = mapped_column(Float, nullable=True)
+    verify_pass_rate: Mapped[float | None] = mapped_column(Float, nullable=True)
+    avg_steps: Mapped[float | None] = mapped_column(Float, nullable=True)
+    precision_at_k: Mapped[float | None] = mapped_column(Float, nullable=True)
+    recall_at_k: Mapped[float | None] = mapped_column(Float, nullable=True)
+    growth_delta: Mapped[float | None] = mapped_column(Float, nullable=True)
+
+    results: Mapped[list["EvalResult"]] = relationship(back_populates="run", passive_deletes=True)
+
+
+class EvalResult(Base):
+    __tablename__ = "eval_results"
+    __table_args__ = (UniqueConstraint("run_id", "case_id", name="uq_eval_results_run_case"),)
+
+    result_id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    run_id: Mapped[int] = mapped_column(
+        ForeignKey("eval_runs.run_id", ondelete="CASCADE"), index=True, nullable=False
+    )
+    case_id: Mapped[str] = mapped_column(
+        ForeignKey("eval_cases.case_id", ondelete="CASCADE"), index=True, nullable=False
+    )
+    actual_outcome: Mapped[str | None] = mapped_column(String(16), nullable=True)
+    passed: Mapped[bool] = mapped_column(Boolean, nullable=False)
+    field_accuracy: Mapped[float | None] = mapped_column(Float, nullable=True)
+    step_count: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    replan_count: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    latency_ms: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    retrieval_hits: Mapped[dict | None] = mapped_column(JSONB, nullable=True)
+
+    run: Mapped["EvalRun"] = relationship(back_populates="results")
+    case: Mapped["EvalCase"] = relationship(back_populates="results")
