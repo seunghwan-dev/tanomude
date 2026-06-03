@@ -44,6 +44,7 @@ def upgrade() -> None:
         sa.Column("replan_count", sa.Integer(), nullable=True),
         sa.Column("latency_ms", sa.Integer(), nullable=True),
         sa.Column("retrieval_hits", JSONB(), nullable=True),
+        sa.UniqueConstraint("run_id", "case_id", name="uq_eval_results_run_case"),
     )
     op.create_index("ix_eval_results_run_id", "eval_results", ["run_id"])
     op.create_index("ix_eval_results_case_id", "eval_results", ["case_id"])

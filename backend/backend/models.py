@@ -212,6 +212,7 @@ class EvalRun(Base):
 
 class EvalResult(Base):
     __tablename__ = "eval_results"
+    __table_args__ = (UniqueConstraint("run_id", "case_id", name="uq_eval_results_run_case"),)
 
     result_id: Mapped[int] = mapped_column(Integer, primary_key=True)
     run_id: Mapped[int] = mapped_column(

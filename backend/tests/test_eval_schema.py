@@ -1,6 +1,7 @@
 import pytest
 from pydantic import ValidationError
 from sqlalchemy import delete, func, select
+from sqlalchemy.exc import IntegrityError
 
 from backend.db import SessionLocal
 from backend.eval_dataset import (
@@ -97,6 +98,18 @@ def test_result_references_run_and_case(session):
     assert result.case.case_id == "normal_01"
     assert [child.result_id for child in run.results] == [result.result_id]
     assert [child.result_id for child in case.results] == [result.result_id]
+
+
+def test_eval_result_unique_per_run_and_case(session):
+    seed_eval_cases(session)
+    run = EvalRun(config={"model": "test"})
+    session.add(run)
+    session.flush()
+    session.add(EvalResult(run_id=run.run_id, case_id="normal_01", actual_outcome="submitted", passed=True))
+    session.commit()
+    session.add(EvalResult(run_id=run.run_id, case_id="normal_01", actual_outcome="submitted", passed=False))
+    with pytest.raises(IntegrityError):
+        session.commit()
 
 
 def test_run_aggregates_default_to_null(session):
