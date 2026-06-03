@@ -205,6 +205,8 @@ class EvalRun(Base):
     avg_steps: Mapped[float | None] = mapped_column(Float, nullable=True)
     precision_at_k: Mapped[float | None] = mapped_column(Float, nullable=True)
     recall_at_k: Mapped[float | None] = mapped_column(Float, nullable=True)
+    precision_at_expected: Mapped[float | None] = mapped_column(Float, nullable=True)
+    mrr: Mapped[float | None] = mapped_column(Float, nullable=True)
     growth_delta: Mapped[float | None] = mapped_column(Float, nullable=True)
 
     results: Mapped[list["EvalResult"]] = relationship(back_populates="run", passive_deletes=True)
