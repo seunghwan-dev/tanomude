@@ -1,10 +1,22 @@
 import datetime as dt
 
 from sqlalchemy import select
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session, selectinload
 
 from backend.coreloop import ExecutionOutcome
 from backend.models import Approval, AuditLog, Execution, Plan, Task
+
+
+class DuplicateDedupKey(Exception):
+    def __init__(self, existing: Task) -> None:
+        self.existing = existing
+
+
+def get_task_by_dedup_key(db: Session, dedup_key: str | None) -> Task | None:
+    if dedup_key is None:
+        return None
+    return db.scalars(select(Task).where(Task.dedup_key == dedup_key)).first()
 
 
 def create_task(
@@ -12,7 +24,14 @@ def create_task(
 ) -> Task:
     task = Task(workflow=workflow, instruction=instruction, fields=fields, dedup_key=dedup_key, status=status)
     db.add(task)
-    db.commit()
+    try:
+        db.commit()
+    except IntegrityError as exc:
+        db.rollback()
+        existing = get_task_by_dedup_key(db, dedup_key)
+        if existing is None:
+            raise
+        raise DuplicateDedupKey(existing) from exc
     db.refresh(task)
     return task
 
