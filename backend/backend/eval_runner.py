@@ -159,6 +159,7 @@ def _mean(values: list[float]) -> float | None:
 def aggregate(results: list[CaseResult]) -> dict[str, float | None]:
     normal = [r for r in results if r.category == "normal"]
     failures = [r for r in results if r.category in FAILURE_CATEGORIES]
+    transient = [r for r in results if r.category == "transient"]
     executed = [r for r in results if r.actual_outcome in EXECUTED_OUTCOMES]
     submitted = [r for r in executed if r.actual_outcome == "submitted"]
     field_scores = [r.field_accuracy for r in results if r.field_accuracy is not None]
@@ -169,6 +170,7 @@ def aggregate(results: list[CaseResult]) -> dict[str, float | None]:
         "field_accuracy": _mean(field_scores),
         "verify_pass_rate": _ratio(len(submitted), len(executed)),
         "avg_steps": _mean(step_counts),
+        "recovery_rate": _ratio(sum(1 for r in transient if r.actual_outcome == "submitted"), len(transient)),
     }
 
 
@@ -176,13 +178,26 @@ def deterministic_cases() -> list[EvalCaseSeed]:
     return [case for case in EVAL_CASES if case.category != "transient"]
 
 
-def run_eval(plat, db: Session, mock_base: str, run_nonce: str) -> tuple[int, list[CaseResult]]:
-    run = EvalRun(config={"model": MODEL, "corrections_applied": False, "transient_inject": False})
+def run_eval(
+    plat,
+    db: Session,
+    mock_base: str,
+    run_nonce: str,
+    cases: list[EvalCaseSeed] | None = None,
+    transient_inject: bool = False,
+    on_case=None,
+) -> tuple[int, list[CaseResult]]:
+    selected = cases if cases is not None else deterministic_cases()
+    run = EvalRun(
+        config={"model": MODEL, "corrections_applied": False, "transient_inject": transient_inject}
+    )
     db.add(run)
     db.commit()
     db.refresh(run)
     results: list[CaseResult] = []
-    for case in deterministic_cases():
+    for case in selected:
+        if on_case is not None:
+            on_case(case)
         dedup_key = f"{run_nonce}:{case.input.dedup_key}" if case.input.dedup_key else None
         try:
             result = run_case(plat, mock_base, case, dedup_key)
@@ -213,6 +228,7 @@ def run_eval(plat, db: Session, mock_base: str, run_nonce: str) -> tuple[int, li
     run.success_rate = metrics["success_rate"]
     run.field_accuracy = metrics["field_accuracy"]
     run.routing_accuracy = metrics["routing_accuracy"]
+    run.recovery_rate = metrics["recovery_rate"]
     run.verify_pass_rate = metrics["verify_pass_rate"]
     run.avg_steps = metrics["avg_steps"]
     db.commit()
@@ -226,6 +242,8 @@ def main() -> int:
     from fastapi.testclient import TestClient
 
     from backend.agent.app import app
+    from backend.agent.service import get_execute_runner
+    from backend.eval_transient import fail_submits_for, transient_execute_runner
 
     if not health():
         print("ollama unavailable; runner structure verified, numbers deferred")
@@ -234,8 +252,19 @@ def main() -> int:
     with SessionLocal() as db:
         if db.scalar(select(func.count()).select_from(EvalCase)) == 0:
             seed_eval_cases(db)
+
+        def on_case(case: EvalCaseSeed) -> None:
+            if case.category == "transient":
+                runner = transient_execute_runner(fail_submits_for(case))
+                app.dependency_overrides[get_execute_runner] = lambda bound=runner: bound
+            else:
+                app.dependency_overrides.pop(get_execute_runner, None)
+
         with TestClient(app) as plat:
-            run_id, results = run_eval(plat, db, settings.mock_as400_url, nonce)
+            run_id, results = run_eval(
+                plat, db, settings.mock_as400_url, nonce, cases=EVAL_CASES, transient_inject=True, on_case=on_case
+            )
+        app.dependency_overrides.pop(get_execute_runner, None)
         metrics = aggregate(results)
     print(json.dumps({"run_id": run_id, "metrics": metrics}, ensure_ascii=False))
     for result in results:
