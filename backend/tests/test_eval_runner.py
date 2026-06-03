@@ -74,6 +74,20 @@ def test_aggregate_empty_metrics_are_null():
     assert metrics["success_rate"] is None
     assert metrics["field_accuracy"] is None
     assert metrics["avg_steps"] is None
+    assert metrics["recovery_rate"] is None
+
+
+def test_aggregate_recovery_rate():
+    results = [
+        _result("n1", "normal", "submitted", "submitted", True, step_count=10, field_accuracy=1.0),
+        _result("e1", "empty", "refused", "refused", True),
+        _result("t1", "transient", "submitted", "submitted", True, step_count=10, field_accuracy=1.0),
+        _result("t2", "transient", "submitted", "submitted", True, step_count=10, field_accuracy=1.0),
+        _result("t3", "transient", "要調査", "要調査", True, step_count=12),
+        _result("t4", "transient", "要調査", "要調査", True, step_count=12),
+    ]
+    metrics = aggregate(results)
+    assert metrics["recovery_rate"] == 0.5
 
 
 def test_expected_fields_derivation():
