@@ -6,7 +6,7 @@ from sqlalchemy import delete
 from sqlalchemy.orm import Session
 
 from backend.corrections import create_correction
-from backend.models import EvalRun, PersonalCorrection
+from backend.models import EvalRun, PersonalCorrection, Task
 from backend.ollama_client import MODEL
 
 WORKFLOW = "shukko"
@@ -151,6 +151,11 @@ def seed_corrections(db: Session) -> None:
         create_correction(db, WORKFLOW, case.trigger, case.correction_text, source="eval")
 
 
+def clear_probe_tasks(db: Session) -> None:
+    db.execute(delete(Task).where(Task.workflow == WORKFLOW, Task.instruction.like("%へ%出張する。")))
+    db.commit()
+
+
 def run_growth_eval(plat, db: Session) -> tuple[int, float, float, dict, dict]:
     clear_corrections(db)
     control = {case.case_id: observe_slot(plat, case) for case in CORRECTION_CASES}
@@ -180,6 +185,7 @@ def run_growth_eval(plat, db: Session) -> tuple[int, float, float, dict, dict]:
     db.add(run)
     db.commit()
     db.refresh(run)
+    clear_probe_tasks(db)
     return run.run_id, growth_delta, boundary_respect_rate, control, treatment
 
 

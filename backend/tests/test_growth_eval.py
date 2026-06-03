@@ -1,6 +1,6 @@
 import pytest
 from fastapi.testclient import TestClient
-from sqlalchemy import delete
+from sqlalchemy import delete, func, select
 
 from backend import growth_eval, ollama_client
 from backend.agent.app import app
@@ -80,6 +80,12 @@ def test_run_growth_eval_policy_flips_boundary_respects(growth_env):
         run = db.get(EvalRun, run_id)
         assert run.growth_delta == growth_delta
         assert run.boundary_respect_rate == boundary_respect_rate
+        leaked = db.scalar(
+            select(func.count())
+            .select_from(Task)
+            .where(Task.workflow == "shukko", Task.instruction.like("%へ%出張する。"))
+        )
+        assert leaked == 0
         db.delete(run)
         db.commit()
     assert growth_delta >= 0.75
