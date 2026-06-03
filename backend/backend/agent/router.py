@@ -1,6 +1,6 @@
 import httpx
 from anyio import to_thread
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Response, status
 from sqlalchemy.orm import Session
 
 from backend.agent import repository
@@ -60,13 +60,28 @@ def _upstream_gateway_error(exc: Exception) -> HTTPException | None:
     return None
 
 
-@router.post("", response_model=TaskView, status_code=status.HTTP_201_CREATED)
+@router.post(
+    "",
+    response_model=TaskView,
+    status_code=status.HTTP_201_CREATED,
+    responses={
+        status.HTTP_409_CONFLICT: {"model": TaskView, "description": "Duplicate dedup_key; the existing task is returned"}
+    },
+)
 async def create_task(
-    body: TaskCreate, db: Session = Depends(get_db), runner: Runner = Depends(get_runner)
+    body: TaskCreate,
+    response: Response,
+    db: Session = Depends(get_db),
+    runner: Runner = Depends(get_runner),
 ) -> TaskView:
-    task = repository.create_task(
-        db, body.workflow, body.instruction, body.fields, body.dedup_key, status="running"
-    )
+    try:
+        task = repository.create_task(
+            db, body.workflow, body.instruction, body.fields, body.dedup_key, status="running"
+        )
+    except repository.DuplicateDedupKey as conflict:
+        response.status_code = status.HTTP_409_CONFLICT
+        existing = conflict.existing
+        return _to_view(existing, repository.list_executions(db, existing.id))
     await manager.broadcast("task_created", task.id, {"status": task.status})
     execution = repository.create_execution(db, task.id, attempt_no=1, status="running")
     await manager.broadcast(
@@ -105,13 +120,32 @@ async def create_task(
     return _to_view(task, repository.list_executions(db, task.id))
 
 
-@router.post("/plan", response_model=TaskPlanView, status_code=status.HTTP_201_CREATED)
+@router.post(
+    "/plan",
+    response_model=TaskPlanView,
+    status_code=status.HTTP_201_CREATED,
+    responses={
+        status.HTTP_409_CONFLICT: {"model": TaskPlanView, "description": "Duplicate dedup_key; the existing task is returned"}
+    },
+)
 async def create_plan_task(
-    body: TaskCreate, db: Session = Depends(get_db), plan_runner: PlanRunner = Depends(get_plan_runner)
+    body: TaskCreate,
+    response: Response,
+    db: Session = Depends(get_db),
+    plan_runner: PlanRunner = Depends(get_plan_runner),
 ) -> TaskPlanView:
-    task = repository.create_task(
-        db, body.workflow, body.instruction, body.fields, body.dedup_key, status="awaiting_approval"
-    )
+    try:
+        task = repository.create_task(
+            db, body.workflow, body.instruction, body.fields, body.dedup_key, status="awaiting_approval"
+        )
+    except repository.DuplicateDedupKey as conflict:
+        response.status_code = status.HTTP_409_CONFLICT
+        existing = conflict.existing
+        existing_plan = repository.get_plan(db, existing.id)
+        return TaskPlanView(
+            task=_to_view(existing, repository.list_executions(db, existing.id)),
+            plan=PlanView.model_validate(existing_plan) if existing_plan is not None else None,
+        )
     await manager.broadcast("task_created", task.id, {"status": task.status})
     request = RequestInput(
         workflow=body.workflow, instruction=body.instruction, fields=body.fields, task_id=str(task.id)
