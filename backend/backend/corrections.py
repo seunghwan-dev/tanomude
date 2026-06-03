@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 
 from backend.models import PersonalCorrection
 
-OVERRIDE_HEADER = "【個人教正・最優先（手順書より優先）】"
+OVERRIDE_HEADER = "【個人修正・最優先（手順書より優先）】"
 RAG_HEADER = "【手順書】"
 MAX_CORRECTION_LENGTH = 2000
 

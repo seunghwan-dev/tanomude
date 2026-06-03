@@ -160,10 +160,10 @@ def test_validate_accepts_multiline_and_tab():
 
 
 def test_apply_excludes_contaminated_keeps_valid(platform_db):
-    _seed(platform_db, trigger={"dest": "大阪"}, correction_text="有効な個人教正")
+    _seed(platform_db, trigger={"dest": "大阪"}, correction_text="有効な個人修正")
     contaminated = _seed(platform_db, trigger={}, correction_text="汚染マーカー\x07注入")
     context, fallback = apply_corrections(platform_db, "shukko", _fields(), "RAG-BASE")
-    assert "有効な個人教正" in context
+    assert "有効な個人修正" in context
     assert "汚染マーカー" not in context
     assert [exc.id for exc in fallback] == [contaminated.id]
     assert fallback[0].reason == "non_printable"
@@ -177,7 +177,7 @@ def test_apply_all_contaminated_falls_back_to_base(platform_db):
 
 
 def test_apply_read_only_with_contamination(platform_db):
-    _seed(platform_db, trigger={"dest": "大阪"}, correction_text="有効な個人教正")
+    _seed(platform_db, trigger={"dest": "大阪"}, correction_text="有効な個人修正")
     _seed(platform_db, trigger={}, correction_text="汚染\x07")
     before = platform_db.scalar(select(func.count()).select_from(PersonalCorrection))
     apply_corrections(platform_db, "shukko", _fields(), "BASE")
