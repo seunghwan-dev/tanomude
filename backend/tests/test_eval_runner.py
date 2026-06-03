@@ -1,15 +1,15 @@
 import pytest
 from fastapi.testclient import TestClient
-from sqlalchemy import delete
+from sqlalchemy import delete, func, select
 
 from backend import eval_runner
 from backend.agent.app import app
 from backend.agent.service import get_execute_runner, get_plan_runner
 from backend.coreloop import ExecutionOutcome
 from backend.db import SessionLocal
-from backend.eval_dataset import EVAL_CASES
+from backend.eval_dataset import EVAL_CASES, seed_eval_cases
 from backend.eval_runner import CaseResult, aggregate
-from backend.models import Approval, AuditLog, Execution, Plan, Task
+from backend.models import Approval, AuditLog, EvalCase, EvalResult, EvalRun, Execution, Plan, Task
 from backend.retrieval import RetrievedChunk
 from backend.slotfill import FilledKeysequence, Slots, Step
 
@@ -144,3 +144,48 @@ def test_duplicate_pair_order_and_idempotent(plat, monkeypatch):
     assert second.actual_outcome == "idempotent"
     assert second.passed
     assert second.step_count is None
+
+
+@pytest.fixture
+def eval_env():
+    client = TestClient(app)
+    app.dependency_overrides[get_plan_runner] = lambda: (lambda request: (FILLED, GROUNDS))
+    app.dependency_overrides[get_execute_runner] = lambda: (
+        lambda request, filled, observer=None: SUBMITTED
+    )
+    with SessionLocal() as session:
+        seed_eval_cases(session)
+    try:
+        yield client
+    finally:
+        app.dependency_overrides.clear()
+        with SessionLocal() as session:
+            session.execute(delete(EvalResult))
+            session.execute(delete(EvalRun))
+            session.execute(delete(EvalCase))
+            session.execute(delete(AuditLog))
+            session.execute(delete(Approval))
+            session.execute(delete(Plan))
+            session.execute(delete(Execution))
+            session.execute(delete(Task))
+            session.commit()
+
+
+def test_run_eval_records_errored_case_without_aborting(eval_env, monkeypatch):
+    monkeypatch.setattr(eval_runner, "_get_trip", lambda mock_base, trip_id: PERFECT_TRIP)
+    real_run_case = eval_runner.run_case
+
+    def flaky(plat_client, mock_base, case, dedup_key):
+        if case.case_id == "wrong_01_px":
+            raise RuntimeError("trip fetch blip")
+        return real_run_case(plat_client, mock_base, case, dedup_key)
+
+    monkeypatch.setattr(eval_runner, "run_case", flaky)
+    with SessionLocal() as db:
+        run_id, results = eval_runner.run_eval(eval_env, db, "http://mock", "nonce")
+        stored = db.scalar(select(func.count()).select_from(EvalResult).where(EvalResult.run_id == run_id))
+    assert len(results) == 20
+    assert stored == 20
+    errored = [r for r in results if r.actual_outcome == "errored"]
+    assert [r.case_id for r in errored] == ["wrong_01_px"]
+    assert errored[0].passed is False

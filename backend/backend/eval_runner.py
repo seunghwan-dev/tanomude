@@ -181,7 +181,16 @@ def run_eval(plat, db: Session, mock_base: str, run_nonce: str) -> tuple[int, li
     results: list[CaseResult] = []
     for case in deterministic_cases():
         dedup_key = f"{run_nonce}:{case.input.dedup_key}" if case.input.dedup_key else None
-        result = run_case(plat, mock_base, case, dedup_key)
+        try:
+            result = run_case(plat, mock_base, case, dedup_key)
+        except Exception:
+            result = CaseResult(
+                case_id=case.case_id,
+                category=case.category,
+                expected_outcome=case.expected_outcome,
+                actual_outcome="errored",
+                passed=False,
+            )
         results.append(result)
         db.add(
             EvalResult(
