@@ -42,6 +42,16 @@ def test_serves_index_assets_and_spa_fallback(tmp_path):
     assert client.get("/tasks/ping").json() == {"ok": True}
 
 
+def test_unknown_reserved_prefix_paths_return_404(tmp_path):
+    api = _api_app()
+    mount_frontend(api, _build_dist(tmp_path))
+    client = TestClient(api)
+
+    assert client.get("/api/does-not-exist").status_code == 404
+    assert client.get("/tasks/does-not-exist").status_code == 404
+    assert "INDEX" in client.get("/client/route").text
+
+
 def test_absent_dist_is_harmless(tmp_path):
     api = _api_app()
     mount_frontend(api, tmp_path / "missing")
