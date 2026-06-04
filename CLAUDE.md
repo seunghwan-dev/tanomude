@@ -2,7 +2,7 @@
 
 Guardrails for autonomous and assisted work in this repository. Each rule exists because something went wrong without it — this file is the harness made explicit.
 
-Tanomude is an on-premise AI assistant that operates AS-400-style legacy systems through natural-language instructions, human-in-the-loop approval, and per-user growth. It is run under the ringi-driven-harness methodology, and the design choices behind it are recorded as the numbered decision records at the end of this file.
+Tanomude is an on-premise AI assistant that operates AS-400-style legacy systems through natural-language instructions, human-in-the-loop approval, and per-user growth. It is run under the [ringi-driven-harness](https://github.com/seunghwan-dev/ringi-driven-harness) methodology, and the design choices behind it are recorded as the numbered decision records at the end of this file.
 
 ## Git
 
