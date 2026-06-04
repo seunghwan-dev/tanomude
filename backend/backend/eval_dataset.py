@@ -7,7 +7,7 @@ from sqlalchemy.orm import Session
 from backend.models import EvalCase
 
 EvalCategory = Literal["normal", "empty", "wrong_code", "transient", "duplicate"]
-EvalOutcome = Literal["submitted", "育成候補", "要調査", "refused", "idempotent"]
+EvalOutcome = Literal["submitted", "再入力/コード確認", "要調査", "refused", "idempotent"]
 
 
 class EvalCaseInput(BaseModel):
@@ -67,10 +67,10 @@ EVAL_CASES: list[EvalCaseSeed] = [
     _case("empty_02_retdate", "empty", _fields("大阪", "P-102", "2026-06-10", "", "定例会議出席"), "refused"),
     _case("empty_03_purpose", "empty", _fields("東京", "P-103", "2026-06-10", "2026-06-11", ""), "refused"),
     _case("empty_04_proj", "empty", _fields("名古屋", "", "2026-06-10", "2026-06-11", "工程監査"), "refused"),
-    _case("wrong_01_px", "wrong_code", _fields("大阪", "PX-001", "2026-06-10", "2026-06-11", "製品X納入調整"), "育成候補"),
-    _case("wrong_02_short", "wrong_code", _fields("東京", "P-1", "2026-06-10", "2026-06-11", "定例会議出席"), "育成候補"),
-    _case("wrong_03_long", "wrong_code", _fields("名古屋", "P-0001", "2026-06-10", "2026-06-11", "ABC商事打合せ"), "育成候補"),
-    _case("wrong_04_alpha", "wrong_code", _fields("福岡", "ABCDEF", "2026-06-10", "2026-06-11", "実験機A検収"), "育成候補"),
+    _case("wrong_01_px", "wrong_code", _fields("大阪", "PX-001", "2026-06-10", "2026-06-11", "製品X納入調整"), "再入力/コード確認"),
+    _case("wrong_02_short", "wrong_code", _fields("東京", "P-1", "2026-06-10", "2026-06-11", "定例会議出席"), "再入力/コード確認"),
+    _case("wrong_03_long", "wrong_code", _fields("名古屋", "P-0001", "2026-06-10", "2026-06-11", "ABC商事打合せ"), "再入力/コード確認"),
+    _case("wrong_04_alpha", "wrong_code", _fields("福岡", "ABCDEF", "2026-06-10", "2026-06-11", "実験機A検収"), "再入力/コード確認"),
     _case("transient_recover_01", "transient", _fields("広島", "P-256", "2026-07-15", "2026-07-17", "製品X保守点検"), "submitted"),
     _case("transient_recover_02", "transient", _fields("横浜", "P-049", "2026-08-01", "2026-08-02", "Material-X調達協議"), "submitted"),
     _case("transient_exhaust_01", "transient", _fields("札幌", "P-072", "2026-09-12", "2026-09-14", "工程監査"), "要調査"),

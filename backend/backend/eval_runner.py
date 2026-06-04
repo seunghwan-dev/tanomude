@@ -28,7 +28,7 @@ DEST_GOLDEN = {
     "横浜": "YOKOHAMA",
 }
 
-EXECUTED_OUTCOMES = ("submitted", "育成候補", "要調査")
+EXECUTED_OUTCOMES = ("submitted", "再入力/コード確認", "要調査")
 FAILURE_CATEGORIES = ("empty", "wrong_code")
 
 
@@ -92,7 +92,7 @@ def outcome_from_execution(execution: dict) -> str:
     candidate = execution.get("correction_candidate")
     if execution.get("status") == "rolled_back":
         if candidate and candidate.get("bad_data"):
-            return "育成候補"
+            return "再入力/コード確認"
         return "要調査"
     return str(execution.get("status"))
 

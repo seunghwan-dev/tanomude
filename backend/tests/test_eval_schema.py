@@ -13,7 +13,7 @@ from backend.eval_dataset import (
 from backend.models import EvalCase, EvalResult, EvalRun
 
 EXPECTED_COUNTS = {"normal": 8, "empty": 4, "wrong_code": 4, "transient": 4, "duplicate": 4}
-OUTCOMES = {"submitted", "育成候補", "要調査", "refused", "idempotent"}
+OUTCOMES = {"submitted", "再入力/コード確認", "要調査", "refused", "idempotent"}
 
 
 @pytest.fixture
@@ -61,7 +61,7 @@ def test_expected_outcomes_match_category_semantics():
         by_category.setdefault(case.category, []).append(case.expected_outcome)
     assert set(by_category["normal"]) == {"submitted"}
     assert set(by_category["empty"]) == {"refused"}
-    assert set(by_category["wrong_code"]) == {"育成候補"}
+    assert set(by_category["wrong_code"]) == {"再入力/コード確認"}
     assert sorted(by_category["transient"]) == sorted(["submitted", "submitted", "要調査", "要調査"])
     assert sorted(by_category["duplicate"]) == sorted(["submitted", "submitted", "idempotent", "idempotent"])
 
