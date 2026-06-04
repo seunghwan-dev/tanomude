@@ -36,7 +36,7 @@ The agent **proposes**; a human **decides**. Only approved plans execute, replay
 
 ## What it does, measured
 
-Every number below comes from the in-repo eval harness.
+Every number below comes from a full run of the in-repo eval harness (with the embedding service); a deterministic subset of that suite gates every pull request.
 
 | Dimension | Result |
 |---|---|
