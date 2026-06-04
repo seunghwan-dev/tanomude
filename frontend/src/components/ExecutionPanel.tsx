@@ -110,7 +110,7 @@ export default function ExecutionPanel({ taskId, initialStatus }: { taskId: numb
             </span>
           ) : execution.badData ? (
             <span className="rounded-full bg-seal-wash px-3 py-1 text-xs font-semibold text-seal-deep">
-              不正データ・育成候補
+              再入力/コード確認
             </span>
           ) : (
             <span className="rounded-full border border-line bg-paper px-3 py-1 text-xs font-semibold text-ink-soft">
@@ -162,8 +162,8 @@ export default function ExecutionPanel({ taskId, initialStatus }: { taskId: numb
         >
           {execution.badData ? (
             <p className="text-sm text-seal-deep">
-              <span className="font-semibold">育成候補：</span>
-              不正データのため差し戻されました。ここでの人手の修正は、次回の同種作業の個人修正（personal_correction）として育成に活かされます。
+              <span className="font-semibold">再入力/コード確認：</span>
+              入力されたコードが基幹システムの検証を通らず、差し戻されました。案件コード等の入力値をご確認のうえ、修正して再入力してください。
             </p>
           ) : (
             <p className="text-sm text-ink-soft">
