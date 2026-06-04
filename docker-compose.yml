@@ -3,15 +3,15 @@ services:
     image: postgres:16
     container_name: tanomude-mock-db
     environment:
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER:-tanomude}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-tanomude}
+      POSTGRES_DB: ${POSTGRES_DB:-mock_as400}
     ports:
       - "5432:5432"
     volumes:
       - mock-db-data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-tanomude} -d ${POSTGRES_DB:-mock_as400}"]
       interval: 5s
       timeout: 3s
       retries: 10
@@ -21,27 +21,32 @@ services:
     build: ./mock-as400
     container_name: tanomude-mock-as400
     environment:
-      DATABASE_URL: postgresql+psycopg://${POSTGRES_USER}:${POSTGRES_PASSWORD}@mock-db:5432/${POSTGRES_DB}
+      DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-tanomude}:${POSTGRES_PASSWORD:-tanomude}@mock-db:5432/${POSTGRES_DB:-mock_as400}
     ports:
       - "8400:8400"
     depends_on:
       mock-db:
         condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://localhost:8400/health', timeout=3).status == 200 else 1)"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
 
   # Platform side (design §10) — RAG/audit/eval store, separate from the Mock DB.
   platform-db:
     image: pgvector/pgvector:pg16
     container_name: tanomude-platform-db
     environment:
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      POSTGRES_DB: ${PLATFORM_DB_NAME}
+      POSTGRES_USER: ${POSTGRES_USER:-tanomude}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-tanomude}
+      POSTGRES_DB: ${PLATFORM_DB_NAME:-platform}
     ports:
-      - "${PLATFORM_DB_PORT}:5432"
+      - "${PLATFORM_DB_PORT:-5433}:5432"
     volumes:
       - platform-db-data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${PLATFORM_DB_NAME}"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-tanomude} -d ${PLATFORM_DB_NAME:-platform}"]
       interval: 5s
       timeout: 3s
       retries: 10
@@ -53,11 +58,54 @@ services:
     container_name: tanomude-embedding
     command: ["--model-id", "intfloat/multilingual-e5-large"]
     ports:
-      - "${EMBEDDING_PORT}:80"
+      - "${EMBEDDING_PORT:-8001}:80"
     volumes:
       - embedding-hf-cache:/data
+
+  ollama:
+    image: ollama/ollama:0.20.7
+    container_name: tanomude-ollama
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        ollama serve &
+        until ollama list >/dev/null 2>&1; do sleep 1; done
+        until ollama pull gemma4:e4b; do sleep 5; done
+        wait
+    volumes:
+      - ollama-models:/root/.ollama
+    healthcheck:
+      test: ["CMD-SHELL", "ollama show gemma4:e4b >/dev/null 2>&1 || exit 1"]
+      interval: 10s
+      timeout: 10s
+      retries: 180
+      start_period: 20s
+
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    container_name: tanomude-backend
+    environment:
+      PLATFORM_DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-tanomude}:${POSTGRES_PASSWORD:-tanomude}@platform-db:5432/${PLATFORM_DB_NAME:-platform}
+      EMBEDDING_URL: http://embedding:80
+      OLLAMA_URL: http://ollama:11434
+      MOCK_AS400_URL: http://mock-as400:8400
+      FRONTEND_DIST: /srv/frontend/dist
+    ports:
+      - "8000:8000"
+    depends_on:
+      platform-db:
+        condition: service_healthy
+      mock-as400:
+        condition: service_healthy
+      embedding:
+        condition: service_started
+      ollama:
+        condition: service_healthy
 
 volumes:
   mock-db-data:
   platform-db-data:
   embedding-hf-cache:
+  ollama-models:
