@@ -1,10 +1,12 @@
 # tanomude frontend
 
-Operator approval console for the tanomude agent. This slice is the **(ii)-B card shell**:
-the 3-tab approval card (分析 / 計画 / 根拠) rendered from real `POST /tasks/plan` data, plus the
-承認 / 修正 / 却下 action shell (UI only — endpoint wiring lands in a later slice).
+Operator approval console for the tanomude agent: the 3-tab approval card (分析 / 計画 / 根拠)
+rendered from real `POST /tasks/plan` data, plus the 承認 / 修正 / 却下 action shell wired to the
+decision endpoints.
 
 Stack: Vite + React 18 + TypeScript + Tailwind CSS + Framer Motion.
+
+In development the Vite dev server (`:5173`) proxies `/api` and `/ws` to the agent API. In production the backend serves this built frontend itself, same-origin on `:8000`, with no proxy.
 
 ## Running (full stack)
 

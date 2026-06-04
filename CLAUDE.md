@@ -2,7 +2,7 @@
 
 Guardrails for autonomous and assisted work in this repository. Each rule exists because something went wrong without it — this file is the harness made explicit.
 
-Tanomude is an on-premise AI assistant that operates company legacy systems (AS-400 / Lotus Notes / Access) through natural-language instructions, human-in-the-loop approval, and per-user growth. Methodology source: ringi-driven-harness.
+Tanomude is an on-premise AI assistant that operates AS-400-style legacy systems through natural-language instructions, human-in-the-loop approval, and per-user growth. It is run under the [ringi-driven-harness](https://github.com/seunghwan-dev/ringi-driven-harness) methodology, and the design choices behind it are recorded as the numbered decision records at the end of this file.
 
 ## Git
 
@@ -72,10 +72,9 @@ and well-informed, not for bypassing it.
 
 ## Decisions
 
-Decision records for design choices made during tracked work. Earlier records ([D-1]
-through [D-53]) live in the design master; new decisions are recorded here.
+Decision records for design choices made during tracked work in this repository.
 
-- **[D-54]** §2-1 seam extended to own session lifecycle: `ScreenAdapter` gains
+- **[D-54]** The screen-adapter seam was extended to own its session lifecycle: `ScreenAdapter` gains
   `open(idempotency_key=None)` and `close()` as abstract methods alongside
   `read_screen`/`send_keys`/`assert_state`. `run_task` takes an unopened adapter and opens
   the session itself as its first action, deriving the idempotency key from

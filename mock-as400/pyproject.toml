@@ -5,7 +5,7 @@ build-backend = "hatchling.build"
 [project]
 name = "mock-as400"
 version = "0.1.0"
-description = "Tanomude mock AS-400 stand-in (behavior/state mock, design section 8)"
+description = "Tanomude mock AS-400 stand-in (behavior/state mock)"
 requires-python = ">=3.11"
 dependencies = [
     "fastapi>=0.110",

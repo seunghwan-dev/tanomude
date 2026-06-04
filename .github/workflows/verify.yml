@@ -1,6 +1,6 @@
 # Tanomude CI — runs on every PR to main.
 # The secret scan and the mock-as400 test suite must pass before the human merge gate.
-# Required status check = job `verify` (extends, never a separate ci.yml — design section 23).
+# Required status check = job `verify` (extends, never a separate ci.yml).
 
 name: ci
 
@@ -31,7 +31,7 @@ jobs:
           --health-timeout 3s
           --health-retries 10
       platform-db:
-        # Platform RAG store (design §10) — pgvector, separate from the Mock DB.
+        # Platform RAG store — pgvector, separate from the Mock DB.
         image: pgvector/pgvector:pg16
         env:
           POSTGRES_USER: tanomude
@@ -107,7 +107,7 @@ jobs:
         run: pytest -q
 
       # Frontend has no test suite yet, so the type-check + production build is the
-      # gate that catches TS/React regressions before the human merge (design section 23).
+      # gate that catches TS/React regressions before the human merge.
       - name: Set up Node
         uses: actions/setup-node@v4
         with:

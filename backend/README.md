@@ -1,6 +1,6 @@
 # backend — platform side (RAG / audit / eval)
 
-Platform services for Tanomude (design §10), separate from the Mock AS-400.
+Platform services for Tanomude, separate from the Mock AS-400.
 
 ## Manual RAG
 
@@ -20,7 +20,7 @@ oversight.
 `coreloop.execute` and `slotfill.assemble` share an implicit screen-transition contract:
 `execute` sends one login `nav Enter` (`LOGIN → MENU`), then runs the assembled keysequence
 whose own leading `nav Enter` is `MENU → TRIP_INPUT`. The keysequence is authored to start at
-`MENU`; the orchestrator owns the login step. A real AS-400 adapter (or a W2 change to either
+`MENU`; the orchestrator owns the login step. A real AS-400 adapter (or a future change to either
 side) must preserve this split — execute does login, the keysequence does menu→trip onward.
 
 ## Slot-fill engine
@@ -40,5 +40,5 @@ rather than typing a literal.
 The `fts` column uses the `simple` configuration, which does not tokenize Japanese
 (no whitespace). Retrieval-eval shows vector search carries Japanese queries while `simple`
 FTS only matches latin tokens (field/project codes). A Japanese-aware FTS backend
-(pgroonga / pg_bigm) is the upgrade path (design §13 stretch) when lexical Japanese matching
+(pgroonga / pg_bigm) is the stretch upgrade path when lexical Japanese matching
 is required.

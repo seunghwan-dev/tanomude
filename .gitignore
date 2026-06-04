@@ -28,5 +28,5 @@ Thumbs.db
 .vscode/
 .idea/
 
-# Private docs — master design, harness guide, NDA material. NEVER commit. [D-45]
+# Private docs — master design, harness guide, NDA material. NEVER commit.
 _local/
