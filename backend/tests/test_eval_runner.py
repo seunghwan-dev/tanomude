@@ -55,10 +55,10 @@ def _result(case_id, category, expected, actual, passed, step_count=None, field_
 def test_aggregate_headline_metrics():
     results = [
         _result("n1", "normal", "submitted", "submitted", True, step_count=13, field_accuracy=1.0),
-        _result("n2", "normal", "submitted", "育成候補", False, step_count=7),
+        _result("n2", "normal", "submitted", "再入力/コード確認", False, step_count=7),
         _result("e1", "empty", "refused", "refused", True),
-        _result("w1", "wrong_code", "育成候補", "育成候補", True, step_count=9),
-        _result("w2", "wrong_code", "育成候補", "submitted", False, step_count=13, field_accuracy=0.5),
+        _result("w1", "wrong_code", "再入力/コード確認", "再入力/コード確認", True, step_count=9),
+        _result("w2", "wrong_code", "再入力/コード確認", "submitted", False, step_count=13, field_accuracy=0.5),
         _result("d2", "duplicate", "idempotent", "idempotent", True),
     ]
     metrics = aggregate(results)
@@ -113,7 +113,7 @@ def test_outcome_from_execution_mapping():
     assert eval_runner.outcome_from_execution({"status": "submitted"}) == "submitted"
     assert eval_runner.outcome_from_execution(
         {"status": "rolled_back", "correction_candidate": {"bad_data": True}}
-    ) == "育成候補"
+    ) == "再入力/コード確認"
     assert eval_runner.outcome_from_execution(
         {"status": "rolled_back", "correction_candidate": {"bad_data": False}}
     ) == "要調査"
