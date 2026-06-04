@@ -94,7 +94,7 @@ export function voiceOutcome(taskId: number, tripId: number | null, badData: boo
   if (badData) {
     speakOnce(
       key,
-      "不正なデータを検知したため、処理を中止しました。育成候補として、次回の個人修正に活かします。",
+      "入力されたコードが検証を通らなかったため、処理を差し戻しました。案件コード等をご確認のうえ、再入力をお願いいたします。",
     );
     return;
   }
