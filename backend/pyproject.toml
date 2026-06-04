@@ -5,7 +5,7 @@ build-backend = "hatchling.build"
 [project]
 name = "backend"
 version = "0.1.0"
-description = "Tanomude platform backend (RAG / audit / eval store, design section 10)"
+description = "Tanomude platform backend (RAG / audit / eval store)"
 requires-python = ">=3.11"
 dependencies = [
     "sqlalchemy>=2.0",

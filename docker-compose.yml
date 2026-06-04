@@ -16,7 +16,7 @@ services:
       timeout: 3s
       retries: 10
 
-  # AS-400 stand-in (behavior/state mock, design §8 ②). Not the agent platform.
+  # AS-400 stand-in (behavior/state mock). Not the agent platform.
   mock-as400:
     build: ./mock-as400
     container_name: tanomude-mock-as400
@@ -33,7 +33,7 @@ services:
       timeout: 5s
       retries: 20
 
-  # Platform side (design §10) — RAG/audit/eval store, separate from the Mock DB.
+  # Platform side — RAG/audit/eval store, separate from the Mock DB.
   platform-db:
     image: pgvector/pgvector:pg16
     container_name: tanomude-platform-db
@@ -51,7 +51,7 @@ services:
       timeout: 3s
       retries: 10
 
-  # tanomude-owned embedding service (design §3 — multilingual-e5-large, 1024d).
+  # tanomude-owned embedding service (multilingual-e5-large, 1024d).
   # CPU posture to avoid VRAM contention with the local Gemma on the 12GB GPU.
   embedding:
     image: ghcr.io/huggingface/text-embeddings-inference:cpu-1.6

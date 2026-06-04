@@ -1,4 +1,4 @@
-# adapter — screen adapter seam (design §2-1)
+# adapter — screen adapter seam
 
 Clean seam between the agent and the operated system (AS-400 mock today, real AS-400 in
 production). The `ScreenAdapter` ABC defines three primitives: `read_screen`, `send_keys`,
