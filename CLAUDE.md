@@ -2,7 +2,7 @@
 
 Guardrails for autonomous and assisted work in this repository. Each rule exists because something went wrong without it — this file is the harness made explicit.
 
-Tanomude is an on-premise AI assistant, built on OpenClaw, that operates company legacy systems (AS-400 / Lotus Notes / Access) through natural-language instructions, human-in-the-loop approval, and per-user growth. Methodology source: ringi-driven-harness.
+Tanomude is an on-premise AI assistant that operates company legacy systems (AS-400 / Lotus Notes / Access) through natural-language instructions, human-in-the-loop approval, and per-user growth. Methodology source: ringi-driven-harness.
 
 ## Git
 
