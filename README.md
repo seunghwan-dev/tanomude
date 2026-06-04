@@ -6,8 +6,6 @@ A human-in-the-loop AI agent that operates legacy enterprise systems through nat
 
 > **Demo video — coming soon**
 
-Built on [OpenClaw](https://github.com/openclaw/openclaw).
-
 ---
 
 ## At a glance
@@ -67,7 +65,7 @@ Then open **http://localhost:8000**.
 Execution resolves to one of four states, surfaced plainly on the timeline:
 
 - **Submitted** — the record was created; the timeline shows its id.
-- **Re-entry / code check (再入力 / コード確認)** — a typed code failed the legacy system's validation; the operator checks and re-enters it.
+- **Re-entry / code check (再入力/コード確認)** — a typed code failed the legacy system's validation; the operator checks and re-enters it.
 - **Needs investigation (要調査)** — retries were exhausted on a transient, environment-side condition.
 - **Refused** — the request was incomplete or out of policy; the reason is shown.
 
