@@ -65,6 +65,8 @@ services:
   ollama:
     image: ollama/ollama:0.20.7
     container_name: tanomude-ollama
+    environment:
+      OLLAMA_HOST: 0.0.0.0
     entrypoint: ["/bin/sh", "-c"]
     command:
       - |
