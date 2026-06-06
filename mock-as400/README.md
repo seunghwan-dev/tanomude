@@ -18,9 +18,9 @@ The app object is `app.main:app`. The `adapter/` contract tests import it and dr
 
 ## Run and test
 
-Built from this directory, the service serves on `:8400` (`docker compose up mock-as400`, with `mock-db`). Standalone:
+Built from this directory, the service serves on `:8400` (`docker compose up mock-as400`, with `mock-db`). Standalone tests need a reachable Postgres and `DATABASE_URL` set (the compose path provides both):
 
-```
+```bash
 pip install -e ".[dev]"
 pytest
 ```
