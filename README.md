@@ -28,6 +28,7 @@ flowchart LR
   C --> AD["Clean screen adapter"]
   AD --> M["Mock AS-400<br/>green-screen state machine"]
   EV["Eval harness + deterministic CI gate"]
+  C -.-> EV
 ```
 
 The agent **proposes**; a human **decides**. Only approved plans execute, replayed key-by-key through a narrow screen adapter against the legacy system.
@@ -49,10 +50,17 @@ Every number below comes from a full run of the in-repo eval harness (with the e
 - **A mention buried in free-text instruction is soft** — honored when plausible, but a personal correction can still move it. That is where the honest 0.75 comes from: not every soft case holds.
 - **Human approval is the final defense.** Whatever the model proposes, nothing executes until a person approves it.
 
+**Also from the same run — the numbers that are not 1.0.**
+- **Recovery (transient faults) 0.5** — replan-and-replay recovers transient, environment-side failures only; by design, bad input data is not retried blindly but short-circuited to a human (the re-entry / needs-investigation paths below).
+- **Verify pass 0.667** — a failed verify is a detection event: it triggers rollback and replan instead of a silent wrong submit.
+- **precision@3 0.5** — a structural artifact of fixed k=3 against expected sets smaller than 3; precision@expected on the same run is 1.0.
+- **Average steps per successful run: 9.56.**
+
 ## Quickstart
 
 ```bash
-git clone <repo> && cd tanomude
+git clone <repo>
+cd tanomude
 docker compose up
 ```
 
@@ -60,7 +68,7 @@ Then open **http://localhost:8000**.
 
 > First run builds the images and downloads the local model (~9.6 GB), so allow roughly 10 minutes on a fast connection — longer on slower links. It is cached afterward.
 
-### Honest outcomes
+## Honest outcomes
 
 Execution resolves to one of four states, surfaced plainly on the timeline:
 
@@ -69,7 +77,7 @@ Execution resolves to one of four states, surfaced plainly on the timeline:
 - **Needs investigation (要調査)** — retries were exhausted on a transient, environment-side condition.
 - **Refused** — the request was incomplete or out of policy; the reason is shown.
 
-### Growth, as two separate numbers
+## Growth, as two separate numbers
 
 Per-user growth is reported as **two** metrics on purpose: a **growth delta** (does a personal correction actually move the model's decision?) and **boundary respect** (does that correction stay out of the inputs it must not override?). Reporting only the first would hide the second.
 
@@ -86,3 +94,7 @@ A living project. Next up:
 
 - **Legacy target** — a green-screen AS-400-style workflow, modeled as a deterministic state machine that the agent drives key-by-key through a clean adapter seam.
 - **Computer-use loop** — read screen → propose keys → assert state, with replan-and-rollback when the screen disagrees, and a short-circuit that hands bad input data to a human instead of retrying blindly.
+
+## License
+
+MIT — see [LICENSE](./LICENSE).
