@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { cleanup, render, screen } from "@testing-library/react";
+import { cleanup, render, screen, waitFor } from "@testing-library/react";
 
 import App from "./App";
 import * as api from "./api";
@@ -61,6 +61,23 @@ describe("App task-view persistence across reload", () => {
 
     expect(screen.getByText(/指示を入力し/)).toBeTruthy();
     expect(api.getTask).not.toHaveBeenCalled();
+    expect(screen.queryByText(/復元したタスク/)).toBeNull();
+  });
+
+  it("falls back to the blank form when the restored task is still awaiting approval", async () => {
+    vi.mocked(api.getTask).mockResolvedValue({
+      id: 9,
+      workflow: "shukko",
+      instruction: "製品Xの納入調整のため大阪へ出張する。",
+      status: "awaiting_approval",
+      executions: [],
+    });
+    window.history.replaceState(null, "", "/?task=9");
+
+    render(<App />);
+
+    await waitFor(() => expect(api.getTask).toHaveBeenCalledWith(9));
+    expect(screen.getByText(/指示を入力し/)).toBeTruthy();
     expect(screen.queryByText(/復元したタスク/)).toBeNull();
   });
 });

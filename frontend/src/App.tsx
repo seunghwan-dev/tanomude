@@ -60,7 +60,7 @@ export default function App() {
     let active = true;
     getTask(taskId)
       .then((detail) => {
-        if (active) {
+        if (active && detail.status !== "awaiting_approval") {
           setRestored(detail);
         }
       })
