@@ -71,6 +71,9 @@ jobs:
       - name: Lint (ruff)
         run: pipx run --spec ruff==0.15.15 ruff check .
 
+      - name: Golden fixture parity
+        run: cmp -s backend/tests/fixtures/cases.json mock-as400/tests/fixtures/cases.json
+
       - name: Install mock-as400
         working-directory: mock-as400
         run: pip install -e ".[dev]"
@@ -118,6 +121,10 @@ jobs:
       - name: Install frontend
         working-directory: frontend
         run: npm ci
+
+      - name: Frontend lint
+        working-directory: frontend
+        run: npm run lint
 
       - name: Frontend unit tests
         working-directory: frontend
