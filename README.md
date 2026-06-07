@@ -55,7 +55,7 @@ Every number below comes from the in-repo eval harness (with the embedding servi
 - **Human approval is the final defense.** Whatever the model proposes, nothing executes until a person approves it.
 
 **Also from the same runs — the numbers that are not 1.0.**
-- **Personal-correction growth Δ 0.625** — corrections are verified to reach the model in every case; `reuse_prev_proj` moves on all four policy cases, while the `overseas` policy slot moves on one of four. The limiter is the model's judgment on the ambiguous slot, not the correction plumbing.
+- **Personal-correction growth Δ 0.625** — corrections are verified to reach the model in every case; `reuse_prev_proj` moves on all four policy cases and the `overseas` policy slot on one of four — five of eight, against a zero control baseline (nothing moves without a correction). The limiter is the model's judgment on the ambiguous slot, not the correction plumbing.
 - **Recovery (transient faults) 0.5** — replan-and-replay recovers transient, environment-side failures only; by design, bad input data is not retried blindly but short-circuited to a human (the re-entry / needs-investigation paths below).
 - **Verify pass 0.667** — a failed verify is a detection event: it triggers rollback and replan instead of a silent wrong submit.
 - **precision@3 0.5** — a structural artifact of fixed k=3 against expected sets smaller than 3; precision@expected on the same run is 1.0.
@@ -71,7 +71,7 @@ docker compose up
 
 Then open **http://localhost:8000**.
 
-> First run builds the images and downloads two local models — the LLM (~9.6 GB) and the embedding model (~2.2 GB), about 12 GB total — so allow roughly 10 minutes on a fast connection — longer on slower links. They are cached afterward.
+> First run builds the images and downloads two local models — the LLM (~9.6 GB) and the embedding model (~2.2 GB), about 12 GB total — so allow roughly 10 minutes on a fast connection, longer on slower links. They are cached afterward.
 
 ## Honest outcomes
 
