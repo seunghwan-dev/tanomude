@@ -13,6 +13,7 @@ class Settings(BaseSettings):
     ollama_url: str = "http://localhost:11434"
     mock_as400_url: str = "http://localhost:8400"
     frontend_dist: str = _DEFAULT_FRONTEND_DIST
+    seed_on_startup: bool = False
 
 
 settings = Settings()

@@ -94,6 +94,7 @@ services:
       OLLAMA_URL: http://ollama:11434
       MOCK_AS400_URL: http://mock-as400:8400
       FRONTEND_DIST: /srv/frontend/dist
+      SEED_ON_STARTUP: "1"
     ports:
       - "8000:8000"
     depends_on:

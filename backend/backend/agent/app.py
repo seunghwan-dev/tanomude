@@ -10,11 +10,15 @@ from backend.agent.manager import manager
 from backend.agent.router import router
 from backend.agent.ws import ws_router
 from backend.config import settings
+from backend.db import SessionLocal
+from backend.ingest import run_startup_seed
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     manager.bind_loop(asyncio.get_running_loop())
+    with SessionLocal() as db:
+        run_startup_seed(db)
     yield
 
 
