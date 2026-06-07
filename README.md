@@ -80,7 +80,7 @@ Execution resolves to one of four states, surfaced plainly on the timeline:
 - **Submitted** — the record was created; the timeline shows its id.
 - **Re-entry / code check (再入力/コード確認)** — a typed code failed the legacy system's validation; the operator checks and re-enters it.
 - **Needs investigation (要調査)** — retries were exhausted on a transient, environment-side condition. This fourth state arises on transient environment faults and is exercised by the transient-fault eval suite.
-- **Refused** — the request was incomplete, out of policy, or out of domain. An instruction that is not a trip request is declined with a new-employee "I can't help with that yet" message rather than being forced into a plan; the reason is shown.
+- **Refused** — the request was incomplete, out of policy, or out of domain. An instruction that is not a trip request is declined with the new-employee message 「すみません、このご依頼はまだ分かりません。今は出張申請の操作のみお手伝いできます。」 rather than being forced into a plan; the reason is shown.
 
 ## Growth, as two separate numbers
 
