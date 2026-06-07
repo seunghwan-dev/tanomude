@@ -7,8 +7,11 @@ from backend.corrections import (
     OVERRIDE_HEADER,
     RAG_HEADER,
     apply_corrections,
+    create_correction,
+    decision_text_rejection_reason,
     match_corrections,
     quarantine_correction,
+    stage_correction,
     validate_correction,
 )
 from backend.db import SessionLocal
@@ -230,3 +233,29 @@ def test_hitl_runner_threads_correction_into_context(platform_db, monkeypatch):
     assert OVERRIDE_HEADER in captured["context"]
     assert "RAG-BASE" in captured["context"]
     assert captured["context"].index("個人ルールX") < captured["context"].index("RAG-BASE")
+
+
+def test_stage_correction_defers_commit(platform_db):
+    correction = stage_correction(platform_db, "shukko", {"dest": "大阪"}, "個人ルール", source="human_reject")
+    assert correction.id is None
+    platform_db.rollback()
+    assert platform_db.scalar(select(func.count()).select_from(PersonalCorrection)) == 0
+
+
+def test_create_correction_commits(platform_db):
+    correction = create_correction(platform_db, "shukko", {"dest": "大阪"}, "個人ルール", source="seed")
+    assert correction.id is not None
+    platform_db.rollback()
+    assert platform_db.scalar(select(func.count()).select_from(PersonalCorrection)) == 1
+
+
+def test_decision_text_rejection_reason_allows_empty_and_none():
+    assert decision_text_rejection_reason(None) is None
+    assert decision_text_rejection_reason("") is None
+    assert decision_text_rejection_reason("案件コード誤り") is None
+
+
+def test_decision_text_rejection_reason_flags_too_long_and_control():
+    assert decision_text_rejection_reason("a" * MAX_CORRECTION_LENGTH) is None
+    assert decision_text_rejection_reason("a" * (MAX_CORRECTION_LENGTH + 1)) == "too_long"
+    assert decision_text_rejection_reason("汚染\x07注入") == "non_printable"

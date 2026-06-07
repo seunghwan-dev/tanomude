@@ -34,10 +34,7 @@ def _has_control_chars(text: str) -> bool:
     )
 
 
-def _validation_reason(correction: PersonalCorrection) -> str | None:
-    text = correction.correction_text
-    if not text.strip():
-        return "empty"
+def _length_or_control_reason(text: str) -> str | None:
     if len(text) > MAX_CORRECTION_LENGTH:
         return "too_long"
     if _has_control_chars(text):
@@ -45,8 +42,21 @@ def _validation_reason(correction: PersonalCorrection) -> str | None:
     return None
 
 
+def _validation_reason(correction: PersonalCorrection) -> str | None:
+    text = correction.correction_text
+    if not text.strip():
+        return "empty"
+    return _length_or_control_reason(text)
+
+
 def validate_correction(correction: PersonalCorrection) -> bool:
     return _validation_reason(correction) is None
+
+
+def decision_text_rejection_reason(text: str | None) -> str | None:
+    if text is None:
+        return None
+    return _length_or_control_reason(text)
 
 
 def apply_corrections(
@@ -68,7 +78,7 @@ def apply_corrections(
     return context, fallback
 
 
-def create_correction(
+def stage_correction(
     db: Session,
     workflow: str,
     trigger: dict,
@@ -102,6 +112,18 @@ def create_correction(
         approver=approver,
     )
     db.add(correction)
+    return correction
+
+
+def create_correction(
+    db: Session,
+    workflow: str,
+    trigger: dict,
+    correction_text: str,
+    source: str,
+    approver: str | None = None,
+) -> PersonalCorrection:
+    correction = stage_correction(db, workflow, trigger, correction_text, source, approver)
     db.commit()
     db.refresh(correction)
     return correction

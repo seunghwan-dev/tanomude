@@ -8,8 +8,9 @@ from backend.agent.app import app
 from backend.agent.manager import manager
 from backend.agent.service import get_execute_runner, get_plan_runner, get_runner
 from backend.coreloop import ExecutionOutcome
+from backend.corrections import MAX_CORRECTION_LENGTH, apply_corrections
 from backend.db import SessionLocal
-from backend.models import Approval, AuditLog, Execution, Plan, Task
+from backend.models import Approval, AuditLog, Execution, PersonalCorrection, Plan, Task
 from backend.retrieval import RetrievedChunk
 from backend.slotfill import FilledKeysequence, Slots, Step
 
@@ -37,15 +38,16 @@ def client():
         with SessionLocal() as session:
             session.execute(delete(AuditLog))
             session.execute(delete(Approval))
+            session.execute(delete(PersonalCorrection))
             session.execute(delete(Plan))
             session.execute(delete(Execution))
             session.execute(delete(Task))
             session.commit()
 
 
-def _seed_awaiting(client) -> int:
+def _seed_awaiting(client, dedup_key: str = "task:dec:1", dest: str = "大阪") -> int:
     app.dependency_overrides[get_plan_runner] = lambda: (lambda request: (FILLED, GROUNDS))
-    body = {"workflow": "shukko", "instruction": "出張申請", "fields": {"dest": "大阪"}, "dedup_key": "task:dec:1"}
+    body = {"workflow": "shukko", "instruction": "出張申請", "fields": {"dest": dest}, "dedup_key": dedup_key}
     return client.post("/tasks/plan", json=body).json()["task"]["id"]
 
 
@@ -178,6 +180,12 @@ def test_reject_records_correction_and_refuses_without_executing(client):
         assert session.scalar(
             select(func.count()).select_from(Execution).where(Execution.task_id == task_id)
         ) == 0
+        correction = session.scalars(select(PersonalCorrection)).one()
+        assert correction.source == "human_reject"
+        assert correction.trigger == {"dest": "大阪"}
+        assert correction.correction_text == "案件コード誤り"
+        assert correction.status == "active"
+        assert correction.approver == "tanaka"
 
 
 def test_revise_records_approval_row_keeps_awaiting_and_no_new_plan(client):
@@ -200,6 +208,11 @@ def test_revise_records_approval_row_keeps_awaiting_and_no_new_plan(client):
         ).one()
         assert audit.decision == "revise"
         assert session.get(Task, task_id).status == "awaiting_approval"
+        correction = session.scalars(select(PersonalCorrection)).one()
+        assert correction.source == "human_revise"
+        assert correction.trigger == {"dest": "大阪"}
+        assert correction.correction_text == "目的を具体化して"
+        assert correction.status == "active"
         plans_after = session.scalar(
             select(func.count()).select_from(Plan).where(Plan.task_id == task_id)
         )
@@ -320,3 +333,103 @@ def test_get_after_decision_is_read_only(client):
         after = session.scalar(select(func.count()).select_from(Approval))
     assert after_updated == before_updated
     assert after == before
+
+
+def test_reject_without_decision_text_persists_no_correction(client):
+    task_id = _seed_awaiting(client)
+    response = client.post(f"/tasks/{task_id}/reject", json={"approver": "tanaka"})
+    assert response.status_code == 200
+    with SessionLocal() as session:
+        assert session.scalars(select(Approval).where(Approval.task_id == task_id)).one().decision == "reject"
+        assert session.scalar(select(func.count()).select_from(PersonalCorrection)) == 0
+
+
+def test_reject_correction_feeds_next_plan_for_same_destination(client):
+    task_id = _seed_awaiting(client)
+    reuse_text = "前回案件コードを再利用し reuse_prev_proj を true に上書きすること。"
+    client.post(f"/tasks/{task_id}/reject", json={"approver": "tanaka", "decision_text": reuse_text})
+    with SessionLocal() as session:
+        context, fallback = apply_corrections(session, "shukko", {"dest": "大阪"}, "RAG-BASE")
+    assert reuse_text in context
+    assert fallback == []
+
+
+@pytest.mark.parametrize("action", ["approve", "reject", "revise"])
+@pytest.mark.parametrize(
+    "bad_text", ["x" * (MAX_CORRECTION_LENGTH + 1), "汚染\x07注入"], ids=["too_long", "control_char"]
+)
+def test_decision_text_rejected_when_unbounded_or_control(client, action, bad_text):
+    task_id = _seed_awaiting(client)
+    response = client.post(
+        f"/tasks/{task_id}/{action}", json={"approver": "tanaka", "decision_text": bad_text}
+    )
+    assert response.status_code == 422
+    with SessionLocal() as session:
+        assert session.scalar(
+            select(func.count()).select_from(Approval).where(Approval.task_id == task_id)
+        ) == 0
+        assert session.scalar(select(func.count()).select_from(PersonalCorrection)) == 0
+        assert session.get(Task, task_id).status == "awaiting_approval"
+
+
+def test_reject_correction_rolls_back_atomically_with_decision(client, monkeypatch):
+    task_id = _seed_awaiting(client)
+    real_stage = repository.stage_correction
+
+    def boom(*args, **kwargs):
+        real_stage(*args, **kwargs)
+        raise RuntimeError("mid-correction crash")
+
+    monkeypatch.setattr(repository, "stage_correction", boom)
+    with pytest.raises(RuntimeError):
+        client.post(
+            f"/tasks/{task_id}/reject", json={"approver": "tanaka", "decision_text": "案件コード誤り"}
+        )
+    with SessionLocal() as session:
+        assert session.scalar(select(func.count()).select_from(PersonalCorrection)) == 0
+        assert session.scalar(
+            select(func.count()).select_from(Approval).where(Approval.task_id == task_id)
+        ) == 0
+        assert session.scalar(
+            select(func.count()).select_from(AuditLog).where(AuditLog.task_id == task_id)
+        ) == 0
+        assert session.get(Task, task_id).status == "awaiting_approval"
+
+
+def test_revise_correction_rolls_back_atomically_with_decision(client, monkeypatch):
+    task_id = _seed_awaiting(client)
+    real_stage = repository.stage_correction
+
+    def boom(*args, **kwargs):
+        real_stage(*args, **kwargs)
+        raise RuntimeError("mid-correction crash")
+
+    monkeypatch.setattr(repository, "stage_correction", boom)
+    with pytest.raises(RuntimeError):
+        client.post(
+            f"/tasks/{task_id}/revise", json={"approver": "tanaka", "decision_text": "目的を具体化して"}
+        )
+    with SessionLocal() as session:
+        assert session.scalar(select(func.count()).select_from(PersonalCorrection)) == 0
+        assert session.scalar(
+            select(func.count()).select_from(Approval).where(Approval.task_id == task_id)
+        ) == 0
+        assert session.get(Task, task_id).status == "awaiting_approval"
+
+
+def test_repeated_reject_same_destination_supersedes_correction(client):
+    t1 = _seed_awaiting(client, dedup_key="task:sup:1", dest="大阪")
+    client.post(f"/tasks/{t1}/reject", json={"approver": "tanaka", "decision_text": "最初の修正"})
+    t2 = _seed_awaiting(client, dedup_key="task:sup:2", dest="大阪")
+    client.post(f"/tasks/{t2}/reject", json={"approver": "tanaka", "decision_text": "二回目の修正"})
+    with SessionLocal() as session:
+        active = session.scalars(
+            select(PersonalCorrection).where(PersonalCorrection.status == "active")
+        ).one()
+        superseded = session.scalars(
+            select(PersonalCorrection).where(PersonalCorrection.status == "superseded")
+        ).one()
+        assert active.correction_text == "二回目の修正"
+        assert active.version == 2
+        assert superseded.correction_text == "最初の修正"
+        assert active.supersedes_id == superseded.id
