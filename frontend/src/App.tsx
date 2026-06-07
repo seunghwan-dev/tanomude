@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 
-import { approveTask, DecisionError, getTask, planTask, rejectTask, reviseTask, type PlanRequest, type TaskDetail, type TaskPlan } from "./api";
+import { approveTask, DecisionError, getTask, getTaskPlan, planTask, rejectTask, reviseTask, type PlanRequest, type TaskDetail, type TaskPlan } from "./api";
 import type { DecisionKind } from "./components/ActionBar";
 import ApprovalCard from "./components/ApprovalCard";
 import ExecutionPanel from "./components/ExecutionPanel";
@@ -60,9 +60,24 @@ export default function App() {
     let active = true;
     getTask(taskId)
       .then((detail) => {
-        if (active && detail.status !== "awaiting_approval") {
-          setRestored(detail);
+        if (!active) {
+          return;
         }
+        if (detail.status !== "awaiting_approval") {
+          setRestored(detail);
+          return;
+        }
+        return getTaskPlan(taskId).then((restoredPlan) => {
+          if (!active || !restoredPlan.plan) {
+            return;
+          }
+          setResult(restoredPlan);
+          setActiveRequest({
+            workflow: restoredPlan.task.workflow,
+            instruction: restoredPlan.task.instruction,
+            fields: restoredPlan.task.fields,
+          });
+        });
       })
       .catch(() => undefined);
     return () => {
