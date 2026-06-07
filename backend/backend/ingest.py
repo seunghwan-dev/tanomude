@@ -59,8 +59,13 @@ def ingest_manual(
     return doc
 
 
-def seed_manual_if_empty(db: Session, embed_fn: Embedder = embed_passages) -> int:
+def run_startup_seed(db: Session, embed_fn: Embedder = embed_passages) -> int:
+    if not settings.seed_on_startup:
+        return 0
     if db.scalar(select(func.count()).select_from(KnowledgeChunk)):
+        return 0
+    if not embedding_health():
+        logger.warning("seed_on_startup is set but the embedding service is unreachable; skipping manual seed")
         return 0
     ingest_manual(
         db,
@@ -70,16 +75,6 @@ def seed_manual_if_empty(db: Session, embed_fn: Embedder = embed_passages) -> in
         markdown=load_manual(SEED_SOURCE),
         embed_fn=embed_fn,
     )
-    return db.scalar(select(func.count()).select_from(KnowledgeChunk))
-
-
-def run_startup_seed(db: Session, embed_fn: Embedder = embed_passages) -> int:
-    if not settings.seed_on_startup:
-        return 0
-    if not embedding_health():
-        logger.warning("seed_on_startup is set but the embedding service is unreachable; skipping manual seed")
-        return 0
-    seeded = seed_manual_if_empty(db, embed_fn=embed_fn)
-    if seeded:
-        logger.info("seed_on_startup: ingested %d manual chunks into the platform store", seeded)
+    seeded = db.scalar(select(func.count()).select_from(KnowledgeChunk))
+    logger.info("seed_on_startup: ingested %d manual chunks into the platform store", seeded)
     return seeded
