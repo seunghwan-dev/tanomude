@@ -15,6 +15,8 @@ MAX_PARSE_RETRY = 2
 RETRY_TEMP_STEP = 0.3
 DOMESTIC_CUE = "国内"
 OVERSEAS_CUE = "海外"
+DOMAIN_CUES = ("出張",)
+OUT_OF_DOMAIN_REASON = "すみません、このご依頼はまだ分かりません。今は出張申請の操作のみお手伝いできます。"
 
 
 class SlotParseError(Exception):
@@ -140,7 +142,14 @@ def assemble(slots: Slots, dept: str, ret: str, proj: str | None) -> list[Step]:
     return steps
 
 
+def instruction_out_of_domain(instruction: str) -> bool:
+    return not any(cue in instruction for cue in DOMAIN_CUES)
+
+
 def fill(request: RequestInput, slot_fn: SlotExtractor, context: str = "") -> FilledKeysequence | Refusal:
+    if instruction_out_of_domain(request.instruction):
+        return Refusal(reason=OUT_OF_DOMAIN_REASON, missing_fields=[])
+
     missing = required_missing(request.fields)
     if missing:
         return Refusal(reason="required fields missing in request", missing_fields=missing)

@@ -1,4 +1,5 @@
 from backend.slotfill import (
+    OUT_OF_DOMAIN_REASON,
     RESULT_ADAPTER,
     FilledKeysequence,
     RequestInput,
@@ -8,6 +9,7 @@ from backend.slotfill import (
     fill,
     immune_extractor,
     instruction_grounds_overseas,
+    instruction_out_of_domain,
     required_missing,
 )
 
@@ -235,4 +237,30 @@ def test_fill_with_immune_extractor_refuses_without_extracting():
     extractor = _two_pass_extractor(_slots(), _slots(), seen)
     result = fill(_request(dest=""), immune_extractor("RAG", extractor), "OVERRIDE\nRAG")
     assert isinstance(result, Refusal)
+    assert seen == []
+
+
+def test_instruction_out_of_domain_keys_on_trip_cue():
+    assert instruction_out_of_domain("経費精算の承認をお願いします。") is True
+    assert instruction_out_of_domain("在庫を確認してください。") is True
+    assert instruction_out_of_domain("大阪へ出張する。") is False
+    assert instruction_out_of_domain("出張申請") is False
+
+
+def test_fill_refuses_out_of_domain_before_extraction_even_with_valid_fields():
+    seen: list[str] = []
+
+    def extractor(request, context):
+        seen.append(context)
+        return _slots()
+
+    request = RequestInput(
+        workflow="shukko",
+        instruction="経費精算の承認をお願いします。請求書を発行してください。",
+        fields={"dest": "大阪", "dept_date": "2026-06-10", "ret_date": "2026-06-11", "proj_hint": "P-001"},
+    )
+    result = fill(request, extractor)
+    assert isinstance(result, Refusal)
+    assert result.reason == OUT_OF_DOMAIN_REASON
+    assert result.missing_fields == []
     assert seen == []
