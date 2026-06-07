@@ -202,6 +202,23 @@ def test_immune_extractor_two_pass_protects_grounded_keeps_movable():
     assert result.reuse_prev_proj is True
 
 
+def test_immune_extractor_two_pass_pins_overseas_when_instruction_grounds_domestic():
+    seen: list[str] = []
+    grounded = _slots(dest_code="KYOTO", overseas=False)
+    corrected = _slots(dest_code="KYOTO", overseas=True, reuse_prev_proj=True)
+    extractor = _two_pass_extractor(grounded, corrected, seen)
+    request = RequestInput(
+        workflow="shukko",
+        instruction="京都へ国内出張する。",
+        fields={"dest": "京都", "dept_date": "2026-06-10", "ret_date": "2026-06-11", "proj_hint": "P-001"},
+    )
+    slot_fn = immune_extractor("RAG", extractor)
+    result = slot_fn(request, "OVERRIDE\nRAG")
+    assert seen == ["RAG", "OVERRIDE\nRAG"]
+    assert result.overseas is False
+    assert result.reuse_prev_proj is True
+
+
 def test_fill_with_immune_extractor_keeps_grounded_dest_code_and_purpose():
     seen: list[str] = []
     grounded = _slots(dest_code="NAGASAKI", purpose="製品X納入調整")
