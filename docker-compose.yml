@@ -75,7 +75,7 @@ services:
         until ollama pull gemma4:e4b; do sleep 5; done
         wait
     volumes:
-      - ollama-models:/root/.ollama
+      - ollama-data:/root/.ollama
     healthcheck:
       test: ["CMD-SHELL", "ollama show gemma4:e4b >/dev/null 2>&1 || exit 1"]
       interval: 10s
@@ -110,4 +110,4 @@ volumes:
   mock-db-data:
   platform-db-data:
   embedding-hf-cache:
-  ollama-models:
+  ollama-data:
