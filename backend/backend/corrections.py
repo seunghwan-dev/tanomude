@@ -34,15 +34,19 @@ def _has_control_chars(text: str) -> bool:
     )
 
 
-def _validation_reason(correction: PersonalCorrection) -> str | None:
-    text = correction.correction_text
-    if not text.strip():
-        return "empty"
+def _length_or_control_reason(text: str) -> str | None:
     if len(text) > MAX_CORRECTION_LENGTH:
         return "too_long"
     if _has_control_chars(text):
         return "non_printable"
     return None
+
+
+def _validation_reason(correction: PersonalCorrection) -> str | None:
+    text = correction.correction_text
+    if not text.strip():
+        return "empty"
+    return _length_or_control_reason(text)
 
 
 def validate_correction(correction: PersonalCorrection) -> bool:
@@ -52,11 +56,7 @@ def validate_correction(correction: PersonalCorrection) -> bool:
 def decision_text_rejection_reason(text: str | None) -> str | None:
     if text is None:
         return None
-    if len(text) > MAX_CORRECTION_LENGTH:
-        return "too_long"
-    if _has_control_chars(text):
-        return "non_printable"
-    return None
+    return _length_or_control_reason(text)
 
 
 def apply_corrections(
