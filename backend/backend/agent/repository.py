@@ -5,6 +5,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session, selectinload
 
 from backend.coreloop import ExecutionOutcome
+from backend.corrections import stage_correction
 from backend.models import Approval, AuditLog, Execution, Plan, Task
 
 
@@ -123,8 +124,18 @@ def _stage_decision(
     )
 
 
+def _stage_correction_from_decision(db: Session, task: Task, source: str, approver: str, decision_text: str | None) -> None:
+    if decision_text is None or not decision_text.strip():
+        return
+    dest = task.fields.get("dest")
+    if not dest:
+        return
+    stage_correction(db, task.workflow, {"dest": dest}, decision_text, source=source, approver=approver)
+
+
 def record_reject(db: Session, task: Task, plan_id: int, approver: str, decision_text: str | None) -> None:
     _stage_decision(db, task, plan_id, "reject", approver, decision_text)
+    _stage_correction_from_decision(db, task, "human_reject", approver, decision_text)
     task.status = "refused"
     db.commit()
     db.refresh(task)
@@ -132,6 +143,7 @@ def record_reject(db: Session, task: Task, plan_id: int, approver: str, decision
 
 def record_revise(db: Session, task: Task, plan_id: int, approver: str, decision_text: str | None) -> None:
     _stage_decision(db, task, plan_id, "revise", approver, decision_text)
+    _stage_correction_from_decision(db, task, "human_revise", approver, decision_text)
     db.commit()
     db.refresh(task)
 

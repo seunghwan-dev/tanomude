@@ -1,7 +1,9 @@
 import datetime as dt
 from typing import Literal
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, field_validator
+
+from backend.corrections import decision_text_rejection_reason
 
 
 class TaskCreate(BaseModel):
@@ -14,6 +16,14 @@ class TaskCreate(BaseModel):
 class DecisionInput(BaseModel):
     approver: str
     decision_text: str | None = None
+
+    @field_validator("decision_text")
+    @classmethod
+    def _bounded_decision_text(cls, value: str | None) -> str | None:
+        reason = decision_text_rejection_reason(value)
+        if reason is not None:
+            raise ValueError(reason)
+        return value
 
 
 EventType = Literal[
