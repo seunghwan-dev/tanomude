@@ -4,7 +4,10 @@ from backend.slotfill import (
     RequestInput,
     Refusal,
     Slots,
+    enforce_immunity,
     fill,
+    immune_extractor,
+    instruction_grounds_overseas,
     required_missing,
 )
 
@@ -122,3 +125,114 @@ def test_discriminated_union_roundtrips_from_json():
     reparsed_filled = RESULT_ADAPTER.validate_json(filled.model_dump_json())
     assert isinstance(reparsed_refusal, Refusal)
     assert isinstance(reparsed_filled, FilledKeysequence)
+
+
+def _nagasaki_request() -> RequestInput:
+    return RequestInput(
+        workflow="shukko",
+        instruction="長崎へ出張する。",
+        fields={"dest": "長崎", "dept_date": "2026-06-10", "ret_date": "2026-06-11", "proj_hint": "P-001"},
+    )
+
+
+def _two_pass_extractor(grounded: Slots, corrected: Slots, seen: list[str]):
+    def extractor(request, context):
+        seen.append(context)
+        return grounded if context == "RAG" else corrected
+
+    return extractor
+
+
+def test_instruction_grounds_overseas_detects_cues():
+    assert instruction_grounds_overseas("京都へ国内出張する。") is True
+    assert instruction_grounds_overseas("ホノルルへ海外出張する。") is True
+    assert instruction_grounds_overseas("大阪へ出張する。") is False
+
+
+def test_enforce_immunity_pins_dest_code_and_purpose_to_grounded():
+    grounded = _slots(dest_code="NAGASAKI", purpose="製品X納入調整")
+    corrected = _slots(dest_code="SAPPORO", purpose="会議出席", overseas=True, reuse_prev_proj=True)
+    result = enforce_immunity(grounded, corrected, "長崎へ出張する。")
+    assert result.dest_code == "NAGASAKI"
+    assert result.purpose == "製品X納入調整"
+
+
+def test_enforce_immunity_keeps_movable_slots_from_correction():
+    grounded = _slots(dest_code="OSAKA", overseas=False, reuse_prev_proj=False)
+    corrected = _slots(dest_code="OSAKA", overseas=True, reuse_prev_proj=True)
+    result = enforce_immunity(grounded, corrected, "大阪へ出張する。")
+    assert result.overseas is True
+    assert result.reuse_prev_proj is True
+
+
+def test_enforce_immunity_pins_overseas_when_instruction_grounds_domestic():
+    grounded = _slots(dest_code="KYOTO", overseas=False)
+    corrected = _slots(dest_code="KYOTO", overseas=True)
+    result = enforce_immunity(grounded, corrected, "京都へ国内出張する。")
+    assert result.overseas is False
+
+
+def test_enforce_immunity_pins_overseas_when_instruction_grounds_overseas():
+    grounded = _slots(dest_code="HONOLULU", overseas=True)
+    corrected = _slots(dest_code="HONOLULU", overseas=False)
+    result = enforce_immunity(grounded, corrected, "ホノルルへ海外出張する。")
+    assert result.overseas is True
+
+
+def test_immune_extractor_single_pass_when_context_unchanged():
+    seen: list[str] = []
+    extractor = _two_pass_extractor(_slots(dest_code="OSAKA"), _slots(dest_code="SAPPORO"), seen)
+    slot_fn = immune_extractor("RAG", extractor)
+    result = slot_fn(_request(), "RAG")
+    assert seen == ["RAG"]
+    assert result.dest_code == "OSAKA"
+
+
+def test_immune_extractor_two_pass_protects_grounded_keeps_movable():
+    seen: list[str] = []
+    grounded = _slots(dest_code="NAGASAKI", purpose="製品X納入調整", overseas=False, reuse_prev_proj=False)
+    corrected = _slots(dest_code="SAPPORO", purpose="会議出席", overseas=True, reuse_prev_proj=True)
+    extractor = _two_pass_extractor(grounded, corrected, seen)
+    slot_fn = immune_extractor("RAG", extractor)
+    result = slot_fn(_nagasaki_request(), "OVERRIDE\nRAG")
+    assert seen == ["RAG", "OVERRIDE\nRAG"]
+    assert result.dest_code == "NAGASAKI"
+    assert result.purpose == "製品X納入調整"
+    assert result.overseas is True
+    assert result.reuse_prev_proj is True
+
+
+def test_immune_extractor_two_pass_pins_overseas_when_instruction_grounds_domestic():
+    seen: list[str] = []
+    grounded = _slots(dest_code="KYOTO", overseas=False)
+    corrected = _slots(dest_code="KYOTO", overseas=True, reuse_prev_proj=True)
+    extractor = _two_pass_extractor(grounded, corrected, seen)
+    request = RequestInput(
+        workflow="shukko",
+        instruction="京都へ国内出張する。",
+        fields={"dest": "京都", "dept_date": "2026-06-10", "ret_date": "2026-06-11", "proj_hint": "P-001"},
+    )
+    slot_fn = immune_extractor("RAG", extractor)
+    result = slot_fn(request, "OVERRIDE\nRAG")
+    assert seen == ["RAG", "OVERRIDE\nRAG"]
+    assert result.overseas is False
+    assert result.reuse_prev_proj is True
+
+
+def test_fill_with_immune_extractor_keeps_grounded_dest_code_and_purpose():
+    seen: list[str] = []
+    grounded = _slots(dest_code="NAGASAKI", purpose="製品X納入調整")
+    corrected = _slots(dest_code="SAPPORO", purpose="会議出席", overseas=True, reuse_prev_proj=True)
+    extractor = _two_pass_extractor(grounded, corrected, seen)
+    result = fill(_nagasaki_request(), immune_extractor("RAG", extractor), "OVERRIDE\nRAG")
+    assert isinstance(result, FilledKeysequence)
+    assert _value(result, "DEST") == "NAGASAKI"
+    assert _value(result, "PURPOSE") == "製品X納入調整"
+
+
+def test_fill_with_immune_extractor_refuses_without_extracting():
+    seen: list[str] = []
+    extractor = _two_pass_extractor(_slots(), _slots(), seen)
+    result = fill(_request(dest=""), immune_extractor("RAG", extractor), "OVERRIDE\nRAG")
+    assert isinstance(result, Refusal)
+    assert seen == []

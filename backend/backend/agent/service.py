@@ -16,6 +16,7 @@ from backend.slotfill import (
     SlotParseError,
     extract_slots,
     ground,
+    immune_extractor,
 )
 
 
@@ -78,7 +79,7 @@ def _production_plan_runner(
         rag_context = "\n\n".join(chunk.text for chunk in grounds)
         context, _fallback = apply_corrections(db, request.workflow, request.fields, rag_context)
     try:
-        result = plan(request, extract_slots, context)
+        result = plan(request, immune_extractor(rag_context), context)
     except SlotParseError as exc:
         return ParseFailure(errors=exc.errors), grounds
     return result, grounds

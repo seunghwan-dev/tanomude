@@ -13,6 +13,8 @@ PURPOSE_MAX = 20
 DATE_FORMATS = ("%Y-%m-%d", "%Y%m%d")
 MAX_PARSE_RETRY = 2
 RETRY_TEMP_STEP = 0.3
+DOMESTIC_CUE = "国内"
+OVERSEAS_CUE = "海外"
 
 
 class SlotParseError(Exception):
@@ -184,3 +186,28 @@ def extract_slots(request: RequestInput, context: str = "") -> Slots:
         except (ValueError, ValidationError) as exc:
             errors.append(str(exc))
     raise SlotParseError(retry_count=MAX_PARSE_RETRY, errors=errors)
+
+
+def instruction_grounds_overseas(instruction: str) -> bool:
+    return DOMESTIC_CUE in instruction or OVERSEAS_CUE in instruction
+
+
+def enforce_immunity(grounded: Slots, corrected: Slots, instruction: str) -> Slots:
+    overseas = grounded.overseas if instruction_grounds_overseas(instruction) else corrected.overseas
+    return Slots(
+        dest_code=grounded.dest_code,
+        purpose=grounded.purpose,
+        overseas=overseas,
+        reuse_prev_proj=corrected.reuse_prev_proj,
+    )
+
+
+def immune_extractor(rag_context: str, extractor: SlotExtractor = extract_slots) -> SlotExtractor:
+    def slot_fn(request: RequestInput, corrected_context: str) -> Slots:
+        grounded = extractor(request, rag_context)
+        if corrected_context == rag_context:
+            return grounded
+        corrected = extractor(request, corrected_context)
+        return enforce_immunity(grounded, corrected, request.instruction)
+
+    return slot_fn
