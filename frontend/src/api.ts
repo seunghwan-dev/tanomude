@@ -43,7 +43,7 @@ export interface TaskView {
   id: number;
   workflow: string;
   instruction: string;
-  fields: Record<string, string | boolean>;
+  fields: Record<string, string>;
   status: string;
 }
 
@@ -91,7 +91,7 @@ export interface TaskDetail {
   id: number;
   workflow: string;
   instruction: string;
-  fields: Record<string, string | boolean>;
+  fields: Record<string, string>;
   status: string;
   executions: Execution[];
 }
@@ -118,7 +118,7 @@ export interface Envelope {
 export interface PlanRequest {
   workflow: string;
   instruction: string;
-  fields: Record<string, string | boolean>;
+  fields: Record<string, string>;
   dedup_key?: string;
 }
 
