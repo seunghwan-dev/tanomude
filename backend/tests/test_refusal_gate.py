@@ -123,4 +123,4 @@ def test_in_domain_instruction_passes_gate_to_extraction(instruction):
     outcome = run_task(_request(instruction=instruction), adapter, slot_fn)
 
     assert len(calls) == 1
-    assert not (outcome.refusal is not None and outcome.refusal.reason == OUT_OF_DOMAIN_REASON)
+    assert outcome.status != "refused"
