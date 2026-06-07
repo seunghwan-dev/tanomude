@@ -183,6 +183,23 @@ def test_plan_commit_precedes_broadcast(client, monkeypatch):
     assert observations == [1]
 
 
+def test_get_task_plan_returns_proposed_plan(client):
+    _use_plan_runner((FILLED, GROUNDS))
+    task_id = client.post("/tasks/plan", json=_body()).json()["task"]["id"]
+    response = client.get(f"/tasks/{task_id}/plan")
+    assert response.status_code == 200
+    body = response.json()
+    assert body["task"]["id"] == task_id
+    assert body["task"]["status"] == "awaiting_approval"
+    assert body["plan"]["status"] == "proposed"
+    assert body["plan"]["analysis"]["dest_code"] == "OSAKA"
+    assert body["plan"]["keysequence"][0]["key"] == "Enter"
+
+
+def test_get_task_plan_404_for_missing_task(client):
+    assert client.get("/tasks/999999/plan").status_code == 404
+
+
 def test_get_after_plan_is_read_only(client):
     _use_plan_runner((FILLED, GROUNDS))
     task_id = client.post("/tasks/plan", json=_body()).json()["task"]["id"]

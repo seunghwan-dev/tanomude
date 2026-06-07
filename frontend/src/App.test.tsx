@@ -1,12 +1,12 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { cleanup, render, screen, waitFor } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 
 import App from "./App";
 import * as api from "./api";
 
 vi.mock("./api", async (importOriginal) => {
   const actual = await importOriginal<typeof import("./api")>();
-  return { ...actual, getTask: vi.fn() };
+  return { ...actual, getTask: vi.fn(), getTaskPlan: vi.fn() };
 });
 
 class FakeWebSocket {
@@ -42,6 +42,7 @@ describe("App task-view persistence across reload", () => {
       id: 7,
       workflow: "shukko",
       instruction: "製品Xの納入調整のため大阪へ出張する。",
+      fields: { dest: "大阪" },
       status: "submitted",
       executions: [],
     });
@@ -64,20 +65,41 @@ describe("App task-view persistence across reload", () => {
     expect(screen.queryByText(/復元したタスク/)).toBeNull();
   });
 
-  it("falls back to the blank form when the restored task is still awaiting approval", async () => {
+  it("restores an actionable approval card when the reloaded task is awaiting approval", async () => {
+    const fields = { dest: "大阪", dept_date: "2026-06-10", ret_date: "2026-06-11", proj_hint: "P-001" };
+    const instruction = "製品Xの納入調整のため大阪へ出張する。";
     vi.mocked(api.getTask).mockResolvedValue({
       id: 9,
       workflow: "shukko",
-      instruction: "製品Xの納入調整のため大阪へ出張する。",
+      instruction,
+      fields,
       status: "awaiting_approval",
       executions: [],
+    });
+    vi.mocked(api.getTaskPlan).mockResolvedValue({
+      task: { id: 9, workflow: "shukko", instruction, fields, status: "awaiting_approval" },
+      plan: {
+        id: 1,
+        task_id: 9,
+        version: 1,
+        analysis: { dest_code: "OSAKA", purpose: "製品X納入調整", overseas: false, reuse_prev_proj: false },
+        keysequence: [{ seq: 1, type: "nav", target: null, value: null, key: "Enter" }],
+        grounding: [],
+        status: "proposed",
+        created_at: "2026-06-07T00:00:00Z",
+      },
+      refusal: null,
     });
     window.history.replaceState(null, "", "/?task=9");
 
     render(<App />);
 
-    await waitFor(() => expect(api.getTask).toHaveBeenCalledWith(9));
-    expect(screen.getByText(/指示を入力し/)).toBeTruthy();
-    expect(screen.queryByText(/復元したタスク/)).toBeNull();
+    expect(await screen.findByText("出張申請 承認カード")).toBeTruthy();
+    expect(api.getTaskPlan).toHaveBeenCalledWith(9);
+    expect(screen.getByText("承認")).toBeTruthy();
+    expect(screen.queryByText(/指示を入力し/)).toBeNull();
+
+    fireEvent.click(screen.getByText("却下"));
+    expect(await screen.findByText(/却下理由/)).toBeTruthy();
   });
 });

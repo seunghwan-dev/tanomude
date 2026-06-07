@@ -281,3 +281,15 @@ def get_task(task_id: int, db: Session = Depends(get_db)) -> TaskView:
     if task is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="task not found")
     return _to_view(task, repository.list_executions(db, task.id))
+
+
+@router.get("/{task_id}/plan", response_model=TaskPlanView)
+def get_task_plan(task_id: int, db: Session = Depends(get_db)) -> TaskPlanView:
+    task = repository.get_task(db, task_id)
+    if task is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="task not found")
+    plan = repository.get_plan(db, task_id)
+    return TaskPlanView(
+        task=_to_view(task, repository.list_executions(db, task.id)),
+        plan=PlanView.model_validate(plan) if plan is not None else None,
+    )

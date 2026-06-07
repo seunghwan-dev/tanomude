@@ -43,6 +43,7 @@ export interface TaskView {
   id: number;
   workflow: string;
   instruction: string;
+  fields: Record<string, string | boolean>;
   status: string;
 }
 
@@ -90,6 +91,7 @@ export interface TaskDetail {
   id: number;
   workflow: string;
   instruction: string;
+  fields: Record<string, string | boolean>;
   status: string;
   executions: Execution[];
 }
@@ -116,7 +118,7 @@ export interface Envelope {
 export interface PlanRequest {
   workflow: string;
   instruction: string;
-  fields: Record<string, string>;
+  fields: Record<string, string | boolean>;
   dedup_key?: string;
 }
 
@@ -131,6 +133,14 @@ export async function getTask(taskId: number): Promise<TaskDetail> {
     throw new Error(`タスク取得に失敗しました (HTTP ${response.status})`);
   }
   return (await response.json()) as TaskDetail;
+}
+
+export async function getTaskPlan(taskId: number): Promise<TaskPlan> {
+  const response = await fetch(`/api/tasks/${taskId}/plan`);
+  if (!response.ok) {
+    throw new Error(`計画の取得に失敗しました (HTTP ${response.status})`);
+  }
+  return (await response.json()) as TaskPlan;
 }
 
 export async function planTask(request: PlanRequest): Promise<TaskPlan> {
