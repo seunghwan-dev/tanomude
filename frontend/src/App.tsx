@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 
-import { approveTask, DecisionError, planTask, rejectTask, reviseTask, type PlanRequest, type TaskPlan } from "./api";
+import { approveTask, DecisionError, getTask, planTask, rejectTask, reviseTask, type PlanRequest, type TaskDetail, type TaskPlan } from "./api";
 import type { DecisionKind } from "./components/ActionBar";
 import ApprovalCard from "./components/ApprovalCard";
 import ExecutionPanel from "./components/ExecutionPanel";
@@ -33,6 +33,7 @@ export default function App() {
   const [projHint, setProjHint] = useState("P-001");
 
   const [result, setResult] = useState<TaskPlan | null>(null);
+  const [restored, setRestored] = useState<TaskDetail | null>(null);
   const [activeRequest, setActiveRequest] = useState<PlanRequest | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -46,6 +47,28 @@ export default function App() {
   const nonce = useMemo(() => sessionNonce(), []);
   const voiceSupported = useMemo(() => isVoiceSupported(), []);
   const generatedKeys = useRef<Set<string>>(new Set());
+
+  useEffect(() => {
+    const param = new URLSearchParams(window.location.search).get("task");
+    if (!param) {
+      return;
+    }
+    const taskId = Number(param);
+    if (!Number.isInteger(taskId) || taskId <= 0) {
+      return;
+    }
+    let active = true;
+    getTask(taskId)
+      .then((detail) => {
+        if (active && detail.status !== "awaiting_approval") {
+          setRestored(detail);
+        }
+      })
+      .catch(() => undefined);
+    return () => {
+      active = false;
+    };
+  }, []);
 
   useEffect(() => {
     if (!result) {
@@ -79,6 +102,8 @@ export default function App() {
       const data = await planTask({ ...request, dedup_key: dedupKey });
       generatedKeys.current.add(dedupKey);
       setResult(data);
+      setRestored(null);
+      window.history.replaceState(null, "", `?task=${data.task.id}`);
       setActiveRequest(request);
       setPending(null);
       setDecided(null);
@@ -248,6 +273,14 @@ export default function App() {
             <ExecutionPanel key={`panel-${result.task.id}`} taskId={result.task.id} initialStatus={result.task.status} />
           ) : null}
         </>
+      ) : restored ? (
+        <div>
+          <div className="mb-3 flex items-center gap-2 font-mono text-[11px] text-ink-faint">
+            <span className="h-2 w-2 rounded-full bg-phosphor" />
+            復元したタスク · task #{restored.id}
+          </div>
+          <ExecutionPanel key={`panel-${restored.id}`} taskId={restored.id} initialStatus={restored.status} />
+        </div>
       ) : (
         <div className="rounded-card border border-dashed border-line bg-paper-panel/50 px-5 py-16 text-center text-sm text-ink-faint">
           指示を入力し「計画を生成」を押すと、承認カードが表示されます。

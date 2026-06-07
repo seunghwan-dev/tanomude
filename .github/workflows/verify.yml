@@ -106,8 +106,8 @@ jobs:
           DATABASE_URL: postgresql+psycopg://tanomude:tanomude@localhost:5432/mock_as400
         run: pytest -q
 
-      # Frontend has no test suite yet, so the type-check + production build is the
-      # gate that catches TS/React regressions before the human merge.
+      # Frontend gate: the vitest unit tests plus the type-check + production build
+      # catch TS/React regressions before the human merge.
       - name: Set up Node
         uses: actions/setup-node@v4
         with:
@@ -118,6 +118,10 @@ jobs:
       - name: Install frontend
         working-directory: frontend
         run: npm ci
+
+      - name: Frontend unit tests
+        working-directory: frontend
+        run: npm test
 
       - name: Build frontend
         working-directory: frontend
