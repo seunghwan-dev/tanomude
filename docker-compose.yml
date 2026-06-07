@@ -61,6 +61,15 @@ services:
       - "${EMBEDDING_PORT:-8001}:80"
     volumes:
       - embedding-hf-cache:/data
+    # /health returns 200 only once the model is loaded — gates readiness, not just process start.
+    # Generous window: a cold cache must download multilingual-e5-large (~2.2 GB) and load it on CPU
+    # before the first probe can pass, like the ollama model pull below.
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:80/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 60
+      start_period: 120s
 
   ollama:
     image: ollama/ollama:0.20.7
@@ -103,7 +112,7 @@ services:
       mock-as400:
         condition: service_healthy
       embedding:
-        condition: service_started
+        condition: service_healthy
       ollama:
         condition: service_healthy
 
