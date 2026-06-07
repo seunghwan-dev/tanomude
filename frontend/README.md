@@ -23,7 +23,7 @@ local LLM. Plan generation (`POST /tasks/plan`) does **not** require the mock-as
    `http://localhost:11434`).
 
 2. **Ingest the shukko manual** into the platform DB once, so the 根拠 (grounding) tab is populated.
-   From `backend/` (venv active, env vars set):
+   The full `docker compose up` stack seeds this manual automatically on first boot; these manual steps are only for this dev path. From `backend/` (venv active, env vars set):
 
    ```python
    from backend.db import SessionLocal
