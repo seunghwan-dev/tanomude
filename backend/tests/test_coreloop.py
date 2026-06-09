@@ -53,7 +53,7 @@ def _opened(mock_client) -> MockAdapter:
 def _request(**field_overrides) -> RequestInput:
     fields = {"dest": "大阪", "dept_date": "2026-06-10", "ret_date": "2026-06-11", "proj_hint": "P-001"}
     fields.update(field_overrides)
-    return RequestInput(workflow="shukko", instruction="出張申請", fields=fields)
+    return RequestInput(workflow="shutchou", instruction="出張申請", fields=fields)
 
 
 def _constant(slots: Slots):
@@ -129,7 +129,7 @@ def test_empty_dest_code_refuses_after_extraction(mock_client):
 def test_verify_gate_halts_on_unfinished_sequence(mock_client):
     before = _trip_count()
     incomplete = FilledKeysequence(
-        workflow="shukko",
+        workflow="shutchou",
         slots=SLOTS,
         steps=[
             Step(seq=1, type="nav", key="Enter"),
@@ -145,7 +145,7 @@ def test_verify_gate_halts_on_unfinished_sequence(mock_client):
 def test_verify_gate_halts_on_error_screen(mock_client):
     before = _trip_count()
     premature = FilledKeysequence(
-        workflow="shukko",
+        workflow="shutchou",
         slots=SLOTS,
         steps=[
             Step(seq=1, type="nav", key="Enter"),
@@ -166,10 +166,10 @@ requires_models = pytest.mark.skipif(
 
 @requires_models
 def test_full_stack_smoke_reaches_submitted(mock_client, db):
-    ingest_manual(db, workflow="shukko", title="出張申請 操作マニュアル",
+    ingest_manual(db, workflow="shutchou", title="出張申請 操作マニュアル",
                   source="shukko_manual.md", markdown=load_manual("shukko_manual.md"))
     request = RequestInput(
-        workflow="shukko",
+        workflow="shutchou",
         instruction="製品Xの納入調整のため大阪へ出張する。",
         fields={"dest": "大阪", "dept_date": "2026-06-10", "ret_date": "2026-06-11", "proj_hint": "P-001"},
     )

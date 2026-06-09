@@ -34,7 +34,7 @@ class _SpyAdapter(ScreenAdapter):
 def _request(instruction: str = "出張申請", **overrides) -> RequestInput:
     fields = {"dest": "大阪", "dept_date": "2026-06-10", "ret_date": "2026-06-11", "proj_hint": "P-001"}
     fields.update(overrides)
-    return RequestInput(workflow="shukko", instruction=instruction, fields=fields)
+    return RequestInput(workflow="shutchou", instruction=instruction, fields=fields)
 
 
 @pytest.mark.parametrize(

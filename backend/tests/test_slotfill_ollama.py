@@ -18,9 +18,9 @@ requires_models = pytest.mark.skipif(
 @requires_models
 @pytest.mark.parametrize("case", CASES, ids=[c["case_id"] for c in CASES])
 def test_slotfill_matches_golden_or_refuses(case, db):
-    ingest_manual(db, workflow="shukko", title="出張申請 操作マニュアル",
+    ingest_manual(db, workflow="shutchou", title="出張申請 操作マニュアル",
                   source="shukko_manual.md", markdown=load_manual("shukko_manual.md"))
-    request = RequestInput(workflow="shukko", instruction=case["input"]["instruction"], fields=case["input"]["fields"])
+    request = RequestInput(workflow="shutchou", instruction=case["input"]["instruction"], fields=case["input"]["fields"])
 
     if case["case_id"] == "case_04_edge_empty_required":
         result = fill(request, extract_slots)

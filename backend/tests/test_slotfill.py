@@ -27,7 +27,7 @@ def _constant(slots: Slots):
 def _request(**field_overrides) -> RequestInput:
     fields = {"dest": "大阪", "dept_date": "2026-06-10", "ret_date": "2026-06-11", "proj_hint": "P-001"}
     fields.update(field_overrides)
-    return RequestInput(workflow="shukko", instruction="出張申請", fields=fields)
+    return RequestInput(workflow="shutchou", instruction="出張申請", fields=fields)
 
 
 def _tokens(steps):
@@ -131,7 +131,7 @@ def test_discriminated_union_roundtrips_from_json():
 
 def _nagasaki_request() -> RequestInput:
     return RequestInput(
-        workflow="shukko",
+        workflow="shutchou",
         instruction="長崎へ出張する。",
         fields={"dest": "長崎", "dept_date": "2026-06-10", "ret_date": "2026-06-11", "proj_hint": "P-001"},
     )
@@ -210,7 +210,7 @@ def test_immune_extractor_two_pass_pins_overseas_when_instruction_grounds_domest
     corrected = _slots(dest_code="KYOTO", overseas=True, reuse_prev_proj=True)
     extractor = _two_pass_extractor(grounded, corrected, seen)
     request = RequestInput(
-        workflow="shukko",
+        workflow="shutchou",
         instruction="京都へ国内出張する。",
         fields={"dest": "京都", "dept_date": "2026-06-10", "ret_date": "2026-06-11", "proj_hint": "P-001"},
     )
@@ -255,7 +255,7 @@ def test_fill_refuses_out_of_domain_before_extraction_even_with_valid_fields():
         return _slots()
 
     request = RequestInput(
-        workflow="shukko",
+        workflow="shutchou",
         instruction="経費精算の承認をお願いします。請求書を発行してください。",
         fields={"dest": "大阪", "dept_date": "2026-06-10", "ret_date": "2026-06-11", "proj_hint": "P-001"},
     )

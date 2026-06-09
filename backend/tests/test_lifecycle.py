@@ -73,7 +73,7 @@ def mock_client():
 def _request(**overrides) -> RequestInput:
     fields = {"dest": "大阪", "dept_date": "2026-06-10", "ret_date": "2026-06-11", "proj_hint": "P-001"}
     fields.update(overrides)
-    return RequestInput(workflow="shukko", instruction="出張申請", fields=fields)
+    return RequestInput(workflow="shutchou", instruction="出張申請", fields=fields)
 
 
 def _constant(slots: Slots):

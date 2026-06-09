@@ -40,7 +40,7 @@ describe("App task-view persistence across reload", () => {
   it("restores the task view from ?task=<id> instead of the blank form", async () => {
     vi.mocked(api.getTask).mockResolvedValue({
       id: 7,
-      workflow: "shukko",
+      workflow: "shutchou",
       instruction: "製品Xの納入調整のため大阪へ出張する。",
       fields: { dest: "大阪" },
       status: "submitted",
@@ -70,14 +70,14 @@ describe("App task-view persistence across reload", () => {
     const instruction = "製品Xの納入調整のため大阪へ出張する。";
     vi.mocked(api.getTask).mockResolvedValue({
       id: 9,
-      workflow: "shukko",
+      workflow: "shutchou",
       instruction,
       fields,
       status: "awaiting_approval",
       executions: [],
     });
     vi.mocked(api.getTaskPlan).mockResolvedValue({
-      task: { id: 9, workflow: "shukko", instruction, fields, status: "awaiting_approval" },
+      task: { id: 9, workflow: "shutchou", instruction, fields, status: "awaiting_approval" },
       plan: {
         id: 1,
         task_id: 9,

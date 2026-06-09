@@ -40,7 +40,7 @@ def test_tables_exist_after_migration():
 def test_task_and_execution_persist(platform_db):
     task = Task(
         dedup_key="task:abc",
-        workflow="shukko",
+        workflow="shutchou",
         instruction="出張申請",
         fields={"dest": "大阪", "proj_hint": "P-001"},
         status="submitted",
@@ -82,23 +82,23 @@ def test_task_and_execution_persist(platform_db):
 
 
 def test_dedup_key_unique_conflicts(platform_db):
-    platform_db.add(Task(dedup_key="task:dup", workflow="shukko", instruction="a", fields={}, status="pending"))
+    platform_db.add(Task(dedup_key="task:dup", workflow="shutchou", instruction="a", fields={}, status="pending"))
     platform_db.commit()
-    platform_db.add(Task(dedup_key="task:dup", workflow="shukko", instruction="b", fields={}, status="pending"))
+    platform_db.add(Task(dedup_key="task:dup", workflow="shutchou", instruction="b", fields={}, status="pending"))
     with pytest.raises(IntegrityError):
         platform_db.commit()
 
 
 def test_null_dedup_key_allows_multiple(platform_db):
-    platform_db.add(Task(dedup_key=None, workflow="shukko", instruction="a", fields={}, status="pending"))
-    platform_db.add(Task(dedup_key=None, workflow="shukko", instruction="b", fields={}, status="pending"))
+    platform_db.add(Task(dedup_key=None, workflow="shutchou", instruction="a", fields={}, status="pending"))
+    platform_db.add(Task(dedup_key=None, workflow="shutchou", instruction="b", fields={}, status="pending"))
     platform_db.commit()
     count = platform_db.scalar(select(func.count()).select_from(Task).where(Task.dedup_key.is_(None)))
     assert count == 2
 
 
 def test_delete_task_cascades_executions(platform_db):
-    task = Task(dedup_key="task:cascade", workflow="shukko", instruction="a", fields={}, status="failed")
+    task = Task(dedup_key="task:cascade", workflow="shutchou", instruction="a", fields={}, status="failed")
     platform_db.add(task)
     platform_db.commit()
     platform_db.add(Execution(task_id=task.id, attempt_no=1, status="rolled_back", executed_steps=3))
@@ -115,7 +115,7 @@ def test_delete_task_cascades_executions(platform_db):
 
 
 def test_attempt_no_unique_per_task(platform_db):
-    task = Task(dedup_key="task:attempts", workflow="shukko", instruction="a", fields={}, status="running")
+    task = Task(dedup_key="task:attempts", workflow="shutchou", instruction="a", fields={}, status="running")
     platform_db.add(task)
     platform_db.commit()
     platform_db.add(Execution(task_id=task.id, attempt_no=1, status="verify_failed", executed_steps=5))

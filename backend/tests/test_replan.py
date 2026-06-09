@@ -78,7 +78,7 @@ def _trip_count() -> int:
 def _request(**field_overrides) -> RequestInput:
     fields = {"dest": "大阪", "dept_date": "2026-06-10", "ret_date": "2026-06-11", "proj_hint": "P-001"}
     fields.update(field_overrides)
-    return RequestInput(workflow="shukko", instruction="出張申請", fields=fields)
+    return RequestInput(workflow="shutchou", instruction="出張申請", fields=fields)
 
 
 def _constant(slots: Slots):

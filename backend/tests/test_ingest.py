@@ -32,7 +32,7 @@ def test_structure_chunking_section_ids_are_unique():
 
 @requires_tei
 def test_ingest_persists_doc_and_chunks_with_embeddings(db):
-    doc = ingest_manual(db, workflow="shukko", title="出張申請 操作マニュアル",
+    doc = ingest_manual(db, workflow="shutchou", title="出張申請 操作マニュアル",
                         source="shukko_manual.md", markdown=MANUAL)
     assert doc.id is not None
 
@@ -50,7 +50,7 @@ def test_ingest_persists_doc_and_chunks_with_embeddings(db):
 
 @requires_tei
 def test_fts_column_populated(db):
-    doc = ingest_manual(db, workflow="shukko", title="t", source="shukko_manual.md", markdown=MANUAL)
+    doc = ingest_manual(db, workflow="shutchou", title="t", source="shukko_manual.md", markdown=MANUAL)
     matched = db.scalar(
         select(func.count())
         .select_from(KnowledgeChunk)

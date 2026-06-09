@@ -48,7 +48,7 @@ def _case(
         case_id=case_id,
         category=category,
         input=EvalCaseInput(
-            workflow="shukko", instruction="出張申請", fields=fields, dedup_key=dedup_key
+            workflow="shutchou", instruction="出張申請", fields=fields, dedup_key=dedup_key
         ),
         expected_outcome=expected_outcome,
     )

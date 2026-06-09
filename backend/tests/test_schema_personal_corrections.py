@@ -31,7 +31,7 @@ def platform_db():
 
 def _correction(platform_db, **overrides) -> PersonalCorrection:
     defaults = {
-        "workflow": "shukko",
+        "workflow": "shutchou",
         "trigger": {"field": "dest_code", "equals": "OSAKA"},
         "correction_text": "OSAKA行きは案件コードをPROJ-Xで補完する",
         "version": 1,
@@ -59,7 +59,7 @@ def test_persist_round_trip(platform_db):
     correction = _correction(platform_db, approver="tanaka")
     with SessionLocal() as readback:
         loaded = readback.get(PersonalCorrection, correction.id)
-        assert loaded.workflow == "shukko"
+        assert loaded.workflow == "shutchou"
         assert loaded.trigger == {"field": "dest_code", "equals": "OSAKA"}
         assert loaded.correction_text == "OSAKA行きは案件コードをPROJ-Xで補完する"
         assert loaded.status == "active"
@@ -72,7 +72,7 @@ def test_persist_round_trip(platform_db):
 
 def test_status_server_default_active(platform_db):
     correction = PersonalCorrection(
-        workflow="shukko",
+        workflow="shutchou",
         trigger={"field": "dest_code", "equals": "KOBE"},
         correction_text="KOBE行きの補完",
         version=1,
@@ -106,7 +106,7 @@ def test_status_filter_query(platform_db):
     _correction(platform_db, status="superseded")
     active = platform_db.scalars(
         select(PersonalCorrection).where(
-            PersonalCorrection.workflow == "shukko", PersonalCorrection.status == "active"
+            PersonalCorrection.workflow == "shutchou", PersonalCorrection.status == "active"
         )
     ).all()
     assert len(active) == 1

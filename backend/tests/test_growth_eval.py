@@ -68,8 +68,8 @@ def growth_env():
         yield client
     finally:
         with SessionLocal() as session:
-            session.execute(delete(PersonalCorrection).where(PersonalCorrection.workflow == "shukko"))
-            session.execute(delete(Task).where(Task.workflow == "shukko", Task.instruction.like("%へ%出張する。")))
+            session.execute(delete(PersonalCorrection).where(PersonalCorrection.workflow == "shutchou"))
+            session.execute(delete(Task).where(Task.workflow == "shutchou", Task.instruction.like("%へ%出張する。")))
             session.commit()
 
 
@@ -83,7 +83,7 @@ def test_run_growth_eval_policy_flips_boundary_respects(growth_env):
         leaked = db.scalar(
             select(func.count())
             .select_from(Task)
-            .where(Task.workflow == "shukko", Task.instruction.like("%へ%出張する。"))
+            .where(Task.workflow == "shutchou", Task.instruction.like("%へ%出張する。"))
         )
         assert leaked == 0
         db.delete(run)

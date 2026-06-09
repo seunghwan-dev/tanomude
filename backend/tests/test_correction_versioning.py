@@ -41,7 +41,7 @@ def _active_count(platform_db, workflow: str, trigger: dict) -> int:
 
 def test_create_first_is_version_one(platform_db):
     correction = create_correction(
-        platform_db, "shukko", {"dest": "大阪"}, "案件コード補完", "seed"
+        platform_db, "shutchou", {"dest": "大阪"}, "案件コード補完", "seed"
     )
     assert correction.version == 1
     assert correction.supersedes_id is None
@@ -50,25 +50,25 @@ def test_create_first_is_version_one(platform_db):
 
 def test_create_same_lineage_supersedes_and_keeps_single_active(platform_db):
     trigger = {"dest": "大阪"}
-    first = create_correction(platform_db, "shukko", trigger, "旧ルール", "seed")
-    second = create_correction(platform_db, "shukko", trigger, "新ルール", "human_revise")
+    first = create_correction(platform_db, "shutchou", trigger, "旧ルール", "seed")
+    second = create_correction(platform_db, "shutchou", trigger, "新ルール", "human_revise")
 
     platform_db.expire_all()
     assert platform_db.get(PersonalCorrection, first.id).status == "superseded"
     assert second.version == 2
     assert second.supersedes_id == first.id
     assert second.status == "active"
-    assert _active_count(platform_db, "shukko", trigger) == 1
+    assert _active_count(platform_db, "shutchou", trigger) == 1
 
 
 def test_create_three_times_chain_is_intact(platform_db):
     trigger = {"dest": "大阪"}
-    v1 = create_correction(platform_db, "shukko", trigger, "v1", "seed")
-    v2 = create_correction(platform_db, "shukko", trigger, "v2", "human_revise")
-    v3 = create_correction(platform_db, "shukko", trigger, "v3", "human_revise")
+    v1 = create_correction(platform_db, "shutchou", trigger, "v1", "seed")
+    v2 = create_correction(platform_db, "shutchou", trigger, "v2", "human_revise")
+    v3 = create_correction(platform_db, "shutchou", trigger, "v3", "human_revise")
 
     platform_db.expire_all()
-    assert _active_count(platform_db, "shukko", trigger) == 1
+    assert _active_count(platform_db, "shutchou", trigger) == 1
     assert platform_db.get(PersonalCorrection, v3.id).status == "active"
     assert platform_db.get(PersonalCorrection, v1.id).status == "superseded"
     assert platform_db.get(PersonalCorrection, v2.id).status == "superseded"
@@ -79,25 +79,25 @@ def test_create_three_times_chain_is_intact(platform_db):
 
 
 def test_create_different_trigger_is_separate_lineage(platform_db):
-    create_correction(platform_db, "shukko", {"dest": "大阪"}, "大阪ルール", "seed")
-    other = create_correction(platform_db, "shukko", {"dest": "神戸"}, "神戸ルール", "seed")
+    create_correction(platform_db, "shutchou", {"dest": "大阪"}, "大阪ルール", "seed")
+    other = create_correction(platform_db, "shutchou", {"dest": "神戸"}, "神戸ルール", "seed")
     assert other.version == 1
     assert other.supersedes_id is None
-    assert _active_count(platform_db, "shukko", {"dest": "大阪"}) == 1
-    assert _active_count(platform_db, "shukko", {"dest": "神戸"}) == 1
+    assert _active_count(platform_db, "shutchou", {"dest": "大阪"}) == 1
+    assert _active_count(platform_db, "shutchou", {"dest": "神戸"}) == 1
 
 
 def test_index_blocks_two_active_in_same_lineage(platform_db):
     trigger = {"dest": "大阪"}
     platform_db.add(
         PersonalCorrection(
-            workflow="shukko", trigger=trigger, correction_text="一号", version=1, source="seed", status="active"
+            workflow="shutchou", trigger=trigger, correction_text="一号", version=1, source="seed", status="active"
         )
     )
     platform_db.commit()
     platform_db.add(
         PersonalCorrection(
-            workflow="shukko", trigger=trigger, correction_text="二号", version=1, source="seed", status="active"
+            workflow="shutchou", trigger=trigger, correction_text="二号", version=1, source="seed", status="active"
         )
     )
     with pytest.raises(IntegrityError):
@@ -106,12 +106,12 @@ def test_index_blocks_two_active_in_same_lineage(platform_db):
 
 def test_deactivate_retires_and_drops_from_match(platform_db):
     correction = create_correction(
-        platform_db, "shukko", {"dest": "大阪"}, "案件コード補完", "seed"
+        platform_db, "shutchou", {"dest": "大阪"}, "案件コード補完", "seed"
     )
-    assert [row.id for row in match_corrections(platform_db, "shukko", _fields())] == [correction.id]
+    assert [row.id for row in match_corrections(platform_db, "shutchou", _fields())] == [correction.id]
 
     deactivate_correction(platform_db, correction.id)
 
     platform_db.expire_all()
     assert platform_db.get(PersonalCorrection, correction.id).status == "retired"
-    assert match_corrections(platform_db, "shukko", _fields()) == []
+    assert match_corrections(platform_db, "shutchou", _fields()) == []

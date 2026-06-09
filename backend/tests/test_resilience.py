@@ -31,7 +31,7 @@ def client():
 def _create(client: TestClient, dedup_key: str) -> dict:
     response = client.post(
         "/tasks",
-        json={"workflow": "shukko", "instruction": "出張申請", "fields": {"dest": "大阪"}, "dedup_key": dedup_key},
+        json={"workflow": "shutchou", "instruction": "出張申請", "fields": {"dest": "大阪"}, "dedup_key": dedup_key},
     )
     return response.json()
 

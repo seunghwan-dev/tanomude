@@ -49,7 +49,7 @@ def test_every_case_has_valid_input_and_outcome(session):
     assert len(cases) == 24
     for case in cases:
         parsed = EvalCaseInput.model_validate(case.input)
-        assert parsed.workflow == "shukko"
+        assert parsed.workflow == "shutchou"
         assert isinstance(parsed.fields, dict)
         assert case.category in EXPECTED_COUNTS
         assert case.expected_outcome in OUTCOMES
@@ -128,7 +128,7 @@ def test_invalid_category_rejected_by_pydantic():
         EvalCaseSeed(
             case_id="x",
             category="bogus",
-            input=EvalCaseInput(workflow="shukko", instruction="出張申請", fields={}),
+            input=EvalCaseInput(workflow="shutchou", instruction="出張申請", fields={}),
             expected_outcome="submitted",
         )
 
@@ -138,6 +138,6 @@ def test_invalid_outcome_rejected_by_pydantic():
         EvalCaseSeed(
             case_id="x",
             category="normal",
-            input=EvalCaseInput(workflow="shukko", instruction="出張申請", fields={}),
+            input=EvalCaseInput(workflow="shutchou", instruction="出張申請", fields={}),
             expected_outcome="bogus",
         )

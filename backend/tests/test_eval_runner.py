@@ -18,7 +18,7 @@ STEPS = [
     Step(seq=1, type="nav", key="Enter"),
     Step(seq=2, type="field", target="DEST", value="OSAKA"),
 ]
-FILLED = FilledKeysequence(workflow="shukko", steps=STEPS, slots=SLOTS)
+FILLED = FilledKeysequence(workflow="shutchou", steps=STEPS, slots=SLOTS)
 GROUNDS = [
     RetrievedChunk(chunk_id=3, doc_id=1, section="apply", heading="申請手順", text="F4で案件を選ぶ", score=0.42, rank=1)
 ]

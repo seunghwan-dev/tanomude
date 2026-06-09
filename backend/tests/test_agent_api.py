@@ -27,7 +27,7 @@ def _use_runner(outcome: ExecutionOutcome) -> None:
 
 
 def _body(**overrides) -> dict:
-    payload = {"workflow": "shukko", "instruction": "出張申請", "fields": {"dest": "大阪"}, "dedup_key": "task:1"}
+    payload = {"workflow": "shutchou", "instruction": "出張申請", "fields": {"dest": "大阪"}, "dedup_key": "task:1"}
     payload.update(overrides)
     return payload
 
