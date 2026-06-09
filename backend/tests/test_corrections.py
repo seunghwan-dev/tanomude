@@ -34,7 +34,7 @@ def platform_db():
 
 def _seed(platform_db, **overrides) -> PersonalCorrection:
     defaults = {
-        "workflow": "shukko",
+        "workflow": "shutchou",
         "trigger": {"dest": "大阪"},
         "correction_text": "大阪行きは案件コードをPROJ-Xで補完する",
         "version": 1,
@@ -54,39 +54,39 @@ def _fields() -> dict:
 
 def test_match_returns_active_workflow_and_trigger(platform_db):
     target = _seed(platform_db)
-    matched = match_corrections(platform_db, "shukko", _fields())
+    matched = match_corrections(platform_db, "shutchou", _fields())
     assert [row.id for row in matched] == [target.id]
 
 
 def test_match_excludes_other_workflow(platform_db):
     _seed(platform_db, workflow="ringi")
-    matched = match_corrections(platform_db, "shukko", _fields())
+    matched = match_corrections(platform_db, "shutchou", _fields())
     assert matched == []
 
 
 def test_match_excludes_non_active(platform_db):
     _seed(platform_db, status="superseded")
     _seed(platform_db, status="quarantined")
-    matched = match_corrections(platform_db, "shukko", _fields())
+    matched = match_corrections(platform_db, "shutchou", _fields())
     assert matched == []
 
 
 def test_match_trigger_subset_required(platform_db):
     _seed(platform_db, trigger={"dest": "大阪", "purpose": "納入調整"})
-    matched = match_corrections(platform_db, "shukko", _fields())
+    matched = match_corrections(platform_db, "shutchou", _fields())
     assert matched == []
 
 
 def test_match_empty_trigger_is_workflow_wide(platform_db):
     target = _seed(platform_db, trigger={})
-    matched = match_corrections(platform_db, "shukko", {"anything": "value"})
+    matched = match_corrections(platform_db, "shutchou", {"anything": "value"})
     assert [row.id for row in matched] == [target.id]
 
 
 def test_apply_prepends_override_block(platform_db):
     _seed(platform_db)
     base = "RAG-CONTEXT"
-    result, _ = apply_corrections(platform_db, "shukko", _fields(), base)
+    result, _ = apply_corrections(platform_db, "shutchou", _fields(), base)
     expected = (
         f"{OVERRIDE_HEADER}\n大阪行きは案件コードをPROJ-Xで補完する\n{RAG_HEADER}\nRAG-CONTEXT"
     )
@@ -96,14 +96,14 @@ def test_apply_prepends_override_block(platform_db):
 def test_apply_no_match_returns_base_unchanged(platform_db):
     _seed(platform_db, workflow="ringi")
     base = "RAG-CONTEXT"
-    context, _ = apply_corrections(platform_db, "shukko", _fields(), base)
+    context, _ = apply_corrections(platform_db, "shutchou", _fields(), base)
     assert context == base
 
 
 def test_apply_override_is_non_vacuous(platform_db):
     _seed(platform_db)
     base = "RAG-CONTEXT"
-    result, _ = apply_corrections(platform_db, "shukko", _fields(), base)
+    result, _ = apply_corrections(platform_db, "shutchou", _fields(), base)
     assert OVERRIDE_HEADER in result
     assert result.index("大阪行きは案件コードをPROJ-Xで補完する") < result.index(base)
     assert result.startswith(OVERRIDE_HEADER)
@@ -112,7 +112,7 @@ def test_apply_override_is_non_vacuous(platform_db):
 def test_apply_joins_multiple_matches(platform_db):
     _seed(platform_db, correction_text="教正A")
     _seed(platform_db, trigger={}, correction_text="教正B")
-    result, _ = apply_corrections(platform_db, "shukko", _fields(), "BASE")
+    result, _ = apply_corrections(platform_db, "shutchou", _fields(), "BASE")
     assert "教正A" in result
     assert "教正B" in result
     assert result.index(OVERRIDE_HEADER) < result.index("教正A")
@@ -120,7 +120,7 @@ def test_apply_joins_multiple_matches(platform_db):
 
 def test_apply_is_reusable_without_runner(platform_db):
     _seed(platform_db)
-    augmented, _ = apply_corrections(platform_db, "shukko", _fields(), "BASE")
+    augmented, _ = apply_corrections(platform_db, "shutchou", _fields(), "BASE")
     assert augmented.startswith(OVERRIDE_HEADER)
     assert augmented.endswith("BASE")
 
@@ -128,7 +128,7 @@ def test_apply_is_reusable_without_runner(platform_db):
 def test_apply_is_read_only(platform_db):
     _seed(platform_db)
     before = platform_db.scalar(select(func.count()).select_from(PersonalCorrection))
-    apply_corrections(platform_db, "shukko", _fields(), "BASE")
+    apply_corrections(platform_db, "shutchou", _fields(), "BASE")
     after = platform_db.scalar(select(func.count()).select_from(PersonalCorrection))
     assert before == after == 1
 
@@ -165,7 +165,7 @@ def test_validate_accepts_multiline_and_tab():
 def test_apply_excludes_contaminated_keeps_valid(platform_db):
     _seed(platform_db, trigger={"dest": "大阪"}, correction_text="有効な個人修正")
     contaminated = _seed(platform_db, trigger={}, correction_text="汚染マーカー\x07注入")
-    context, fallback = apply_corrections(platform_db, "shukko", _fields(), "RAG-BASE")
+    context, fallback = apply_corrections(platform_db, "shutchou", _fields(), "RAG-BASE")
     assert "有効な個人修正" in context
     assert "汚染マーカー" not in context
     assert [exc.id for exc in fallback] == [contaminated.id]
@@ -174,7 +174,7 @@ def test_apply_excludes_contaminated_keeps_valid(platform_db):
 
 def test_apply_all_contaminated_falls_back_to_base(platform_db):
     _seed(platform_db, correction_text="")
-    context, fallback = apply_corrections(platform_db, "shukko", _fields(), "RAG-BASE")
+    context, fallback = apply_corrections(platform_db, "shutchou", _fields(), "RAG-BASE")
     assert context == "RAG-BASE"
     assert [exc.reason for exc in fallback] == ["empty"]
 
@@ -183,7 +183,7 @@ def test_apply_read_only_with_contamination(platform_db):
     _seed(platform_db, trigger={"dest": "大阪"}, correction_text="有効な個人修正")
     _seed(platform_db, trigger={}, correction_text="汚染\x07")
     before = platform_db.scalar(select(func.count()).select_from(PersonalCorrection))
-    apply_corrections(platform_db, "shukko", _fields(), "BASE")
+    apply_corrections(platform_db, "shutchou", _fields(), "BASE")
     after = platform_db.scalar(select(func.count()).select_from(PersonalCorrection))
     active = platform_db.scalar(
         select(func.count())
@@ -199,7 +199,7 @@ def test_quarantine_sets_status_and_excludes_from_match(platform_db):
     quarantine_correction(platform_db, target.id)
     refreshed = platform_db.get(PersonalCorrection, target.id)
     assert refreshed.status == "quarantined"
-    assert match_corrections(platform_db, "shukko", _fields()) == []
+    assert match_corrections(platform_db, "shutchou", _fields()) == []
 
 
 def _chunk(text: str) -> RetrievedChunk:
@@ -223,7 +223,7 @@ def test_hitl_runner_threads_correction_into_context(platform_db, monkeypatch):
     monkeypatch.setattr(service, "plan", fake_plan)
 
     request = RequestInput(
-        workflow="shukko",
+        workflow="shutchou",
         instruction="出張申請",
         fields=_fields(),
     )
@@ -236,14 +236,14 @@ def test_hitl_runner_threads_correction_into_context(platform_db, monkeypatch):
 
 
 def test_stage_correction_defers_commit(platform_db):
-    correction = stage_correction(platform_db, "shukko", {"dest": "大阪"}, "個人ルール", source="human_reject")
+    correction = stage_correction(platform_db, "shutchou", {"dest": "大阪"}, "個人ルール", source="human_reject")
     assert correction.id is None
     platform_db.rollback()
     assert platform_db.scalar(select(func.count()).select_from(PersonalCorrection)) == 0
 
 
 def test_create_correction_commits(platform_db):
-    correction = create_correction(platform_db, "shukko", {"dest": "大阪"}, "個人ルール", source="seed")
+    correction = create_correction(platform_db, "shutchou", {"dest": "大阪"}, "個人ルール", source="seed")
     assert correction.id is not None
     platform_db.rollback()
     assert platform_db.scalar(select(func.count()).select_from(PersonalCorrection)) == 1

@@ -9,7 +9,7 @@ from backend.slotfill import RequestInput, extract_slots
 
 requires_ollama = pytest.mark.skipif(not ollama_client.health(), reason="ollama not reachable")
 
-WORKFLOW = "shukko"
+WORKFLOW = "shutchou"
 
 CASES = [
     {

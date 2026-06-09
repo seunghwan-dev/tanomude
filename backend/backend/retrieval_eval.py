@@ -144,7 +144,7 @@ def main(k: int = 3) -> int:
     with SessionLocal() as db:
         ingest_manual(
             db,
-            workflow="shukko",
+            workflow="shutchou",
             title="出張申請 操作マニュアル",
             source="shukko_manual.md",
             markdown=load_manual("shukko_manual.md"),

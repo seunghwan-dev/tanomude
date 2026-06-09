@@ -8,7 +8,7 @@ pytestmark = pytest.mark.skipif(not embedding.health(), reason="embedding servic
 
 
 def test_retrieval_eval_hybrid_hits_majority(db):
-    ingest_manual(db, workflow="shukko", title="出張申請 操作マニュアル",
+    ingest_manual(db, workflow="shutchou", title="出張申請 操作マニュアル",
                   source="shukko_manual.md", markdown=load_manual("shukko_manual.md"))
     results = run_eval(db, top_k=3)
     hybrid_hits = sum(1 for result in results if result.hit(result.hybrid_sections))

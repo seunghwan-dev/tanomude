@@ -69,7 +69,7 @@ def run_startup_seed(db: Session, embed_fn: Embedder = embed_passages) -> int:
         return 0
     ingest_manual(
         db,
-        workflow="shukko",
+        workflow="shutchou",
         title=SEED_TITLE,
         source=SEED_SOURCE,
         markdown=load_manual(SEED_SOURCE),

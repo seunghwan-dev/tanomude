@@ -36,7 +36,7 @@ def test_seed_is_idempotent_when_store_populated(db, monkeypatch):
     _reset(db)
     monkeypatch.setattr(settings, "seed_on_startup", True)
     monkeypatch.setattr(ingest, "embedding_health", lambda: True)
-    ingest_manual(db, workflow="shukko", title=ingest.SEED_TITLE,
+    ingest_manual(db, workflow="shutchou", title=ingest.SEED_TITLE,
                   source=ingest.SEED_SOURCE, markdown=MANUAL, embed_fn=_fake_embed)
     before = _count(db)
     assert before > 0

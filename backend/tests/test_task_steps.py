@@ -65,7 +65,7 @@ def clean_platform():
 def _request(**overrides) -> RequestInput:
     fields = {"dest": "大阪", "dept_date": "2026-06-10", "ret_date": "2026-06-11", "proj_hint": "P-001"}
     fields.update(overrides)
-    return RequestInput(workflow="shukko", instruction="出張申請", fields=fields)
+    return RequestInput(workflow="shutchou", instruction="出張申請", fields=fields)
 
 
 def _constant(slots: Slots):
@@ -74,7 +74,7 @@ def _constant(slots: Slots):
 
 def _seed_task_execution() -> tuple[int, int]:
     with SessionLocal() as db:
-        task = Task(workflow="shukko", instruction="出張申請", fields={"dest": "大阪"}, status="running")
+        task = Task(workflow="shutchou", instruction="出張申請", fields={"dest": "大阪"}, status="running")
         db.add(task)
         db.commit()
         db.refresh(task)
@@ -186,7 +186,7 @@ def test_hydration_includes_steps_so_far(mock_client):
 
     app.dependency_overrides[get_runner] = lambda: stepping_runner
     body = {
-        "workflow": "shukko",
+        "workflow": "shutchou",
         "instruction": "出張申請",
         "fields": {"dest": "大阪", "dept_date": "2026-06-10", "ret_date": "2026-06-11", "proj_hint": "P-001"},
         "dedup_key": "task:steps",
@@ -206,7 +206,7 @@ def test_step_executed_broadcast_over_ws(mock_client):
 
     app.dependency_overrides[get_runner] = lambda: stepping_runner
     body = {
-        "workflow": "shukko",
+        "workflow": "shutchou",
         "instruction": "出張申請",
         "fields": {"dest": "大阪", "dept_date": "2026-06-10", "ret_date": "2026-06-11", "proj_hint": "P-001"},
         "dedup_key": "task:ws",

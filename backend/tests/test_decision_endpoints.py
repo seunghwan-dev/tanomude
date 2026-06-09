@@ -19,7 +19,7 @@ STEPS = [
     Step(seq=1, type="nav", key="Enter"),
     Step(seq=2, type="field", target="DEST", value="OSAKA"),
 ]
-FILLED = FilledKeysequence(workflow="shukko", steps=STEPS, slots=SLOTS)
+FILLED = FilledKeysequence(workflow="shutchou", steps=STEPS, slots=SLOTS)
 GROUNDS = [
     RetrievedChunk(chunk_id=3, doc_id=1, section="apply", heading="申請手順", text="F4で案件を選ぶ", score=0.42, rank=1)
 ]
@@ -47,7 +47,7 @@ def client():
 
 def _seed_awaiting(client, dedup_key: str = "task:dec:1", dest: str = "大阪") -> int:
     app.dependency_overrides[get_plan_runner] = lambda: (lambda request: (FILLED, GROUNDS))
-    body = {"workflow": "shukko", "instruction": "出張申請", "fields": {"dest": dest}, "dedup_key": dedup_key}
+    body = {"workflow": "shutchou", "instruction": "出張申請", "fields": {"dest": dest}, "dedup_key": dedup_key}
     return client.post("/tasks/plan", json=body).json()["task"]["id"]
 
 
@@ -146,7 +146,7 @@ def test_create_task_maps_upstream_http_error_to_502(client):
         )
 
     app.dependency_overrides[get_runner] = lambda: _raising
-    body = {"workflow": "shukko", "instruction": "出張申請", "fields": {"dest": "大阪"}, "dedup_key": "task:create:err"}
+    body = {"workflow": "shutchou", "instruction": "出張申請", "fields": {"dest": "大阪"}, "dedup_key": "task:create:err"}
     response = client.post("/tasks", json=body)
     assert response.status_code == 502
     assert response.json()["detail"] == "upstream 503 at http://localhost:8001/embed"
@@ -349,7 +349,7 @@ def test_reject_correction_feeds_next_plan_for_same_destination(client):
     reuse_text = "前回案件コードを再利用し reuse_prev_proj を true に上書きすること。"
     client.post(f"/tasks/{task_id}/reject", json={"approver": "tanaka", "decision_text": reuse_text})
     with SessionLocal() as session:
-        context, fallback = apply_corrections(session, "shukko", {"dest": "大阪"}, "RAG-BASE")
+        context, fallback = apply_corrections(session, "shutchou", {"dest": "大阪"}, "RAG-BASE")
     assert reuse_text in context
     assert fallback == []
 

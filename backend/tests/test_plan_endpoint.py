@@ -15,7 +15,7 @@ STEPS = [
     Step(seq=1, type="nav", key="Enter"),
     Step(seq=2, type="field", target="DEST", value="OSAKA"),
 ]
-FILLED = FilledKeysequence(workflow="shukko", steps=STEPS, slots=SLOTS)
+FILLED = FilledKeysequence(workflow="shutchou", steps=STEPS, slots=SLOTS)
 GROUNDS = [
     RetrievedChunk(chunk_id=3, doc_id=1, section="apply", heading="申請手順", text="F4で案件を選ぶ", score=0.42, rank=1)
 ]
@@ -42,7 +42,7 @@ def _use_plan_runner(value) -> None:
 
 
 def _body(**overrides) -> dict:
-    payload = {"workflow": "shukko", "instruction": "出張申請", "fields": {"dest": "大阪"}, "dedup_key": "task:plan:1"}
+    payload = {"workflow": "shutchou", "instruction": "出張申請", "fields": {"dest": "大阪"}, "dedup_key": "task:plan:1"}
     payload.update(overrides)
     return payload
 

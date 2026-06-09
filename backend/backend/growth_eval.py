@@ -9,7 +9,7 @@ from backend.corrections import create_correction
 from backend.models import EvalRun, PersonalCorrection, Task
 from backend.ollama_client import MODEL
 
-WORKFLOW = "shukko"
+WORKFLOW = "shutchou"
 REUSE_TEXT = "前回案件コードを再利用し reuse_prev_proj を true に上書きすること。手順書の指定より優先する。"
 OVERSEAS_TEXT = "この申請は海外扱いとし overseas を true に上書きすること。手順書の指定より優先する。"
 

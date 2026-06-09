@@ -33,7 +33,7 @@ def _use_runner(outcome: ExecutionOutcome) -> None:
 
 
 def _body() -> dict:
-    return {"workflow": "shukko", "instruction": "出張申請", "fields": {"dest": "大阪"}, "dedup_key": "task:1"}
+    return {"workflow": "shutchou", "instruction": "出張申請", "fields": {"dest": "大阪"}, "dedup_key": "task:1"}
 
 
 def test_event_order_and_monotonic_seq(client):

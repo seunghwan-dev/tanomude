@@ -36,7 +36,7 @@ def platform_db():
 
 
 def _task(platform_db, **overrides) -> Task:
-    defaults = {"dedup_key": None, "workflow": "shukko", "instruction": "出張申請", "fields": {}, "status": "awaiting_approval"}
+    defaults = {"dedup_key": None, "workflow": "shutchou", "instruction": "出張申請", "fields": {}, "status": "awaiting_approval"}
     defaults.update(overrides)
     task = Task(**defaults)
     platform_db.add(task)

@@ -25,7 +25,7 @@ function TextField(props: { label: string; value: string; onChange: (value: stri
 }
 
 export default function App() {
-  const workflow = "shukko";
+  const workflow = "shutchou";
   const [instruction, setInstruction] = useState("製品Xの納入調整のため大阪へ出張する。");
   const [dest, setDest] = useState("大阪");
   const [deptDate, setDeptDate] = useState("2026-06-10");
