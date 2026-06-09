@@ -46,7 +46,7 @@ Every number below comes from the in-repo eval harness (with the embedding servi
 
 > Retrieval figures are measured at the eval's retrieval depth (k=3); the serving planner grounds deeper (top-k 5–6), so the eval operating point differs from serving.
 
-**How overrides are governed.** A personal correction may move the model's *inference* slots, but it cannot rewrite what the request already grounds — and that choice is enforced in code, slot by slot, not left to the model:
+**How overrides are governed.** A personal correction may move the model's *inference* slots, but it cannot rewrite what the request already grounds — and the same immunity now covers the 修正 (revise) gesture, not only persisted corrections, so a revise aimed at a grounded slot is declined with a notice directing the operator to issue a new instruction. That choice is enforced in code, slot by slot, not left to the model:
 
 - **Destination code and purpose are correction-immune.** They follow the request's grounded input; a correction cannot move them.
 - **Overseas is immune only when the instruction grounds it** (e.g. it states domestic or overseas); otherwise it is a movable inference slot.
@@ -71,7 +71,7 @@ docker compose up
 
 Then open **http://localhost:8000**.
 
-> First run builds the images and downloads two local models — the LLM (~9.6 GB) and the embedding model (~2.2 GB), about 12 GB total — so allow roughly 10 minutes on a fast connection, longer on slower links. They are cached afterward.
+> First run builds and pulls the container images and downloads two local models — the LLM (~9.6 GB) and the embedding model (~2.2 GB), about 12 GB total. Timing is network-dependent: roughly 10–15 minutes on a fast connection (the embedding-model download is often the slowest leg), longer on slower links. They are cached afterward.
 
 ## Honest outcomes
 

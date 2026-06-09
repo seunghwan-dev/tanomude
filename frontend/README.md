@@ -22,14 +22,14 @@ local LLM. Plan generation (`POST /tasks/plan`) does **not** require the mock-as
    and have Ollama running locally with the configured model pulled (`OLLAMA_URL`, default
    `http://localhost:11434`).
 
-2. **Ingest the shukko manual** into the platform DB once, so the 根拠 (grounding) tab is populated.
+2. **Ingest the operation manual** into the platform DB once, so the 根拠 (grounding) tab is populated.
    The full `docker compose up` stack seeds this manual automatically on first boot; these manual steps are only for this dev path. From `backend/` (venv active, env vars set):
 
    ```python
    from backend.db import SessionLocal
    from backend.ingest import ingest_manual, load_manual
    with SessionLocal() as db:
-       ingest_manual(db, workflow="shukko", title="出張申請 操作マニュアル",
+       ingest_manual(db, workflow="shutchou", title="出張申請 操作マニュアル",
                      source="shukko_manual.md", markdown=load_manual("shukko_manual.md"))
    ```
 
