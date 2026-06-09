@@ -71,7 +71,7 @@ docker compose up
 
 Then open **http://localhost:8000**.
 
-> First run pulls the container images and downloads two local models — the LLM (~9.6 GB) and the embedding model (~2.2 GB), about 12 GB total. Timing is network-dependent: roughly 10–15 minutes on a fast connection (the embedding-model download is often the slowest leg), longer on slower links. They are cached afterward.
+> First run builds and pulls the container images and downloads two local models — the LLM (~9.6 GB) and the embedding model (~2.2 GB), about 12 GB total. Timing is network-dependent: roughly 10–15 minutes on a fast connection (the embedding-model download is often the slowest leg), longer on slower links. They are cached afterward.
 
 ## Honest outcomes
 
