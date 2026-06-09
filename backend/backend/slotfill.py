@@ -17,6 +17,9 @@ DOMESTIC_CUE = "国内"
 OVERSEAS_CUE = "海外"
 DOMAIN_CUES = ("出張",)
 OUT_OF_DOMAIN_REASON = "すみません、このご依頼はまだ分かりません。今は出張申請の操作のみお手伝いできます。"
+REQUIRED_FIELDS_REASON = "必須項目が入力されていません。不足している項目をご入力のうえ、再度お試しください。"
+MALFORMED_DATE_REASON = "日付の形式が正しくありません。出発日・帰着日をご確認のうえ、修正して再入力してください。"
+EXTRACTION_MISSING_REASON = "必須項目の値を取得できませんでした。入力内容をご確認のうえ、修正して再度お試しください。"
 
 
 class SlotParseError(Exception):
@@ -152,22 +155,22 @@ def fill(request: RequestInput, slot_fn: SlotExtractor, context: str = "") -> Fi
 
     missing = required_missing(request.fields)
     if missing:
-        return Refusal(reason="required fields missing in request", missing_fields=missing)
+        return Refusal(reason=REQUIRED_FIELDS_REASON, missing_fields=missing)
 
     dept = parse_date(request.fields["dept_date"])
     ret = parse_date(request.fields["ret_date"])
     if dept is None or ret is None:
         bad = [name for name, value in (("DEPTDATE", dept), ("RETDATE", ret)) if value is None]
-        return Refusal(reason="malformed date fields", missing_fields=bad)
+        return Refusal(reason=MALFORMED_DATE_REASON, missing_fields=bad)
 
     proj = resolve_proj(request.fields)
     slots = slot_fn(request, context)
     slots.dest_code = slots.dest_code.upper()
     slots.purpose = slots.purpose[:PURPOSE_MAX]
     if not _present(slots.dest_code):
-        return Refusal(reason="required field missing after extraction", missing_fields=["DEST"])
+        return Refusal(reason=EXTRACTION_MISSING_REASON, missing_fields=["DEST"])
     if not _present(slots.purpose):
-        return Refusal(reason="required field missing after extraction", missing_fields=["PURPOSE"])
+        return Refusal(reason=EXTRACTION_MISSING_REASON, missing_fields=["PURPOSE"])
     return FilledKeysequence(workflow=request.workflow, steps=assemble(slots, dept, ret, proj), slots=slots)
 
 
