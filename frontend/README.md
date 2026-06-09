@@ -29,7 +29,7 @@ local LLM. Plan generation (`POST /tasks/plan`) does **not** require the mock-as
    from backend.db import SessionLocal
    from backend.ingest import ingest_manual, load_manual
    with SessionLocal() as db:
-       ingest_manual(db, workflow="shukko", title="出張申請 操作マニュアル",
+       ingest_manual(db, workflow="shutchou", title="出張申請 操作マニュアル",
                      source="shukko_manual.md", markdown=load_manual("shukko_manual.md"))
    ```
 
