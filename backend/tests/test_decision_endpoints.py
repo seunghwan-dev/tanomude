@@ -6,13 +6,13 @@ from sqlalchemy import delete, func, select
 from backend.agent import repository
 from backend.agent.app import app
 from backend.agent.manager import manager
-from backend.agent.service import get_execute_runner, get_plan_runner, get_runner
+from backend.agent.service import get_execute_runner, get_plan_runner, get_revise_assessor, get_runner
 from backend.coreloop import ExecutionOutcome
 from backend.corrections import MAX_CORRECTION_LENGTH, apply_corrections
 from backend.db import SessionLocal
 from backend.models import Approval, AuditLog, Execution, PersonalCorrection, Plan, Task
 from backend.retrieval import RetrievedChunk
-from backend.slotfill import FilledKeysequence, Slots, Step
+from backend.slotfill import FilledKeysequence, ReviseAssessment, Slots, Step
 
 SLOTS = Slots(dest_code="OSAKA", purpose="製品X納入調整")
 STEPS = [
@@ -53,6 +53,12 @@ def _seed_awaiting(client, dedup_key: str = "task:dec:1", dest: str = "大阪") 
 
 def _use_execute_runner(outcome: ExecutionOutcome) -> None:
     app.dependency_overrides[get_execute_runner] = lambda: (lambda request, filled, observer=None: outcome)
+
+
+def _use_revise_assessor(persist: bool, blocked_slot: str | None = None) -> None:
+    app.dependency_overrides[get_revise_assessor] = lambda: (
+        lambda request, decision_text: ReviseAssessment(persist=persist, blocked_slot=blocked_slot)
+    )
 
 
 def test_approve_records_decision_and_executes(client):
@@ -190,6 +196,7 @@ def test_reject_records_correction_and_refuses_without_executing(client):
 
 def test_revise_records_approval_row_keeps_awaiting_and_no_new_plan(client):
     task_id = _seed_awaiting(client)
+    _use_revise_assessor(True)
     with SessionLocal() as session:
         plans_before = session.scalar(
             select(func.count()).select_from(Plan).where(Plan.task_id == task_id)
@@ -320,6 +327,7 @@ def test_approve_failed_outcome_rolls_up_to_failed(client, exec_status):
 
 def test_get_after_decision_is_read_only(client):
     task_id = _seed_awaiting(client)
+    _use_revise_assessor(True)
     client.post(f"/tasks/{task_id}/revise", json={"approver": "tanaka", "decision_text": "x"})
     with SessionLocal() as session:
         before_updated = session.get(Task, task_id).updated_at
@@ -398,6 +406,7 @@ def test_reject_correction_rolls_back_atomically_with_decision(client, monkeypat
 
 def test_revise_correction_rolls_back_atomically_with_decision(client, monkeypatch):
     task_id = _seed_awaiting(client)
+    _use_revise_assessor(True)
     real_stage = repository.stage_correction
 
     def boom(*args, **kwargs):
@@ -433,3 +442,52 @@ def test_repeated_reject_same_destination_supersedes_correction(client):
         assert active.version == 2
         assert superseded.correction_text == "最初の修正"
         assert active.supersedes_id == superseded.id
+
+
+def test_revise_blocked_grounded_slot_surfaces_notice_and_persists_no_correction(client):
+    task_id = _seed_awaiting(client)
+    _use_revise_assessor(False, blocked_slot="目的地")
+    response = client.post(
+        f"/tasks/{task_id}/revise", json={"approver": "tanaka", "decision_text": "目的地を神戸に変更"}
+    )
+    assert response.status_code == 200
+    body = response.json()
+    assert body["status"] == "awaiting_approval"
+    assert body["revise_notice"] == (
+        "申し訳ありません。目的地は指示文で確定する項目のため、修正では変更できません。"
+        "変更したい場合は、新しい指示でやり直してください。"
+    )
+    with SessionLocal() as session:
+        assert session.scalars(select(Approval).where(Approval.task_id == task_id)).one().decision == "revise"
+        assert session.scalar(select(func.count()).select_from(PersonalCorrection)) == 0
+        assert session.get(Task, task_id).status == "awaiting_approval"
+
+
+def test_revise_movable_change_persists_correction_without_notice(client):
+    task_id = _seed_awaiting(client)
+    _use_revise_assessor(True)
+    response = client.post(
+        f"/tasks/{task_id}/revise", json={"approver": "tanaka", "decision_text": "前回の案件を再利用"}
+    )
+    assert response.status_code == 200
+    assert response.json()["revise_notice"] is None
+    with SessionLocal() as session:
+        correction = session.scalars(select(PersonalCorrection)).one()
+        assert correction.source == "human_revise"
+        assert correction.status == "active"
+
+
+def test_blocked_revise_preserves_existing_active_correction(client):
+    t1 = _seed_awaiting(client, dedup_key="task:imm:1", dest="大阪")
+    _use_revise_assessor(True)
+    client.post(f"/tasks/{t1}/revise", json={"approver": "tanaka", "decision_text": "前回の案件を再利用"})
+    t2 = _seed_awaiting(client, dedup_key="task:imm:2", dest="大阪")
+    _use_revise_assessor(False, blocked_slot="目的地")
+    client.post(f"/tasks/{t2}/revise", json={"approver": "tanaka", "decision_text": "目的地を神戸に変更"})
+    with SessionLocal() as session:
+        actives = session.scalars(
+            select(PersonalCorrection).where(PersonalCorrection.status == "active")
+        ).all()
+        assert len(actives) == 1
+        assert actives[0].correction_text == "前回の案件を再利用"
+        assert session.scalar(select(func.count()).select_from(PersonalCorrection)) == 1

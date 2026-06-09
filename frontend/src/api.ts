@@ -94,6 +94,7 @@ export interface TaskDetail {
   fields: Record<string, string>;
   status: string;
   executions: Execution[];
+  revise_notice?: string | null;
 }
 
 export type EventType =

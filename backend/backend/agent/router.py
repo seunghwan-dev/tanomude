@@ -19,15 +19,25 @@ from backend.agent.service import (
     ExecuteRunner,
     ParseFailure,
     PlanRunner,
+    ReviseAssessor,
     Runner,
     get_execute_runner,
     get_plan_runner,
+    get_revise_assessor,
     get_runner,
     rollup_status,
 )
 from backend.db import get_db
 from backend.models import Execution, Plan, Task
-from backend.slotfill import FilledKeysequence, Refusal, RequestInput, Slots, Step
+from backend.slotfill import (
+    FilledKeysequence,
+    Refusal,
+    RequestInput,
+    ReviseAssessment,
+    Slots,
+    Step,
+    revise_blocked_notice,
+)
 
 router = APIRouter(prefix="/tasks", tags=["tasks"])
 
@@ -260,14 +270,26 @@ async def reject_task(
 
 @router.post("/{task_id}/revise", response_model=TaskView)
 async def revise_task(
-    task_id: int, body: DecisionInput, db: Session = Depends(get_db)
+    task_id: int,
+    body: DecisionInput,
+    db: Session = Depends(get_db),
+    assess_revise: ReviseAssessor = Depends(get_revise_assessor),
 ) -> TaskView:
     task, plan = _decision_target(db, task_id)
-    repository.record_revise(db, task, plan.id, body.approver, body.decision_text)
+    assessment = ReviseAssessment(persist=True, blocked_slot=None)
+    if body.decision_text and body.decision_text.strip() and task.fields.get("dest"):
+        request = RequestInput(workflow=task.workflow, instruction=task.instruction, fields=task.fields)
+        assessment = await to_thread.run_sync(assess_revise, request, body.decision_text)
+    repository.record_revise(
+        db, task, plan.id, body.approver, body.decision_text, persist=assessment.persist
+    )
     await manager.broadcast(
         "revised", task.id, {"status": task.status, "decision_text": body.decision_text}
     )
-    return _to_view(task, repository.list_executions(db, task.id))
+    view = _to_view(task, repository.list_executions(db, task.id))
+    if assessment.blocked_slot is not None:
+        view.revise_notice = revise_blocked_notice(assessment.blocked_slot)
+    return view
 
 
 @router.get("", response_model=list[TaskView])

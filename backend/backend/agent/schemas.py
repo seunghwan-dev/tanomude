@@ -89,6 +89,7 @@ class TaskView(BaseModel):
     created_at: dt.datetime
     updated_at: dt.datetime
     executions: list[ExecutionView]
+    revise_notice: str | None = None
 
 
 class PlanView(BaseModel):

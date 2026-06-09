@@ -42,6 +42,7 @@ export default function App() {
   const [decided, setDecided] = useState<"approved" | "rejected" | null>(null);
   const [decisionError, setDecisionError] = useState<string | null>(null);
   const [liveStatus, setLiveStatus] = useState<string | null>(null);
+  const [reviseNotice, setReviseNotice] = useState<string | null>(null);
   const [muted, setMuted] = useState(false);
 
   const nonce = useMemo(() => sessionNonce(), []);
@@ -124,6 +125,7 @@ export default function App() {
       setDecided(null);
       setDecisionError(null);
       setLiveStatus(null);
+      setReviseNotice(null);
       return data;
     } catch (err) {
       setError(err instanceof Error ? err.message : "不明なエラーが発生しました");
@@ -195,10 +197,17 @@ export default function App() {
     }
     setPending("revise");
     setDecisionError(null);
+    setReviseNotice(null);
+    let detail: TaskDetail;
     try {
-      await reviseTask(result.task.id, { approver: APPROVER, decision_text: text });
+      detail = await reviseTask(result.task.id, { approver: APPROVER, decision_text: text });
     } catch (err) {
       setDecisionError(err instanceof Error ? err.message : "修正の送信に失敗しました");
+      setPending(null);
+      return;
+    }
+    if (detail.revise_notice) {
+      setReviseNotice(detail.revise_notice);
       setPending(null);
       return;
     }
@@ -273,6 +282,11 @@ export default function App() {
 
       {result ? (
         <>
+          {reviseNotice ? (
+            <div className="mb-4 rounded-lg border border-seal/40 bg-seal-wash/50 px-4 py-3 text-sm text-seal-deep">
+              {reviseNotice}
+            </div>
+          ) : null}
           <ApprovalCard
             key={`card-${result.task.id}`}
             result={result}

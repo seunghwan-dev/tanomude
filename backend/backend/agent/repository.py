@@ -141,9 +141,12 @@ def record_reject(db: Session, task: Task, plan_id: int, approver: str, decision
     db.refresh(task)
 
 
-def record_revise(db: Session, task: Task, plan_id: int, approver: str, decision_text: str | None) -> None:
+def record_revise(
+    db: Session, task: Task, plan_id: int, approver: str, decision_text: str | None, persist: bool = True
+) -> None:
     _stage_decision(db, task, plan_id, "revise", approver, decision_text)
-    _stage_correction_from_decision(db, task, "human_revise", approver, decision_text)
+    if persist:
+        _stage_correction_from_decision(db, task, "human_revise", approver, decision_text)
     db.commit()
     db.refresh(task)
 

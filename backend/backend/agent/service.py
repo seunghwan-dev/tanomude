@@ -6,17 +6,21 @@ from pydantic import BaseModel
 from adapter.mock_adapter import MockAdapter
 from backend.config import settings
 from backend.coreloop import ExecutionOutcome, StepObserver, execute, plan, run_task
-from backend.corrections import apply_corrections
+from backend.corrections import OVERRIDE_HEADER, RAG_HEADER, apply_corrections
 from backend.db import SessionLocal
 from backend.retrieval import RetrievedChunk, hybrid_search
 from backend.slotfill import (
+    REVISE_MARKER,
     FilledKeysequence,
     Refusal,
     RequestInput,
+    ReviseAssessment,
     SlotParseError,
+    base_instruction,
     extract_slots,
     ground,
     immune_extractor,
+    revise_assessment,
 )
 
 
@@ -29,6 +33,7 @@ ExecuteRunner = Callable[[RequestInput, FilledKeysequence, StepObserver | None],
 PlanRunner = Callable[
     [RequestInput], tuple[FilledKeysequence | Refusal | ParseFailure, list[RetrievedChunk]]
 ]
+ReviseAssessor = Callable[[RequestInput, str], ReviseAssessment]
 
 _ROLLUP = {
     "submitted": "submitted",
@@ -87,3 +92,19 @@ def _production_plan_runner(
 
 def get_plan_runner() -> PlanRunner:
     return _production_plan_runner
+
+
+def _production_revise_assessor(request: RequestInput, decision_text: str) -> ReviseAssessment:
+    base = base_instruction(request.instruction)
+    amended = f"{base}\n\n{REVISE_MARKER}{decision_text}"
+    with SessionLocal() as db:
+        grounds = hybrid_search(db, amended)
+        rag_context = "\n\n".join(chunk.text for chunk in grounds)
+    corrected_context = f"{OVERRIDE_HEADER}\n{decision_text}\n{RAG_HEADER}\n{rag_context}"
+    grounded = extract_slots(request.model_copy(update={"instruction": base}), rag_context)
+    corrected = extract_slots(request.model_copy(update={"instruction": amended}), corrected_context)
+    return revise_assessment(grounded, corrected, base)
+
+
+def get_revise_assessor() -> ReviseAssessor:
+    return _production_revise_assessor
