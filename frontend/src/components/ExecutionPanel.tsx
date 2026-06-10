@@ -1,8 +1,4 @@
-import { useEffect, useRef, useState } from "react";
-
-import type { TaskStep } from "../api";
-import { useAgentStream } from "../hooks/useAgentStream";
-import { voiceOutcome } from "../lib/voice";
+import type { Replay } from "../hooks/useReplay";
 import Inspector from "./Inspector";
 import Timeline from "./Timeline";
 
@@ -16,81 +12,9 @@ const STATUS_LABELS: Record<string, string> = {
   errored: "エラー",
 };
 
-function stepKey(step: TaskStep): string {
-  return `${step.execution_id}:${step.ordinal}`;
-}
-
-export default function ExecutionPanel({ taskId, initialStatus }: { taskId: number; initialStatus: string }) {
-  const { steps, taskStatus, execution, connected } = useAgentStream(taskId, initialStatus);
-  const [cursor, setCursor] = useState(0);
-  const [playing, setPlaying] = useState(false);
-  const [pinned, setPinned] = useState(false);
-  const lengthRef = useRef(0);
-  lengthRef.current = steps.length;
-
-  useEffect(() => {
-    if (!execution?.finished) {
-      return;
-    }
-    voiceOutcome(taskId, execution.tripId, execution.badData);
-  }, [taskId, execution]);
-
-  useEffect(() => {
-    setCursor((current) => Math.min(current, Math.max(steps.length - 1, 0)));
-  }, [steps.length]);
-
-  useEffect(() => {
-    if (!playing && !pinned && steps.length > 0) {
-      setCursor(steps.length - 1);
-    }
-  }, [steps.length, playing, pinned]);
-
-  useEffect(() => {
-    if (!playing) {
-      return;
-    }
-    const id = window.setInterval(() => {
-      setCursor((current) => (current >= lengthRef.current - 1 ? current : current + 1));
-    }, 700);
-    return () => window.clearInterval(id);
-  }, [playing]);
-
-  useEffect(() => {
-    if (playing && steps.length > 0 && cursor >= steps.length - 1) {
-      setPlaying(false);
-      setPinned(true);
-    }
-  }, [playing, cursor, steps.length]);
-
-  const safeCursor = Math.min(cursor, Math.max(steps.length - 1, 0));
-  const selected = steps[safeCursor] ?? null;
-  const activeKey = selected ? stepKey(selected) : null;
-
-  function onSelect(step: TaskStep) {
-    setPlaying(false);
-    setPinned(true);
-    const index = steps.findIndex((entry) => stepKey(entry) === stepKey(step));
-    if (index >= 0) {
-      setCursor(index);
-    }
-  }
-
-  function onPlay() {
-    if (steps.length === 0) {
-      return;
-    }
-    setPinned(false);
-    if (cursor >= steps.length - 1) {
-      setCursor(0);
-    }
-    setPlaying(true);
-  }
-
-  function onLive() {
-    setPlaying(false);
-    setPinned(false);
-    setCursor(Math.max(steps.length - 1, 0));
-  }
+export default function ExecutionPanel({ replay }: { replay: Replay }) {
+  const { steps, taskStatus, execution, connected, selected, activeKey, cursor, playing, play, stop, live, select } =
+    replay;
 
   return (
     <section className="mt-6 overflow-hidden rounded-card border border-line bg-paper-panel shadow-card">
@@ -123,7 +47,7 @@ export default function ExecutionPanel({ taskId, initialStatus }: { taskId: numb
           {playing ? (
             <button
               type="button"
-              onClick={() => setPlaying(false)}
+              onClick={stop}
               className="rounded-md border border-line bg-paper px-3 py-1.5 text-xs font-semibold text-ink hover:bg-paper-sunk"
             >
               停止
@@ -131,7 +55,7 @@ export default function ExecutionPanel({ taskId, initialStatus }: { taskId: numb
           ) : (
             <button
               type="button"
-              onClick={onPlay}
+              onClick={play}
               disabled={steps.length === 0}
               className="rounded-md border border-line bg-paper px-3 py-1.5 text-xs font-semibold text-ink hover:bg-paper-sunk disabled:opacity-40"
             >
@@ -140,14 +64,14 @@ export default function ExecutionPanel({ taskId, initialStatus }: { taskId: numb
           )}
           <button
             type="button"
-            onClick={onLive}
+            onClick={live}
             disabled={steps.length === 0}
             className="rounded-md px-3 py-1.5 text-xs font-medium text-ink-faint hover:bg-paper-sunk hover:text-ink disabled:opacity-40"
           >
             ライブ
           </button>
           <span className="ml-1 font-mono text-[11px] text-ink-faint">
-            {steps.length === 0 ? "0/0" : `${safeCursor + 1}/${steps.length}`}
+            {steps.length === 0 ? "0/0" : `${cursor + 1}/${steps.length}`}
           </span>
         </div>
       </header>
@@ -176,7 +100,7 @@ export default function ExecutionPanel({ taskId, initialStatus }: { taskId: numb
 
       <div className="grid gap-4 p-5 md:grid-cols-12">
         <div className="max-h-[24rem] overflow-y-auto md:col-span-5">
-          <Timeline steps={steps} activeKey={activeKey} onSelect={onSelect} />
+          <Timeline steps={steps} activeKey={activeKey} onSelect={select} />
         </div>
         <div className="rounded-lg border border-line/70 bg-paper p-4 md:col-span-7">
           <Inspector step={selected} />

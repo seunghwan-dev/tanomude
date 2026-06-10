@@ -1,0 +1,226 @@
+.as400-root {
+  --bg: #050806;
+  --grn: #34d06a;
+  --grn-dim: #1f7d49;
+  --white: #eafff2;
+  --blu: #5566ff;
+  font-family: "JetBrains Mono", ui-monospace, "SFMono-Regular", "Noto Sans JP", "MS Gothic", monospace;
+}
+
+.as400-screen {
+  position: relative;
+  overflow: hidden;
+  background: var(--bg);
+  border: 1px solid #103324;
+  padding: 14px 16px;
+  min-height: 384px;
+  color: var(--grn);
+  font-size: 13px;
+  line-height: 1.22;
+}
+
+.as400-body {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.as400-line {
+  white-space: pre;
+}
+
+.as400-title {
+  color: var(--white);
+  text-align: center;
+  font-weight: 500;
+}
+
+.as400-ident {
+  color: var(--blu);
+}
+
+.as400-dim {
+  color: var(--grn-dim);
+}
+
+.as400-hi {
+  color: var(--white);
+}
+
+.as400-rule {
+  color: var(--grn-dim);
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.as400-rev {
+  background: var(--white);
+  color: var(--bg);
+  padding: 0 3px;
+}
+
+.as400-hdr {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.as400-sysblock {
+  text-align: right;
+  color: var(--blu);
+  font-size: 11px;
+  line-height: 1.3;
+  white-space: pre;
+}
+
+.as400-row {
+  display: flex;
+  align-items: baseline;
+  gap: 0.4em;
+}
+
+.as400-lbl {
+  flex: 0 0 8.5em;
+  white-space: nowrap;
+}
+
+.as400-lead {
+  flex: 1 1 auto;
+  align-self: stretch;
+  min-width: 1.5em;
+  background-image: radial-gradient(currentColor 0.9px, transparent 0.9px);
+  background-size: 0.6em 0.6em;
+  background-position: 0 0.82em;
+  background-repeat: repeat-x;
+  color: var(--grn-dim);
+}
+
+.as400-sep {
+  color: var(--grn);
+  white-space: pre;
+}
+
+.as400-field {
+  flex: 0 0 auto;
+  border-bottom: 1px solid var(--grn-dim);
+  padding: 0 1px;
+  white-space: pre;
+  color: var(--white);
+}
+
+.as400-field.as400-code {
+  background: rgba(52, 208, 106, 0.1);
+}
+
+.as400-hint {
+  flex: 0 0 auto;
+  margin-left: 0.4em;
+  color: var(--grn-dim);
+}
+
+.as400-cursor {
+  display: inline-block;
+  width: 0.6ch;
+  height: 1.02em;
+  vertical-align: -2px;
+  background: var(--white);
+  animation: as400-blink 1.05s steps(1) infinite;
+}
+
+@keyframes as400-blink {
+  50% {
+    opacity: 0;
+  }
+}
+
+.as400-fkeys {
+  color: var(--grn-dim);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4em 1.1em;
+}
+
+.as400-fkey.as400-hot {
+  background: var(--white);
+  color: var(--bg);
+  padding: 0 2px;
+}
+
+.as400-statusln {
+  display: flex;
+  align-items: center;
+  gap: 1.1em;
+  color: var(--blu);
+  border-top: 1px solid #103324;
+  padding-top: 4px;
+}
+
+.as400-statusblock {
+  display: inline-block;
+  width: 1.1ch;
+  height: 1em;
+  vertical-align: -2px;
+  background: var(--grn-dim);
+}
+
+.as400-statusblock.as400-on {
+  background: var(--blu);
+}
+
+.as400-lookup {
+  position: absolute;
+  right: 14px;
+  top: 70px;
+  z-index: 4;
+  min-width: 208px;
+  background: #04150c;
+  border: 1px solid var(--grn-dim);
+  padding: 8px 10px;
+  color: var(--grn);
+}
+
+.as400-lookup-title {
+  color: var(--blu);
+  border-bottom: 1px solid var(--grn-dim);
+  padding-bottom: 4px;
+  margin-bottom: 5px;
+}
+
+.as400-lookup-item {
+  white-space: pre;
+}
+
+.as400-lookup-item.as400-sel {
+  background: var(--white);
+  color: var(--bg);
+  padding: 0 4px;
+}
+
+.as400-outcome {
+  margin-top: 8px;
+  padding: 9px 11px;
+  border: 1px solid var(--grn-dim);
+  background: #04150c;
+  color: var(--grn);
+}
+
+.as400-outcome b {
+  color: var(--white);
+}
+
+.as400-outcome .as400-vchk {
+  color: var(--grn);
+}
+
+.as400-spacer {
+  flex: 1 1 auto;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .as400-cursor {
+    animation: none;
+  }
+}

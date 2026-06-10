@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { getTask, type Envelope, type TaskStep } from "../api";
 
 export interface ExecutionState {
+  taskId: number;
   status: string;
   tripId: number | null;
   badData: boolean;
@@ -61,6 +62,7 @@ export function useAgentStream(taskId: number | null, initialStatus: string | nu
         const last = detail.executions[detail.executions.length - 1];
         if (last && FINAL_STATUSES.includes(last.status)) {
           setExecution({
+            taskId: activeId,
             status: last.status,
             tripId: last.trip_id,
             badData: last.correction_candidate?.bad_data ?? false,
