@@ -3,10 +3,12 @@ import type { Step, TaskStep } from "../api";
 function actionToken(action: Step) {
   if (action.type === "field") {
     return (
-      <span className="font-mono text-[11px]">
-        <span className="text-ink-faint">{action.target}</span>
-        <span className="text-ink-faint"> ← </span>
-        <span className="rounded bg-ink/90 px-1.5 py-0.5 text-phosphor-glow">{action.value || "∅"}</span>
+      <span className="flex items-baseline gap-1 font-mono text-[11px]">
+        <span className="shrink-0 text-ink-faint">{action.target}</span>
+        <span className="shrink-0 text-ink-faint">←</span>
+        <span className="max-w-[6.5rem] truncate rounded bg-ink/90 px-1.5 py-0.5 text-phosphor-glow">
+          {action.value || "∅"}
+        </span>
       </span>
     );
   }
@@ -40,7 +42,7 @@ export default function Timeline({
             <button
               type="button"
               onClick={() => onSelect(step)}
-              className={`flex w-full items-center gap-2.5 rounded-md border px-2.5 py-2 text-left transition-colors ${
+              className={`flex w-full items-center gap-2 rounded-md border px-2.5 py-2 text-left transition-colors ${
                 active
                   ? "border-ink bg-paper"
                   : error
@@ -48,10 +50,12 @@ export default function Timeline({
                     : "border-line/70 bg-paper-panel hover:bg-paper-sunk"
               }`}
             >
-              <span className="font-mono text-[11px] text-ink-faint">{step.ordinal.toString().padStart(2, "0")}</span>
+              <span className="shrink-0 font-mono text-[11px] text-ink-faint">
+                {step.ordinal.toString().padStart(2, "0")}
+              </span>
               <span className={`h-2 w-2 shrink-0 rounded-full ${error ? "bg-seal" : "bg-phosphor"}`} />
-              <span className="w-32 shrink-0 truncate text-xs font-medium text-ink">{step.intent}</span>
-              <span className="ml-auto">{actionToken(step.action)}</span>
+              <span className="min-w-0 flex-1 truncate text-xs font-medium text-ink">{step.intent}</span>
+              <span className="shrink-0">{actionToken(step.action)}</span>
             </button>
           </li>
         );

@@ -3,9 +3,11 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { approveTask, DecisionError, getTask, getTaskPlan, planTask, rejectTask, reviseTask, type PlanRequest, type TaskDetail, type TaskPlan } from "./api";
 import type { DecisionKind } from "./components/ActionBar";
 import ApprovalCard from "./components/ApprovalCard";
+import As400Screen from "./components/As400Screen";
 import ExecutionPanel from "./components/ExecutionPanel";
+import { useReplay } from "./hooks/useReplay";
 import { planDedupKey, sessionNonce } from "./lib/dedup";
-import { isVoiceSupported, setVoiceMuted, voicePlanReady, voicePlanRefused, voicePlanUnreadable } from "./lib/voice";
+import { isVoiceSupported, setVoiceMuted, voiceOutcome, voicePlanReady, voicePlanRefused, voicePlanUnreadable } from "./lib/voice";
 
 const APPROVER = "operator";
 
@@ -99,6 +101,20 @@ export default function App() {
       voicePlanUnreadable(taskId);
     }
   }, [result]);
+
+  const showPanel = Boolean(result?.plan) && decided !== "rejected";
+  const replaySource = showPanel ? result?.task ?? null : restored;
+  const panelTaskId = replaySource ? replaySource.id : null;
+  const panelInitialStatus = replaySource?.status ?? "";
+  const replay = useReplay(panelTaskId, panelInitialStatus);
+
+  useEffect(() => {
+    const exec = replay.execution;
+    if (!exec?.finished || exec.taskId !== panelTaskId) {
+      return;
+    }
+    voiceOutcome(exec.taskId, exec.tripId, exec.badData);
+  }, [panelTaskId, replay.execution]);
 
   function toggleMute() {
     const next = !muted;
@@ -222,99 +238,104 @@ export default function App() {
   }
 
   const cardStatus = liveStatus ?? result?.task.status ?? "";
-  const showPanel = Boolean(result?.plan) && decided !== "rejected";
 
   return (
-    <div className="mx-auto max-w-3xl px-5 py-10">
-      <header className="mb-8 flex items-end justify-between">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight text-ink">
-            tanomude<span className="text-seal">.</span>
-          </h1>
-          <p className="text-sm text-ink-faint">基幹系オペレーション 承認コンソール</p>
-        </div>
-        <div className="flex items-center gap-3">
-          {voiceSupported ? (
-            <button
-              type="button"
-              onClick={toggleMute}
-              aria-pressed={muted}
-              className="flex items-center gap-1.5 rounded-md border border-line bg-paper px-2.5 py-1 font-mono text-[11px] text-ink-faint transition-colors hover:bg-paper-sunk hover:text-ink"
-            >
-              <span className={`h-1.5 w-1.5 rounded-full ${muted ? "bg-ink-faint" : "bg-phosphor"}`} />
-              {muted ? "音声 OFF" : "音声 ON"}
-            </button>
-          ) : null}
-          <div className="flex items-center gap-2 font-mono text-[11px] text-ink-faint">
-            <span className="h-2 w-2 rounded-full bg-phosphor" />
-            AS-400 / 出張申請
-          </div>
-        </div>
-      </header>
+    <div className="mx-auto max-w-6xl px-5 py-10">
+      <div className="flex flex-col gap-6 lg:flex-row lg:items-start">
+        <aside className="lg:sticky lg:top-6 lg:w-[38%] lg:flex-none">
+          <As400Screen steps={replay.steps} cursor={replay.cursor} tripId={replay.execution?.tripId ?? null} fast={replay.fast} />
+        </aside>
 
-      <form onSubmit={onSubmit} className="mb-8 rounded-card border border-line bg-paper-panel p-5 shadow-card">
-        <label className="mb-4 block">
-          <span className="mb-1 block text-xs font-semibold text-ink-soft">指示</span>
-          <textarea
-            value={instruction}
-            onChange={(event) => setInstruction(event.target.value)}
-            rows={2}
-            className="w-full resize-none rounded-lg border border-line bg-paper-panel px-3 py-2 text-sm text-ink focus:border-ink-soft focus:outline-none"
-          />
-        </label>
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-          <TextField label="出張先" value={dest} onChange={setDest} />
-          <TextField label="出発日" value={deptDate} onChange={setDeptDate} mono />
-          <TextField label="帰着日" value={retDate} onChange={setRetDate} mono />
-          <TextField label="案件コード" value={projHint} onChange={setProjHint} mono />
-        </div>
-        <div className="mt-4 flex items-center gap-3">
-          <button
-            type="submit"
-            disabled={loading || pending !== null}
-            className="rounded-lg bg-ink px-5 py-2.5 text-sm font-semibold text-paper-panel transition-colors hover:bg-ink-soft disabled:opacity-50"
-          >
-            {loading ? "生成中…" : "計画を生成"}
-          </button>
-          {error ? <span className="text-sm text-seal-deep">{error}</span> : null}
-        </div>
-      </form>
-
-      {result ? (
-        <>
-          {reviseNotice ? (
-            <div className="mb-4 rounded-lg border border-seal/40 bg-seal-wash/50 px-4 py-3 text-sm text-seal-deep">
-              {reviseNotice}
+        <main className="min-w-0 flex-1">
+          <header className="mb-8 flex items-end justify-between">
+            <div>
+              <h1 className="text-2xl font-bold tracking-tight text-ink">
+                tanomude<span className="text-seal">.</span>
+              </h1>
+              <p className="text-sm text-ink-faint">基幹系オペレーション 承認コンソール</p>
             </div>
-          ) : null}
-          <ApprovalCard
-            key={`card-${result.task.id}`}
-            result={result}
-            status={cardStatus}
-            pending={pending}
-            decided={decided}
-            error={decisionError}
-            onApprove={onApprove}
-            onRevise={onRevise}
-            onReject={onReject}
-          />
-          {showPanel ? (
-            <ExecutionPanel key={`panel-${result.task.id}`} taskId={result.task.id} initialStatus={result.task.status} />
-          ) : null}
-        </>
-      ) : restored ? (
-        <div>
-          <div className="mb-3 flex items-center gap-2 font-mono text-[11px] text-ink-faint">
-            <span className="h-2 w-2 rounded-full bg-phosphor" />
-            復元したタスク · task #{restored.id}
-          </div>
-          <ExecutionPanel key={`panel-${restored.id}`} taskId={restored.id} initialStatus={restored.status} />
-        </div>
-      ) : (
-        <div className="rounded-card border border-dashed border-line bg-paper-panel/50 px-5 py-16 text-center text-sm text-ink-faint">
-          指示を入力し「計画を生成」を押すと、承認カードが表示されます。
-        </div>
-      )}
+            <div className="flex items-center gap-3">
+              {voiceSupported ? (
+                <button
+                  type="button"
+                  onClick={toggleMute}
+                  aria-pressed={muted}
+                  className="flex items-center gap-1.5 rounded-md border border-line bg-paper px-2.5 py-1 font-mono text-[11px] text-ink-faint transition-colors hover:bg-paper-sunk hover:text-ink"
+                >
+                  <span className={`h-1.5 w-1.5 rounded-full ${muted ? "bg-ink-faint" : "bg-phosphor"}`} />
+                  {muted ? "音声 OFF" : "音声 ON"}
+                </button>
+              ) : null}
+              <div className="flex items-center gap-2 font-mono text-[11px] text-ink-faint">
+                <span className="h-2 w-2 rounded-full bg-phosphor" />
+                AS-400 / 出張申請
+              </div>
+            </div>
+          </header>
+
+          <form onSubmit={onSubmit} className="mb-8 rounded-card border border-line bg-paper-panel p-5 shadow-card">
+            <label className="mb-4 block">
+              <span className="mb-1 block text-xs font-semibold text-ink-soft">指示</span>
+              <textarea
+                value={instruction}
+                onChange={(event) => setInstruction(event.target.value)}
+                rows={2}
+                className="w-full resize-none rounded-lg border border-line bg-paper-panel px-3 py-2 text-sm text-ink focus:border-ink-soft focus:outline-none"
+              />
+            </label>
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+              <TextField label="出張先" value={dest} onChange={setDest} />
+              <TextField label="出発日" value={deptDate} onChange={setDeptDate} mono />
+              <TextField label="帰着日" value={retDate} onChange={setRetDate} mono />
+              <TextField label="案件コード" value={projHint} onChange={setProjHint} mono />
+            </div>
+            <div className="mt-4 flex items-center gap-3">
+              <button
+                type="submit"
+                disabled={loading || pending !== null}
+                className="rounded-lg bg-ink px-5 py-2.5 text-sm font-semibold text-paper-panel transition-colors hover:bg-ink-soft disabled:opacity-50"
+              >
+                {loading ? "生成中…" : "計画を生成"}
+              </button>
+              {error ? <span className="text-sm text-seal-deep">{error}</span> : null}
+            </div>
+          </form>
+
+          {result ? (
+            <>
+              {reviseNotice ? (
+                <div className="mb-4 rounded-lg border border-seal/40 bg-seal-wash/50 px-4 py-3 text-sm text-seal-deep">
+                  {reviseNotice}
+                </div>
+              ) : null}
+              <ApprovalCard
+                key={`card-${result.task.id}`}
+                result={result}
+                status={cardStatus}
+                pending={pending}
+                decided={decided}
+                error={decisionError}
+                onApprove={onApprove}
+                onRevise={onRevise}
+                onReject={onReject}
+              />
+              {showPanel ? <ExecutionPanel replay={replay} /> : null}
+            </>
+          ) : restored ? (
+            <div>
+              <div className="mb-3 flex items-center gap-2 font-mono text-[11px] text-ink-faint">
+                <span className="h-2 w-2 rounded-full bg-phosphor" />
+                復元したタスク · task #{restored.id}
+              </div>
+              <ExecutionPanel replay={replay} />
+            </div>
+          ) : (
+            <div className="rounded-card border border-dashed border-line bg-paper-panel/50 px-5 py-16 text-center text-sm text-ink-faint">
+              指示を入力し「計画を生成」を押すと、承認カードが表示されます。
+            </div>
+          )}
+        </main>
+      </div>
     </div>
   );
 }
