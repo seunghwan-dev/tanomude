@@ -8,7 +8,7 @@ A human-in-the-loop AI agent that operates legacy enterprise systems through nat
 
 A no-backend, hand-authored interactive mock of the approval console — **not a live LLM**. Walk the whole flow (instruction → plan → approve / revise / reject → green-screen replay) right in the browser:
 
-**▶ Open the live mock: https://seunghwan-dev.github.io/tanomude/**
+**▶ [Open the live mock](https://seunghwan-dev.github.io/tanomude/)**
 
 > **Demo video — coming soon**
 
