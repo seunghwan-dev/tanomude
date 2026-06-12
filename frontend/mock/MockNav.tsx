@@ -1,9 +1,9 @@
 import type { CSSProperties } from "react";
 
 const bar: CSSProperties = {
-  background: "#FFFFFF",
-  borderBottom: "1px solid #E2E6EC",
-  fontFamily: '"Noto Sans JP", "Segoe UI", system-ui, sans-serif',
+  background: "#FBFAF6",
+  borderBottom: "1px solid #D9D2C3",
+  fontFamily: '"Inter", "Noto Sans JP", system-ui, sans-serif',
 };
 
 const inner: CSSProperties = {
@@ -19,12 +19,12 @@ const inner: CSSProperties = {
 const brand: CSSProperties = {
   fontWeight: 700,
   fontSize: "15px",
-  color: "#1A2230",
+  color: "#1C1A17",
   textDecoration: "none",
 };
 
 const link: CSSProperties = {
-  color: "#5A6678",
+  color: "#4A463F",
   textDecoration: "none",
   fontSize: "13px",
 };
@@ -42,14 +42,14 @@ export function MockNav() {
         <a style={brand} href="../">
           Tanomude
         </a>
+        <a style={current} href="./">
+          インタラクティブモック
+        </a>
         <a style={link} href="../status/">
           実装状況
         </a>
         <a style={link} href="../operations/">
           設計と技術選定
-        </a>
-        <a style={current} href="./">
-          インタラクティブモック
         </a>
       </div>
     </nav>

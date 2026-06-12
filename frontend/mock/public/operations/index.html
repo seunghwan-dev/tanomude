@@ -6,14 +6,14 @@
 <link rel="icon" type="image/svg+xml" href="../favicon.svg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Noto+Sans+JP:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../shared.css">
-<title>Tanomude — design &amp; technology choices</title>
+<title>Tanomude — 設計と技術選定</title>
 <style>
   :root{
-    --warn:#92600E; --warn-bg:#FFF8E8; --warn-line:#E7CF94;
-    --built:#1C7A45; --built-bg:#E7F4EC;
-    --design:#475569; --design-bg:#EEF1F5;
+    --warn:#92400E; --warn-bg:#FBEEDC; --warn-line:#E7C9A0;
+    --built:#1C7A45; --built-bg:#E4EDE0;
+    --design:#4A463F; --design-bg:#ECE6D8;
   }
   .wrap{max-width:1040px;margin:0 auto;padding:0 22px;}
   header.page{padding:40px 0 4px;}
@@ -27,7 +27,7 @@
   .src code{font-size:.74rem;}
   p{margin:10px 0;}
   .note{font-size:.9rem;color:var(--soft);max-width:78ch;}
-  code{font-family:"Cascadia Code",Consolas,monospace;font-size:.86em;
+  code{font-family:"JetBrains Mono",Consolas,monospace;font-size:.86em;
     background:var(--sunk);padding:1px 5px;border-radius:4px;}
   table.dec{width:100%;border-collapse:collapse;background:var(--panel);
     border:1px solid var(--line);border-radius:10px;overflow:hidden;margin:12px 0;font-size:13.5px;}
@@ -82,9 +82,9 @@
 
 <nav class="nav"><div class="nav-inner">
   <a class="brand" href="../">Tanomude</a>
+  <a class="nav-link" href="../mock/"><span class="en">Interactive mock</span><span class="ja" lang="ja">インタラクティブモック</span></a>
   <a class="nav-link" href="../status/"><span class="en">Status &amp; roadmap</span><span class="ja" lang="ja">実装状況</span></a>
   <a class="nav-link current" href="./"><span class="en">Design &amp; technology choices</span><span class="ja" lang="ja">設計と技術選定</span></a>
-  <a class="nav-link" href="../mock/"><span class="en">Interactive mock</span><span class="ja" lang="ja">インタラクティブモック</span></a>
   <div class="lang">
     <button class="lang-btn" type="button" data-lang="en">English</button>
     <button class="lang-btn" type="button" data-lang="ja">日本語</button>
@@ -154,109 +154,109 @@
     <svg id="loopdiagram" viewBox="0 0 940 470" role="img" aria-label="Core loop: code guards refuse before the LLM, the model fills slots, code assembles keys; after human approval the adapter session opens with an idempotency key, every step is driven and asserted, mismatches replan up to twice then roll back, bad input goes to a person">
       <defs>
         <marker id="ah" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto">
-          <path d="M0,0 L9,4.5 L0,9 Z" fill="#8A94A6"/>
+          <path d="M0,0 L9,4.5 L0,9 Z" fill="#8A8479"/>
         </marker>
         <marker id="aha" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto">
-          <path d="M0,0 L9,4.5 L0,9 Z" fill="#B7791F"/>
+          <path d="M0,0 L9,4.5 L0,9 Z" fill="#B45309"/>
         </marker>
       </defs>
-      <g font-family="'Noto Sans JP','Segoe UI',sans-serif">
-        <text class="en" x="16" y="32" font-size="11" font-weight="700" fill="#8A94A6" letter-spacing="2">PLAN — fill()</text>
-        <text class="ja" x="16" y="32" font-size="11" font-weight="700" fill="#8A94A6" letter-spacing="2">計画 — fill()</text>
+      <g font-family="'Inter','Noto Sans JP',sans-serif">
+        <text class="en" x="16" y="32" font-size="11" font-weight="700" fill="#8A8479" letter-spacing="2">PLAN — fill()</text>
+        <text class="ja" x="16" y="32" font-size="11" font-weight="700" fill="#8A8479" letter-spacing="2">計画 — fill()</text>
         <g>
-          <rect x="16" y="44" width="250" height="96" rx="10" fill="#FFFFFF" stroke="#C9D2DD" stroke-width="1.4"/>
-          <text x="141" y="68" text-anchor="middle" font-weight="700" font-size="13.5" fill="#1A2230"><tspan class="en">code: deterministic guards</tspan><tspan class="ja">コード：決定論ガード</tspan></text>
-          <text class="en" x="141" y="88" text-anchor="middle" font-size="10" fill="#5A6678">domain cue · required fields</text>
-          <text class="ja" x="141" y="88" text-anchor="middle" font-size="10" fill="#5A6678">ドメイン語・必須項目</text>
-          <text class="en" x="141" y="104" text-anchor="middle" font-size="10" fill="#5A6678">date format · extraction presence</text>
-          <text class="ja" x="141" y="104" text-anchor="middle" font-size="10" fill="#5A6678">日付形式・抽出値の有無</text>
-          <text class="en" x="141" y="124" text-anchor="middle" font-size="9.5" fill="#92600E">each failure → schema-typed refusal</text>
-          <text class="ja" x="141" y="124" text-anchor="middle" font-size="9.5" fill="#92600E">失敗はスキーマ型の却下に</text>
+          <rect x="16" y="44" width="250" height="96" rx="10" fill="#FBFAF6" stroke="#D9D2C3" stroke-width="1.4"/>
+          <text x="141" y="68" text-anchor="middle" font-weight="700" font-size="13.5" fill="#1C1A17"><tspan class="en">code: deterministic guards</tspan><tspan class="ja">コード：決定論ガード</tspan></text>
+          <text class="en" x="141" y="88" text-anchor="middle" font-size="10" fill="#4A463F">domain cue · required fields</text>
+          <text class="ja" x="141" y="88" text-anchor="middle" font-size="10" fill="#4A463F">ドメイン語・必須項目</text>
+          <text class="en" x="141" y="104" text-anchor="middle" font-size="10" fill="#4A463F">date format · extraction presence</text>
+          <text class="ja" x="141" y="104" text-anchor="middle" font-size="10" fill="#4A463F">日付形式・抽出値の有無</text>
+          <text class="en" x="141" y="124" text-anchor="middle" font-size="9.5" fill="#92400E">each failure → schema-typed refusal</text>
+          <text class="ja" x="141" y="124" text-anchor="middle" font-size="9.5" fill="#92400E">失敗はスキーマ型の却下に</text>
         </g>
         <g>
-          <rect x="312" y="44" width="280" height="96" rx="10" fill="#EDF0F4" stroke="#C9D2DD" stroke-width="1.4"/>
-          <text x="452" y="68" text-anchor="middle" font-weight="700" font-size="13.5" fill="#1A2230"><tspan class="en">LLM: slot extraction only</tspan><tspan class="ja">LLM：スロット抽出のみ</tspan></text>
-          <text class="en" x="452" y="88" text-anchor="middle" font-size="10" fill="#5A6678">dest_code · purpose · overseas · reuse_prev_proj</text>
-          <text class="ja" x="452" y="88" text-anchor="middle" font-size="10" fill="#5A6678">dest_code・purpose・overseas・reuse_prev_proj</text>
-          <text class="en" x="452" y="104" text-anchor="middle" font-size="10" fill="#5A6678">JSON-forced · temp 0 · fixed seed</text>
-          <text class="ja" x="452" y="104" text-anchor="middle" font-size="10" fill="#5A6678">JSON 強制・temp 0・固定シード</text>
-          <text class="en" x="452" y="124" text-anchor="middle" font-size="9.5" fill="#5A6678">parse retry ≤2 — seed &amp; temp step each time</text>
-          <text class="ja" x="452" y="124" text-anchor="middle" font-size="9.5" fill="#5A6678">parse 再試行 ≤2 — シードと temp を毎回加算</text>
+          <rect x="312" y="44" width="280" height="96" rx="10" fill="#ECE6D8" stroke="#D9D2C3" stroke-width="1.4"/>
+          <text x="452" y="68" text-anchor="middle" font-weight="700" font-size="13.5" fill="#1C1A17"><tspan class="en">LLM: slot extraction only</tspan><tspan class="ja">LLM：スロット抽出のみ</tspan></text>
+          <text class="en" x="452" y="88" text-anchor="middle" font-size="10" fill="#4A463F">dest_code · purpose · overseas · reuse_prev_proj</text>
+          <text class="ja" x="452" y="88" text-anchor="middle" font-size="10" fill="#4A463F">dest_code・purpose・overseas・reuse_prev_proj</text>
+          <text class="en" x="452" y="104" text-anchor="middle" font-size="10" fill="#4A463F">JSON-forced · temp 0 · fixed seed</text>
+          <text class="ja" x="452" y="104" text-anchor="middle" font-size="10" fill="#4A463F">JSON 強制・temp 0・固定シード</text>
+          <text class="en" x="452" y="124" text-anchor="middle" font-size="9.5" fill="#4A463F">parse retry ≤2 — seed &amp; temp step each time</text>
+          <text class="ja" x="452" y="124" text-anchor="middle" font-size="9.5" fill="#4A463F">parse 再試行 ≤2 — シードと temp を毎回加算</text>
         </g>
         <g>
-          <rect x="638" y="44" width="286" height="96" rx="10" fill="#FFFFFF" stroke="#C9D2DD" stroke-width="1.4"/>
-          <text x="781" y="68" text-anchor="middle" font-weight="700" font-size="13.5" fill="#1A2230"><tspan class="en">code: assemble()</tspan><tspan class="ja">コード：assemble()</tspan></text>
-          <text class="en" x="781" y="88" text-anchor="middle" font-size="10" fill="#5A6678">fixed keystroke skeleton, slot values inserted</text>
-          <text class="ja" x="781" y="88" text-anchor="middle" font-size="10" fill="#5A6678">固定のキー骨格にスロット値を差し込む</text>
-          <text class="en" x="781" y="104" text-anchor="middle" font-size="10" fill="#5A6678">day count recomputed in code</text>
-          <text class="ja" x="781" y="104" text-anchor="middle" font-size="10" fill="#5A6678">日数はコードで再計算</text>
-          <text class="en" x="781" y="124" text-anchor="middle" font-size="9.5" fill="#5A6678">branches: F9 reuse / F4 picker · overseas Y</text>
-          <text class="ja" x="781" y="124" text-anchor="middle" font-size="9.5" fill="#5A6678">分岐：F9 再利用／F4 選択・海外 Y</text>
+          <rect x="638" y="44" width="286" height="96" rx="10" fill="#FBFAF6" stroke="#D9D2C3" stroke-width="1.4"/>
+          <text x="781" y="68" text-anchor="middle" font-weight="700" font-size="13.5" fill="#1C1A17"><tspan class="en">code: assemble()</tspan><tspan class="ja">コード：assemble()</tspan></text>
+          <text class="en" x="781" y="88" text-anchor="middle" font-size="10" fill="#4A463F">fixed keystroke skeleton, slot values inserted</text>
+          <text class="ja" x="781" y="88" text-anchor="middle" font-size="10" fill="#4A463F">固定のキー骨格にスロット値を差し込む</text>
+          <text class="en" x="781" y="104" text-anchor="middle" font-size="10" fill="#4A463F">day count recomputed in code</text>
+          <text class="ja" x="781" y="104" text-anchor="middle" font-size="10" fill="#4A463F">日数はコードで再計算</text>
+          <text class="en" x="781" y="124" text-anchor="middle" font-size="9.5" fill="#4A463F">branches: F9 reuse / F4 picker · overseas Y</text>
+          <text class="ja" x="781" y="124" text-anchor="middle" font-size="9.5" fill="#4A463F">分岐：F9 再利用／F4 選択・海外 Y</text>
         </g>
-        <g fill="none" stroke="#8A94A6" stroke-width="1.6" marker-end="url(#ah)">
+        <g fill="none" stroke="#8A8479" stroke-width="1.6" marker-end="url(#ah)">
           <line x1="266" y1="92" x2="306" y2="92"/>
           <line x1="592" y1="92" x2="632" y2="92"/>
         </g>
-        <path d="M141 140 C 141 168, 141 180, 141 196" fill="none" stroke="#B7791F" stroke-width="1.5" stroke-dasharray="5 4" marker-end="url(#aha)"/>
+        <path d="M141 140 C 141 168, 141 180, 141 196" fill="none" stroke="#B45309" stroke-width="1.5" stroke-dasharray="5 4" marker-end="url(#aha)"/>
         <g>
-          <rect x="56" y="200" width="170" height="44" rx="10" fill="#FFF8E8" stroke="#E7CF94" stroke-width="1.4"/>
-          <text x="141" y="219" text-anchor="middle" font-weight="700" font-size="12" fill="#92600E">却下</text>
-          <text class="en" x="141" y="235" text-anchor="middle" font-size="9.5" fill="#92600E">refused before approval</text>
-          <text class="ja" x="141" y="235" text-anchor="middle" font-size="9.5" fill="#92600E">承認の手前で却下</text>
+          <rect x="56" y="200" width="170" height="44" rx="10" fill="#FBEEDC" stroke="#E7C9A0" stroke-width="1.4"/>
+          <text x="141" y="219" text-anchor="middle" font-weight="700" font-size="12" fill="#92400E">却下</text>
+          <text class="en" x="141" y="235" text-anchor="middle" font-size="9.5" fill="#92400E">refused before approval</text>
+          <text class="ja" x="141" y="235" text-anchor="middle" font-size="9.5" fill="#92400E">承認の手前で却下</text>
         </g>
         <g>
-          <rect x="312" y="186" width="612" height="58" rx="10" fill="#E7F4EC" stroke="#1C7A45" stroke-width="2.2"/>
-          <text x="618" y="210" text-anchor="middle" font-weight="700" font-size="14" fill="#14532D"><tspan class="en">human approval — the only path to execution</tspan><tspan class="ja">人手承認 — 実行への唯一の経路</tspan></text>
+          <rect x="312" y="186" width="612" height="58" rx="10" fill="#E4EDE0" stroke="#1C7A45" stroke-width="2.2"/>
+          <text x="618" y="210" text-anchor="middle" font-weight="700" font-size="14" fill="#194D30"><tspan class="en">human approval — the only path to execution</tspan><tspan class="ja">人手承認 — 実行への唯一の経路</tspan></text>
           <text class="en" x="618" y="231" text-anchor="middle" font-size="10" fill="#1C7A45">plan stops at awaiting_approval · execute lives only in the approve endpoint · wrong-state decisions → 409</text>
           <text class="ja" x="618" y="231" text-anchor="middle" font-size="10" fill="#1C7A45">計画は awaiting_approval で停止・実行は承認エンドポイントの内側のみ・状態外の決定は 409</text>
         </g>
-        <line x1="781" y1="140" x2="781" y2="180" fill="none" stroke="#8A94A6" stroke-width="1.6" marker-end="url(#ah)"/>
-        <text class="en" x="16" y="290" font-size="11" font-weight="700" fill="#8A94A6" letter-spacing="2">EXECUTE — execute()</text>
-        <text class="ja" x="16" y="290" font-size="11" font-weight="700" fill="#8A94A6" letter-spacing="2">実行 — execute()</text>
-        <line x1="618" y1="244" x2="618" y2="298" fill="none" stroke="#8A94A6" stroke-width="1.6" marker-end="url(#ah)"/>
+        <line x1="781" y1="140" x2="781" y2="180" fill="none" stroke="#8A8479" stroke-width="1.6" marker-end="url(#ah)"/>
+        <text class="en" x="16" y="290" font-size="11" font-weight="700" fill="#8A8479" letter-spacing="2">EXECUTE — execute()</text>
+        <text class="ja" x="16" y="290" font-size="11" font-weight="700" fill="#8A8479" letter-spacing="2">実行 — execute()</text>
+        <line x1="618" y1="244" x2="618" y2="298" fill="none" stroke="#8A8479" stroke-width="1.6" marker-end="url(#ah)"/>
         <g>
-          <rect x="16" y="302" width="180" height="92" rx="10" fill="#FFFFFF" stroke="#C9D2DD" stroke-width="1.4"/>
-          <text x="106" y="328" text-anchor="middle" font-weight="700" font-size="13" fill="#1A2230"><tspan class="en">open session</tspan><tspan class="ja">セッション開始</tspan></text>
-          <text x="106" y="348" text-anchor="middle" font-size="10" fill="#5A6678">key = task:{task_id}</text>
-          <text class="en" x="106" y="366" text-anchor="middle" font-size="9.5" fill="#5A6678">duplicate submit → one trip</text>
-          <text class="ja" x="106" y="366" text-anchor="middle" font-size="9.5" fill="#5A6678">重複送信でも申請は1件</text>
-          <text class="en" x="106" y="382" text-anchor="middle" font-size="9.5" fill="#5A6678">closed in finally</text>
-          <text class="ja" x="106" y="382" text-anchor="middle" font-size="9.5" fill="#5A6678">finally で必ず close</text>
+          <rect x="16" y="302" width="180" height="92" rx="10" fill="#FBFAF6" stroke="#D9D2C3" stroke-width="1.4"/>
+          <text x="106" y="328" text-anchor="middle" font-weight="700" font-size="13" fill="#1C1A17"><tspan class="en">open session</tspan><tspan class="ja">セッション開始</tspan></text>
+          <text x="106" y="348" text-anchor="middle" font-size="10" fill="#4A463F">key = task:{task_id}</text>
+          <text class="en" x="106" y="366" text-anchor="middle" font-size="9.5" fill="#4A463F">duplicate submit → one trip</text>
+          <text class="ja" x="106" y="366" text-anchor="middle" font-size="9.5" fill="#4A463F">重複送信でも申請は1件</text>
+          <text class="en" x="106" y="382" text-anchor="middle" font-size="9.5" fill="#4A463F">closed in finally</text>
+          <text class="ja" x="106" y="382" text-anchor="middle" font-size="9.5" fill="#4A463F">finally で必ず close</text>
         </g>
         <g>
-          <rect x="242" y="302" width="300" height="92" rx="10" fill="#FFFFFF" stroke="#C9D2DD" stroke-width="1.4"/>
-          <text x="392" y="328" text-anchor="middle" font-weight="700" font-size="13" fill="#1A2230"><tspan class="en">drive, step by step</tspan><tspan class="ja">ステップ単位で駆動</tspan></text>
-          <text class="en" x="392" y="348" text-anchor="middle" font-size="10" fill="#5A6678">send_keys → wait_for_screen (poll, no sleep)</text>
-          <text class="ja" x="392" y="348" text-anchor="middle" font-size="10" fill="#5A6678">send_keys → wait_for_screen（ポーリング・sleep なし）</text>
-          <text class="en" x="392" y="366" text-anchor="middle" font-size="9.5" fill="#5A6678">every step observed → timeline + live events</text>
-          <text class="ja" x="392" y="366" text-anchor="middle" font-size="9.5" fill="#5A6678">全ステップを観測 → タイムライン＋ライブ配信</text>
-          <text class="en" x="392" y="382" text-anchor="middle" font-size="9.5" fill="#B7791F">screen error = bad input → stop, to a person</text>
-          <text class="ja" x="392" y="382" text-anchor="middle" font-size="9.5" fill="#B7791F">画面エラー＝入力不良 → 中断して人へ</text>
+          <rect x="242" y="302" width="300" height="92" rx="10" fill="#FBFAF6" stroke="#D9D2C3" stroke-width="1.4"/>
+          <text x="392" y="328" text-anchor="middle" font-weight="700" font-size="13" fill="#1C1A17"><tspan class="en">drive, step by step</tspan><tspan class="ja">ステップ単位で駆動</tspan></text>
+          <text class="en" x="392" y="348" text-anchor="middle" font-size="10" fill="#4A463F">send_keys → wait_for_screen (poll, no sleep)</text>
+          <text class="ja" x="392" y="348" text-anchor="middle" font-size="10" fill="#4A463F">send_keys → wait_for_screen（ポーリング・sleep なし）</text>
+          <text class="en" x="392" y="366" text-anchor="middle" font-size="9.5" fill="#4A463F">every step observed → timeline + live events</text>
+          <text class="ja" x="392" y="366" text-anchor="middle" font-size="9.5" fill="#4A463F">全ステップを観測 → タイムライン＋ライブ配信</text>
+          <text class="en" x="392" y="382" text-anchor="middle" font-size="9.5" fill="#B45309">screen error = bad input → stop, to a person</text>
+          <text class="ja" x="392" y="382" text-anchor="middle" font-size="9.5" fill="#B45309">画面エラー＝入力不良 → 中断して人へ</text>
         </g>
         <g>
-          <rect x="588" y="302" width="180" height="92" rx="10" fill="#FFFFFF" stroke="#C9D2DD" stroke-width="1.4"/>
-          <text x="678" y="328" text-anchor="middle" font-weight="700" font-size="13" fill="#1A2230"><tspan class="en">final assert</tspan><tspan class="ja">最終照合</tspan></text>
-          <text class="en" x="678" y="348" text-anchor="middle" font-size="10" fill="#5A6678">screen = submitted</text>
-          <text class="ja" x="678" y="348" text-anchor="middle" font-size="10" fill="#5A6678">画面 = submitted</text>
-          <text class="en" x="678" y="366" text-anchor="middle" font-size="10" fill="#5A6678">trip actually saved</text>
-          <text class="ja" x="678" y="366" text-anchor="middle" font-size="10" fill="#5A6678">申請が実際に保存済みか</text>
+          <rect x="588" y="302" width="180" height="92" rx="10" fill="#FBFAF6" stroke="#D9D2C3" stroke-width="1.4"/>
+          <text x="678" y="328" text-anchor="middle" font-weight="700" font-size="13" fill="#1C1A17"><tspan class="en">final assert</tspan><tspan class="ja">最終照合</tspan></text>
+          <text class="en" x="678" y="348" text-anchor="middle" font-size="10" fill="#4A463F">screen = submitted</text>
+          <text class="ja" x="678" y="348" text-anchor="middle" font-size="10" fill="#4A463F">画面 = submitted</text>
+          <text class="en" x="678" y="366" text-anchor="middle" font-size="10" fill="#4A463F">trip actually saved</text>
+          <text class="ja" x="678" y="366" text-anchor="middle" font-size="10" fill="#4A463F">申請が実際に保存済みか</text>
         </g>
         <g>
-          <rect x="814" y="302" width="110" height="92" rx="10" fill="#E7F4EC" stroke="#1C7A45" stroke-width="1.6"/>
-          <text x="869" y="344" text-anchor="middle" font-weight="700" font-size="13" fill="#14532D">送信済</text>
+          <rect x="814" y="302" width="110" height="92" rx="10" fill="#E4EDE0" stroke="#1C7A45" stroke-width="1.6"/>
+          <text x="869" y="344" text-anchor="middle" font-weight="700" font-size="13" fill="#194D30">送信済</text>
           <text class="en" x="869" y="364" text-anchor="middle" font-size="9.5" fill="#1C7A45">with the trip id</text>
           <text class="ja" x="869" y="364" text-anchor="middle" font-size="9.5" fill="#1C7A45">申請番号つき</text>
         </g>
-        <g fill="none" stroke="#8A94A6" stroke-width="1.6" marker-end="url(#ah)">
+        <g fill="none" stroke="#8A8479" stroke-width="1.6" marker-end="url(#ah)">
           <line x1="196" y1="348" x2="236" y2="348"/>
           <line x1="542" y1="348" x2="582" y2="348"/>
           <line x1="768" y1="348" x2="808" y2="348"/>
         </g>
-        <path d="M620 394 C 560 428, 470 428, 420 398" fill="none" stroke="#8A94A6" stroke-width="1.5" stroke-dasharray="5 4" marker-end="url(#ah)"/>
-        <text class="en" x="520" y="441" text-anchor="middle" font-size="10" fill="#5A6678">mismatch → recover (F3) and replan, at most 2 — then roll back (F3 ≤3, to a safe screen) as a correction candidate</text>
-        <text class="ja" x="520" y="441" text-anchor="middle" font-size="10" fill="#5A6678">不一致 → F3 で復帰し再計画（最大2回）。それでも駄目なら F3（≤3）で安全な画面までロールバックし、修正候補として記録</text>
-        <text class="en" x="520" y="458" text-anchor="middle" font-size="10" fill="#B7791F">bad input data never replans — it short-circuits to a person (再入力／コード確認)</text>
-        <text class="ja" x="520" y="458" text-anchor="middle" font-size="10" fill="#B7791F">入力不良は再計画せず、人へ直行します（再入力／コード確認）</text>
+        <path d="M620 394 C 560 428, 470 428, 420 398" fill="none" stroke="#8A8479" stroke-width="1.5" stroke-dasharray="5 4" marker-end="url(#ah)"/>
+        <text class="en" x="520" y="441" text-anchor="middle" font-size="10" fill="#4A463F">mismatch → recover (F3) and replan, at most 2 — then roll back (F3 ≤3, to a safe screen) as a correction candidate</text>
+        <text class="ja" x="520" y="441" text-anchor="middle" font-size="10" fill="#4A463F">不一致 → F3 で復帰し再計画（最大2回）。それでも駄目なら F3（≤3）で安全な画面までロールバックし、修正候補として記録</text>
+        <text class="en" x="520" y="458" text-anchor="middle" font-size="10" fill="#B45309">bad input data never replans — it short-circuits to a person (再入力／コード確認)</text>
+        <text class="ja" x="520" y="458" text-anchor="middle" font-size="10" fill="#B45309">入力不良は再計画せず、人へ直行します（再入力／コード確認）</text>
       </g>
     </svg>
     <div class="fig-cap"><span class="en">Control flow of <code>plan()</code> + <code>execute()</code>, with the constants the code actually uses.</span><span class="ja" lang="ja"><code>plan()</code> と <code>execute()</code> の制御フロー。定数はコードが実際に使う値。</span></div>
@@ -278,102 +278,102 @@
     <svg id="ragdiagram" viewBox="0 0 940 430" role="img" aria-label="RAG pipeline: the manual is chunked by heading structure, embedded with e5 passage prefixes into pgvector plus full-text; a query is embedded, both channels return top-20, RRF fuses with k 60, top-5 becomes the grounding context, personal corrections are layered above it with an override header">
       <defs>
         <marker id="ah2" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto">
-          <path d="M0,0 L9,4.5 L0,9 Z" fill="#8A94A6"/>
+          <path d="M0,0 L9,4.5 L0,9 Z" fill="#8A8479"/>
         </marker>
         <marker id="ahg2" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto">
           <path d="M0,0 L9,4.5 L0,9 Z" fill="#1C7A45"/>
         </marker>
       </defs>
-      <g font-family="'Noto Sans JP','Segoe UI',sans-serif">
-        <text class="en" x="16" y="32" font-size="11" font-weight="700" fill="#8A94A6" letter-spacing="2">INGEST</text>
-        <text class="ja" x="16" y="32" font-size="11" font-weight="700" fill="#8A94A6" letter-spacing="2">取り込み</text>
+      <g font-family="'Inter','Noto Sans JP',sans-serif">
+        <text class="en" x="16" y="32" font-size="11" font-weight="700" fill="#8A8479" letter-spacing="2">INGEST</text>
+        <text class="ja" x="16" y="32" font-size="11" font-weight="700" fill="#8A8479" letter-spacing="2">取り込み</text>
         <g>
-          <rect x="16" y="44" width="178" height="78" rx="10" fill="#FFFFFF" stroke="#C9D2DD" stroke-width="1.4"/>
-          <text x="105" y="72" text-anchor="middle" font-weight="700" font-size="12.5" fill="#1A2230"><tspan class="en">operating manual</tspan><tspan class="ja">操作マニュアル</tspan></text>
-          <text class="en" x="105" y="92" text-anchor="middle" font-size="10" fill="#5A6678">markdown, numbered sections</text>
-          <text class="ja" x="105" y="92" text-anchor="middle" font-size="10" fill="#5A6678">markdown・番号つきの節</text>
-          <text class="en" x="105" y="108" text-anchor="middle" font-size="9.5" fill="#5A6678">seeded at startup</text>
-          <text class="ja" x="105" y="108" text-anchor="middle" font-size="9.5" fill="#5A6678">起動時にシード</text>
+          <rect x="16" y="44" width="178" height="78" rx="10" fill="#FBFAF6" stroke="#D9D2C3" stroke-width="1.4"/>
+          <text x="105" y="72" text-anchor="middle" font-weight="700" font-size="12.5" fill="#1C1A17"><tspan class="en">operating manual</tspan><tspan class="ja">操作マニュアル</tspan></text>
+          <text class="en" x="105" y="92" text-anchor="middle" font-size="10" fill="#4A463F">markdown, numbered sections</text>
+          <text class="ja" x="105" y="92" text-anchor="middle" font-size="10" fill="#4A463F">markdown・番号つきの節</text>
+          <text class="en" x="105" y="108" text-anchor="middle" font-size="9.5" fill="#4A463F">seeded at startup</text>
+          <text class="ja" x="105" y="108" text-anchor="middle" font-size="9.5" fill="#4A463F">起動時にシード</text>
         </g>
         <g>
-          <rect x="240" y="44" width="200" height="78" rx="10" fill="#FFFFFF" stroke="#C9D2DD" stroke-width="1.4"/>
-          <text x="340" y="72" text-anchor="middle" font-weight="700" font-size="12.5" fill="#1A2230"><tspan class="en">structure chunker</tspan><tspan class="ja">構造チャンカー</tspan></text>
-          <text class="en" x="340" y="92" text-anchor="middle" font-size="10" fill="#5A6678">one chunk per heading + body</text>
-          <text class="ja" x="340" y="92" text-anchor="middle" font-size="10" fill="#5A6678">見出し＋本文ごとに1チャンク</text>
-          <text class="en" x="340" y="108" text-anchor="middle" font-size="9.5" fill="#5A6678">section number preserved (e.g. 3.2)</text>
-          <text class="ja" x="340" y="108" text-anchor="middle" font-size="9.5" fill="#5A6678">節番号を保持（例：3.2）</text>
+          <rect x="240" y="44" width="200" height="78" rx="10" fill="#FBFAF6" stroke="#D9D2C3" stroke-width="1.4"/>
+          <text x="340" y="72" text-anchor="middle" font-weight="700" font-size="12.5" fill="#1C1A17"><tspan class="en">structure chunker</tspan><tspan class="ja">構造チャンカー</tspan></text>
+          <text class="en" x="340" y="92" text-anchor="middle" font-size="10" fill="#4A463F">one chunk per heading + body</text>
+          <text class="ja" x="340" y="92" text-anchor="middle" font-size="10" fill="#4A463F">見出し＋本文ごとに1チャンク</text>
+          <text class="en" x="340" y="108" text-anchor="middle" font-size="9.5" fill="#4A463F">section number preserved (e.g. 3.2)</text>
+          <text class="ja" x="340" y="108" text-anchor="middle" font-size="9.5" fill="#4A463F">節番号を保持（例：3.2）</text>
         </g>
         <g>
-          <rect x="486" y="44" width="200" height="78" rx="10" fill="#FFFFFF" stroke="#C9D2DD" stroke-width="1.4"/>
-          <text x="586" y="72" text-anchor="middle" font-weight="700" font-size="12.5" fill="#1A2230"><tspan class="en">embed (TEI)</tspan><tspan class="ja">埋め込み（TEI）</tspan></text>
-          <text x="586" y="92" text-anchor="middle" font-size="10" fill="#5A6678">multilingual-e5-large · 1024d</text>
-          <text class="en" x="586" y="108" text-anchor="middle" font-size="9.5" fill="#5A6678">"passage: " prefix (e5 convention)</text>
-          <text class="ja" x="586" y="108" text-anchor="middle" font-size="9.5" fill="#5A6678">「passage: 」接頭辞（e5 規約）</text>
+          <rect x="486" y="44" width="200" height="78" rx="10" fill="#FBFAF6" stroke="#D9D2C3" stroke-width="1.4"/>
+          <text x="586" y="72" text-anchor="middle" font-weight="700" font-size="12.5" fill="#1C1A17"><tspan class="en">embed (TEI)</tspan><tspan class="ja">埋め込み（TEI）</tspan></text>
+          <text x="586" y="92" text-anchor="middle" font-size="10" fill="#4A463F">multilingual-e5-large · 1024d</text>
+          <text class="en" x="586" y="108" text-anchor="middle" font-size="9.5" fill="#4A463F">"passage: " prefix (e5 convention)</text>
+          <text class="ja" x="586" y="108" text-anchor="middle" font-size="9.5" fill="#4A463F">「passage: 」接頭辞（e5 規約）</text>
         </g>
         <g>
-          <rect x="732" y="44" width="192" height="78" rx="10" fill="#EDF0F4" stroke="#C9D2DD" stroke-width="1.4"/>
-          <text x="828" y="72" text-anchor="middle" font-weight="700" font-size="12.5" fill="#1A2230">knowledge_chunks</text>
-          <text class="en" x="828" y="92" text-anchor="middle" font-size="10" fill="#5A6678">Postgres: pgvector + FTS</text>
-          <text class="ja" x="828" y="92" text-anchor="middle" font-size="10" fill="#5A6678">Postgres：pgvector＋全文索引</text>
-          <text class="en" x="828" y="108" text-anchor="middle" font-size="9.5" fill="#5A6678">one store, both indexes</text>
-          <text class="ja" x="828" y="108" text-anchor="middle" font-size="9.5" fill="#5A6678">一つの保存層に両索引</text>
+          <rect x="732" y="44" width="192" height="78" rx="10" fill="#ECE6D8" stroke="#D9D2C3" stroke-width="1.4"/>
+          <text x="828" y="72" text-anchor="middle" font-weight="700" font-size="12.5" fill="#1C1A17">knowledge_chunks</text>
+          <text class="en" x="828" y="92" text-anchor="middle" font-size="10" fill="#4A463F">Postgres: pgvector + FTS</text>
+          <text class="ja" x="828" y="92" text-anchor="middle" font-size="10" fill="#4A463F">Postgres：pgvector＋全文索引</text>
+          <text class="en" x="828" y="108" text-anchor="middle" font-size="9.5" fill="#4A463F">one store, both indexes</text>
+          <text class="ja" x="828" y="108" text-anchor="middle" font-size="9.5" fill="#4A463F">一つの保存層に両索引</text>
         </g>
-        <g fill="none" stroke="#8A94A6" stroke-width="1.6" marker-end="url(#ah2)">
+        <g fill="none" stroke="#8A8479" stroke-width="1.6" marker-end="url(#ah2)">
           <line x1="194" y1="83" x2="234" y2="83"/>
           <line x1="440" y1="83" x2="480" y2="83"/>
           <line x1="686" y1="83" x2="726" y2="83"/>
         </g>
-        <text class="en" x="16" y="178" font-size="11" font-weight="700" fill="#8A94A6" letter-spacing="2">QUERY</text>
-        <text class="ja" x="16" y="178" font-size="11" font-weight="700" fill="#8A94A6" letter-spacing="2">検索</text>
+        <text class="en" x="16" y="178" font-size="11" font-weight="700" fill="#8A8479" letter-spacing="2">QUERY</text>
+        <text class="ja" x="16" y="178" font-size="11" font-weight="700" fill="#8A8479" letter-spacing="2">検索</text>
         <g>
-          <rect x="16" y="190" width="150" height="70" rx="10" fill="#FFFFFF" stroke="#C9D2DD" stroke-width="1.4"/>
-          <text x="91" y="218" text-anchor="middle" font-weight="700" font-size="12.5" fill="#1A2230"><tspan class="en">instruction</tspan><tspan class="ja">指示文</tspan></text>
-          <text class="en" x="91" y="238" text-anchor="middle" font-size="9.5" fill="#5A6678">embedded with "query: "</text>
-          <text class="ja" x="91" y="238" text-anchor="middle" font-size="9.5" fill="#5A6678">「query: 」で埋め込み</text>
+          <rect x="16" y="190" width="150" height="70" rx="10" fill="#FBFAF6" stroke="#D9D2C3" stroke-width="1.4"/>
+          <text x="91" y="218" text-anchor="middle" font-weight="700" font-size="12.5" fill="#1C1A17"><tspan class="en">instruction</tspan><tspan class="ja">指示文</tspan></text>
+          <text class="en" x="91" y="238" text-anchor="middle" font-size="9.5" fill="#4A463F">embedded with "query: "</text>
+          <text class="ja" x="91" y="238" text-anchor="middle" font-size="9.5" fill="#4A463F">「query: 」で埋め込み</text>
         </g>
         <g>
-          <rect x="212" y="156" width="190" height="58" rx="10" fill="#FFFFFF" stroke="#C9D2DD" stroke-width="1.4"/>
-          <text x="307" y="180" text-anchor="middle" font-weight="700" font-size="12" fill="#1A2230"><tspan class="en">vector channel</tspan><tspan class="ja">ベクトル側</tspan></text>
-          <text class="en" x="307" y="200" text-anchor="middle" font-size="9.5" fill="#5A6678">cosine distance · top 20</text>
-          <text class="ja" x="307" y="200" text-anchor="middle" font-size="9.5" fill="#5A6678">コサイン距離・上位20</text>
+          <rect x="212" y="156" width="190" height="58" rx="10" fill="#FBFAF6" stroke="#D9D2C3" stroke-width="1.4"/>
+          <text x="307" y="180" text-anchor="middle" font-weight="700" font-size="12" fill="#1C1A17"><tspan class="en">vector channel</tspan><tspan class="ja">ベクトル側</tspan></text>
+          <text class="en" x="307" y="200" text-anchor="middle" font-size="9.5" fill="#4A463F">cosine distance · top 20</text>
+          <text class="ja" x="307" y="200" text-anchor="middle" font-size="9.5" fill="#4A463F">コサイン距離・上位20</text>
         </g>
         <g>
-          <rect x="212" y="228" width="190" height="58" rx="10" fill="#FFFFFF" stroke="#C9D2DD" stroke-width="1.4"/>
-          <text x="307" y="252" text-anchor="middle" font-weight="700" font-size="12" fill="#1A2230"><tspan class="en">full-text channel</tspan><tspan class="ja">全文検索側</tspan></text>
-          <text class="en" x="307" y="272" text-anchor="middle" font-size="9.5" fill="#5A6678">ts_rank, unstemmed · top 20</text>
-          <text class="ja" x="307" y="272" text-anchor="middle" font-size="9.5" fill="#5A6678">ts_rank・語幹処理なし・上位20</text>
+          <rect x="212" y="228" width="190" height="58" rx="10" fill="#FBFAF6" stroke="#D9D2C3" stroke-width="1.4"/>
+          <text x="307" y="252" text-anchor="middle" font-weight="700" font-size="12" fill="#1C1A17"><tspan class="en">full-text channel</tspan><tspan class="ja">全文検索側</tspan></text>
+          <text class="en" x="307" y="272" text-anchor="middle" font-size="9.5" fill="#4A463F">ts_rank, unstemmed · top 20</text>
+          <text class="ja" x="307" y="272" text-anchor="middle" font-size="9.5" fill="#4A463F">ts_rank・語幹処理なし・上位20</text>
         </g>
         <g>
-          <rect x="448" y="190" width="150" height="70" rx="10" fill="#FFFFFF" stroke="#C9D2DD" stroke-width="1.4"/>
-          <text x="523" y="218" text-anchor="middle" font-weight="700" font-size="12.5" fill="#1A2230"><tspan class="en">RRF fusion</tspan><tspan class="ja">RRF 融合</tspan></text>
-          <text x="523" y="238" text-anchor="middle" font-size="10" fill="#5A6678">k = 60</text>
-          <text class="en" x="523" y="252" text-anchor="middle" font-size="9.5" fill="#5A6678">ranks only, no score mixing</text>
-          <text class="ja" x="523" y="252" text-anchor="middle" font-size="9.5" fill="#5A6678">順位のみ・スコアは混ぜない</text>
+          <rect x="448" y="190" width="150" height="70" rx="10" fill="#FBFAF6" stroke="#D9D2C3" stroke-width="1.4"/>
+          <text x="523" y="218" text-anchor="middle" font-weight="700" font-size="12.5" fill="#1C1A17"><tspan class="en">RRF fusion</tspan><tspan class="ja">RRF 融合</tspan></text>
+          <text x="523" y="238" text-anchor="middle" font-size="10" fill="#4A463F">k = 60</text>
+          <text class="en" x="523" y="252" text-anchor="middle" font-size="9.5" fill="#4A463F">ranks only, no score mixing</text>
+          <text class="ja" x="523" y="252" text-anchor="middle" font-size="9.5" fill="#4A463F">順位のみ・スコアは混ぜない</text>
         </g>
         <g>
-          <rect x="644" y="190" width="130" height="70" rx="10" fill="#EDF0F4" stroke="#C9D2DD" stroke-width="1.4"/>
-          <text x="709" y="218" text-anchor="middle" font-weight="700" font-size="12.5" fill="#1A2230"><tspan class="en">top 5</tspan><tspan class="ja">上位5件</tspan></text>
-          <text class="en" x="709" y="238" text-anchor="middle" font-size="9.5" fill="#5A6678">grounding context</text>
-          <text class="ja" x="709" y="238" text-anchor="middle" font-size="9.5" fill="#5A6678">根拠コンテキスト</text>
+          <rect x="644" y="190" width="130" height="70" rx="10" fill="#ECE6D8" stroke="#D9D2C3" stroke-width="1.4"/>
+          <text x="709" y="218" text-anchor="middle" font-weight="700" font-size="12.5" fill="#1C1A17"><tspan class="en">top 5</tspan><tspan class="ja">上位5件</tspan></text>
+          <text class="en" x="709" y="238" text-anchor="middle" font-size="9.5" fill="#4A463F">grounding context</text>
+          <text class="ja" x="709" y="238" text-anchor="middle" font-size="9.5" fill="#4A463F">根拠コンテキスト</text>
         </g>
-        <g fill="none" stroke="#8A94A6" stroke-width="1.5" marker-end="url(#ah2)">
+        <g fill="none" stroke="#8A8479" stroke-width="1.5" marker-end="url(#ah2)">
           <path d="M166 210 C 186 200, 192 192, 206 188"/>
           <path d="M166 240 C 186 250, 192 254, 206 256"/>
           <path d="M402 185 C 422 192, 428 200, 442 208"/>
           <path d="M402 257 C 422 250, 428 244, 442 238"/>
           <line x1="598" y1="225" x2="638" y2="225"/>
         </g>
-        <path d="M828 122 C 828 160, 600 165, 420 172" fill="none" stroke="#8A94A6" stroke-width="1.3" stroke-dasharray="4 4"/>
+        <path d="M828 122 C 828 160, 600 165, 420 172" fill="none" stroke="#8A8479" stroke-width="1.3" stroke-dasharray="4 4"/>
         <g>
-          <rect x="160" y="318" width="620" height="84" rx="10" fill="#F0FDF4" stroke="#86EFAC" stroke-width="1.4"/>
-          <text x="470" y="344" text-anchor="middle" font-weight="700" font-size="12.5" fill="#14532D"><tspan class="en">the prompt the model actually sees</tspan><tspan class="ja">モデルが実際に見るプロンプト</tspan></text>
-          <text x="470" y="366" text-anchor="middle" font-size="10.5" fill="#15803D">【個人修正・最優先（手順書より優先）】 → 【手順書】</text>
-          <text class="en" x="470" y="386" text-anchor="middle" font-size="9.5" fill="#15803D">matching active personal corrections are layered above the manual context — validated, versioned, trigger = exact field match</text>
-          <text class="ja" x="470" y="386" text-anchor="middle" font-size="9.5" fill="#15803D">一致した有効な個人修正を手順書コンテキストの上に重ねる — 検証済み・バージョン管理・トリガーは項目の完全一致</text>
+          <rect x="160" y="318" width="620" height="84" rx="10" fill="#EAF2E6" stroke="#9BCBA4" stroke-width="1.4"/>
+          <text x="470" y="344" text-anchor="middle" font-weight="700" font-size="12.5" fill="#194D30"><tspan class="en">the prompt the model actually sees</tspan><tspan class="ja">モデルが実際に見るプロンプト</tspan></text>
+          <text x="470" y="366" text-anchor="middle" font-size="10.5" fill="#1C7A45">【個人修正・最優先（手順書より優先）】 → 【手順書】</text>
+          <text class="en" x="470" y="386" text-anchor="middle" font-size="9.5" fill="#1C7A45">matching active personal corrections are layered above the manual context — validated, versioned, trigger = exact field match</text>
+          <text class="ja" x="470" y="386" text-anchor="middle" font-size="9.5" fill="#1C7A45">一致した有効な個人修正を手順書コンテキストの上に重ねる — 検証済み・バージョン管理・トリガーは項目の完全一致</text>
         </g>
         <path d="M709 260 C 709 290, 600 305, 540 314" fill="none" stroke="#1C7A45" stroke-width="1.6" marker-end="url(#ahg2)"/>
-        <text class="en" x="470" y="424" text-anchor="middle" font-size="10" fill="#5A6678">grounded slots stay correction-immune: a separate grounded pass pins dest/purpose, enforced in code, measured 1.0</text>
-        <text class="ja" x="470" y="424" text-anchor="middle" font-size="10" fill="#5A6678">根拠スロットは修正で動きません：別建ての根拠パスが dest／purpose を固定（コード強制・測定値 1.0）</text>
+        <text class="en" x="470" y="424" text-anchor="middle" font-size="10" fill="#4A463F">grounded slots stay correction-immune: a separate grounded pass pins dest/purpose, enforced in code, measured 1.0</text>
+        <text class="ja" x="470" y="424" text-anchor="middle" font-size="10" fill="#4A463F">根拠スロットは修正で動きません：別建ての根拠パスが dest／purpose を固定（コード強制・測定値 1.0）</text>
       </g>
     </svg>
     <div class="fig-cap"><span class="en">Ingest and query paths as implemented; both retrieval channels read the same Postgres store.</span><span class="ja" lang="ja">実装どおりの取り込み・検索経路。二つの検索チャネルは同じ Postgres 保存層を読む。</span></div>
@@ -454,6 +454,8 @@
   </p>
 </div></section>
 
+<button class="totop" type="button" aria-label="Back to top">&uarr;</button>
+
 <script>
 (function(){
   var root=document.documentElement;
@@ -468,6 +470,11 @@
   var saved=null;
   try{saved=localStorage.getItem("tanomude-lang");}catch(e){}
   apply(saved==="ja"?"ja":"en");
+  var totop=document.querySelector(".totop");
+  function onScroll(){totop.classList.toggle("show",window.scrollY>480);}
+  window.addEventListener("scroll",onScroll,{passive:true});
+  onScroll();
+  totop.addEventListener("click",function(){window.scrollTo({top:0,behavior:"smooth"});});
 })();
 </script>
 </body>
