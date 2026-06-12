@@ -104,7 +104,7 @@
     <tbody>
       <tr>
         <td class="d"><span class="en">The key-sequence skeleton lives in code; the model fills slots only</span><span class="ja" lang="ja">キー操作列の骨格はコード側、モデルはスロットのみ</span></td>
-        <td><span class="en">Measured, not assumed: free-form generation scored 7.5% exact vs 87.5% for skeleton + slot-fill (96 runs, zero parse failures) — and in all 96 runs the model never once produced the correct abort sequence on a missing required field. So dates, day counts, branching and required-field guards are code; the model returns four normalized values and two branch decisions.</span><span class="ja" lang="ja">前提ではなく測定で決定：自由生成は exact 7.5%、骨格＋スロットフィルは 87.5%（96ラン・parse失敗0）。さらに96ラン中、必須項目欠落時の正しい中断列は一度も生成されませんでした。だから日付・日数・分岐・必須項目ガードはコード側に置き、モデルは4つの値の正規化と2つの分岐判断だけを返します。</span></td>
+        <td><span class="en">Measured, not assumed: free-form generation scored 7.5% exact vs 87.5% for skeleton + slot-fill (96 runs, zero parse failures) — and in all 96 runs the model never once produced the correct abort sequence on a missing required field. So dates, day counts, branching and required-field guards are code; the model returns two normalized values and two branch decisions.</span><span class="ja" lang="ja">前提ではなく測定で決定：自由生成は exact 7.5%、骨格＋スロットフィルは 87.5%（96ラン・parse失敗0）。さらに96ラン中、必須項目欠落時の正しい中断列は一度も生成されませんでした。だから日付・日数・分岐・必須項目ガードはコード側に置き、モデルは2つの値の正規化と2つの分岐判断だけを返します。</span></td>
       </tr>
       <tr>
         <td class="d"><span class="en">A custom agent loop, not a framework</span><span class="ja" lang="ja">フレームワークではなく独自ループ</span></td>
@@ -136,7 +136,7 @@
       </tr>
       <tr>
         <td class="d"><span class="en">Determinism first</span><span class="ja" lang="ja">決定論を最優先</span></td>
-        <td><span class="en">temperature 0, a fixed seed, JSON-forced output; a retry raises temperature stepwise (+0.3) only after a parse failure. The published numbers were identical across five consecutive runs because the serving path is deterministic by construction.</span><span class="ja" lang="ja">temperature 0・固定シード・JSON 強制出力。再試行は parse 失敗時のみ、temperature を +0.3 ずつ上げます。公表数値が連続5回の実行で完全一致したのは、本番経路が構成からして決定論的だからです。</span></td>
+        <td><span class="en">temperature 0, a fixed seed, JSON-forced output; only after a parse failure does a retry step both the seed and the temperature (+0.3). The published numbers were identical across five consecutive runs because the serving path is deterministic by construction.</span><span class="ja" lang="ja">temperature 0・固定シード・JSON 強制出力。parse 失敗時の再試行に限り、シードと temperature（+0.3 ずつ）を進めます。公表数値が連続5回の実行で完全一致したのは、本番経路が構成からして決定論的だからです。</span></td>
       </tr>
       <tr>
         <td class="d"><span class="en">Idempotency at the session seam</span><span class="ja" lang="ja">セッション境界での冪等性</span></td>
@@ -180,8 +180,8 @@
           <text class="ja" x="452" y="88" text-anchor="middle" font-size="10" fill="#5A6678">dest_code・purpose・overseas・reuse_prev_proj</text>
           <text class="en" x="452" y="104" text-anchor="middle" font-size="10" fill="#5A6678">JSON-forced · temp 0 · fixed seed</text>
           <text class="ja" x="452" y="104" text-anchor="middle" font-size="10" fill="#5A6678">JSON 強制・temp 0・固定シード</text>
-          <text class="en" x="452" y="124" text-anchor="middle" font-size="9.5" fill="#5A6678">parse retry ≤2, temp +0.3 each</text>
-          <text class="ja" x="452" y="124" text-anchor="middle" font-size="9.5" fill="#5A6678">parse 再試行 ≤2、temp +0.3 ずつ</text>
+          <text class="en" x="452" y="124" text-anchor="middle" font-size="9.5" fill="#5A6678">parse retry ≤2 — seed &amp; temp step each time</text>
+          <text class="ja" x="452" y="124" text-anchor="middle" font-size="9.5" fill="#5A6678">parse 再試行 ≤2 — シードと temp を毎回加算</text>
         </g>
         <g>
           <rect x="638" y="44" width="286" height="96" rx="10" fill="#FFFFFF" stroke="#C9D2DD" stroke-width="1.4"/>
@@ -267,7 +267,7 @@
     <span class="chip"><b>PURPOSE_MAX</b> = 20</span>
     <span class="chip"><b>MAX_PARSE_RETRY</b> = 2</span>
     <span class="chip"><b>temperature</b> 0 (+0.3/retry)</span>
-    <span class="chip"><b>seed</b> fixed</span>
+    <span class="chip"><b>seed</b> fixed (steps on retry)</span>
     <span class="chip"><b>idempotency</b> task:{task_id}</span>
   </div>
 </div></section>
