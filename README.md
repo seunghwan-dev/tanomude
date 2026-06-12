@@ -2,13 +2,19 @@
 
 **English** · [日本語](./README.ja.md)
 
-A human-in-the-loop AI agent that operates legacy enterprise systems through natural language — fully on-premises, with every action gated by human approval and recorded in an append-only audit trail.
+A human-in-the-loop AI agent that operates legacy mainframe (green-screen) systems through natural language — fully on-premises, with every action gated by human approval and recorded in an append-only audit trail.
+
+**Encoding tacit operational knowledge.** The veterans who operate manufacturing's legacy back-office systems are retiring, and the knowledge of *how* to drive those green screens leaves with them. Tanomude turns that tacit know-how into explicit natural-language instructions, grounded in the retrieved operating manuals, so an AS-400-style workflow that once required a seasoned operator can be carried out — and verified — from a plain instruction. It is a system-operation answer to the skilled-worker succession problem (技能伝承).
+
+The project is built end-to-end as production AI/LLM engineering: owning the architecture of the agent core loop, retrieval, and eval harness; carrying it through the full PoC → implementation → evaluation → operation lifecycle; improving it by measurement (boundary respect raised from 0.25 to a code-enforced 1.0; per-user growth reported honestly at 0.625, not rounded up); layering quality gates (a required CI `verify` check, `@claude` review, and multi-pass QC); building a custom agent loop only after weighing existing frameworks against these safety and verification needs; and keeping a person and a check on every write — approval before execution, screen-state verification, and rollback on mismatch.
 
 ## Interactive demo (mock)
 
-A no-backend, hand-authored interactive mock of the approval console — **not a live LLM**. Walk the whole flow (instruction → plan → approve / revise / reject → green-screen replay) right in the browser:
+A no-backend, hand-authored interactive mock of the approval console — **not a live LLM**. Walk the approval flow (instruction → plan → approve / reject → green-screen replay) on recorded data, right in the browser:
 
 **▶ [Open the live mock](https://seunghwan-dev.github.io/tanomude/)**
+
+> Scope: the mock demonstrates the approval and refusal flow on recorded data. The correction-learning loop — a 修正 (revise) reshaping the next plan, and the immunity notice that declines a revise aimed at a grounded slot — runs in the full local product, not in this mock.
 
 > **Demo video — coming soon**
 
@@ -17,7 +23,7 @@ A no-backend, hand-authored interactive mock of the approval console — **not a
 ## At a glance
 
 - **RAG agent** — turns a natural-language request into a concrete plan, grounded in retrieved operating manuals.
-- **Eval harness** — an in-repo suite scores planning, retrieval, and guardrails; a deterministic subset runs as a required check on every pull request.
+- **Eval harness** — an in-repo suite scores planning, retrieval, and guardrails when run locally with the model; CI enforces a deterministic, model-free subset (lint, type-check, unit tests, fixture parity) on every pull request.
 - **Guardrails (LLMOps)** — every model response is a validated structured-output contract, governed by a three-tier override hierarchy that keeps grounded input correction-immune in code, and an out-of-domain instruction is refused rather than forced into a plan.
 - **Human-in-the-loop** — nothing reaches the legacy system without an explicit human approval; the approval card is restored if the page is reloaded.
 - **On-premises** — local model (Gemma via Ollama), local embeddings, local databases. Nothing leaves the building.
@@ -33,7 +39,7 @@ flowchart LR
   H --> C["Core loop"]
   C --> AD["Clean screen adapter"]
   AD --> M["Mock AS-400<br/>green-screen state machine"]
-  EV["Eval harness + deterministic CI gate"]
+  EV["Eval harness (local, model-run)<br/>+ deterministic CI subset"]
   C -.-> EV
 ```
 
@@ -41,7 +47,7 @@ The agent **proposes**; a human **decides**. Only approved plans execute, replay
 
 ## What it does, measured
 
-Every number below comes from the in-repo eval harness (with the embedding service) and is stable across five identical full runs; a deterministic subset of that suite gates every pull request.
+Every number below comes from running the in-repo eval harness locally with the model and the embedding service, and is stable across five identical full runs. CI does not run the model: it gates a deterministic, model-free subset (lint, type-check, unit tests, and golden-fixture parity). Promoting the model-scored eval into a regression gate is a documented next step.
 
 | Dimension | Result |
 |---|---|
@@ -65,7 +71,7 @@ Every number below comes from the in-repo eval harness (with the embedding servi
 - **Recovery (transient faults) 0.5** — replan-and-replay recovers transient, environment-side failures only; by design, bad input data is not retried blindly but short-circuited to a human (the re-entry / needs-investigation paths below).
 - **Verify pass 0.667** — a failed verify is a detection event: it triggers rollback and replan instead of a silent wrong submit.
 - **precision@3 0.5** — a structural artifact of fixed k=3 against expected sets smaller than 3; precision@expected on the same run is 1.0.
-- **Average steps per successful run: 9.56.**
+- **Average steps per executed run: 9.56.**
 
 ## Quickstart
 
@@ -77,7 +83,7 @@ docker compose up
 
 Then open **http://localhost:8000**.
 
-> First run builds and pulls the container images and downloads two local models — the LLM (~9.6 GB) and the embedding model (~2.2 GB), about 12 GB total. Timing is network-dependent: roughly 10–15 minutes on a fast connection (the embedding-model download is often the slowest leg), longer on slower links. They are cached afterward.
+> First run builds and pulls the container images and downloads two local models — the LLM (around 10 GB) and the embedding model (~2.2 GB), about 12 GB total. Timing is network-dependent: roughly 10–15 minutes on a fast connection (the embedding-model download is often the slowest leg), longer on slower links. They are cached afterward.
 
 ## Honest outcomes
 
@@ -102,6 +108,7 @@ A living project. Next up:
 - Per-field re-entry guidance driven by the validation codes.
 - Ingest real operating manuals and measure "a correction beats the manual rule" on them.
 - A continuous-integration smoke test of the full container stack.
+- Promote the model-scored eval suite into a CI regression gate (today it runs locally; CI gates only the model-free subset).
 
 ## Under the hood
 
