@@ -7,6 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../shared.css">
 <title>Tanomude — implementation status &amp; roadmap</title>
 <style>
   :root{
@@ -14,27 +15,9 @@
     --partial:#B7791F; --partial-bg:#FBF1DF;
     --deferred:#475569; --deferred-bg:#EEF1F5;
     --gap:#B91C1C; --gap-bg:#FBE9E9;
-    --ink:#1A2230; --soft:#5A6678; --faint:#8A94A6;
-    --line:#E2E6EC; --panel:#FFFFFF; --bg:#F5F7FA; --sunk:#EDF0F4;
     --rt:#0F766E; --rt-bg:#DEF2F0; --ca:#64748B; --ca-bg:#EEF1F5;
   }
-  *{box-sizing:border-box;}
-  body{margin:0;background:var(--bg);color:var(--ink);
-    font-family:"Noto Sans JP","Segoe UI",system-ui,-apple-system,"Hiragino Sans","Yu Gothic",sans-serif;
-    font-size:14px;line-height:1.55;padding:0 0 80px;}
-  [data-lang="en"] .ja{display:none;}
-  [data-lang="ja"] .en{display:none;}
-  .nav{background:var(--panel);border-bottom:1px solid var(--line);}
-  .nav-inner{max-width:1160px;margin:0 auto;padding:10px 22px;display:flex;
-    align-items:center;gap:18px;flex-wrap:wrap;}
-  .brand{font-weight:700;font-size:15px;color:var(--ink);text-decoration:none;}
-  .nav a.nav-link{color:var(--soft);text-decoration:none;font-size:13px;}
-  .nav a.nav-link:hover{color:var(--ink);}
-  .nav a.nav-link.current{color:var(--impl);font-weight:600;}
-  .lang{margin-left:auto;display:flex;gap:4px;}
-  .lang-btn{border:1px solid var(--line);background:var(--panel);color:var(--soft);
-    font-size:12px;padding:3px 10px;border-radius:14px;cursor:pointer;}
-  .lang-btn.active{background:var(--ink);color:#fff;border-color:var(--ink);}
+  body{font-size:14px;line-height:1.55;}
   .wrap{max-width:1160px;margin:0 auto;padding:28px 22px 0;}
   h1{font-size:24px;margin:0 0 4px;}
   .sub{color:var(--soft);font-size:13px;margin:0 0 2px;}
@@ -82,17 +65,16 @@
   .note{color:var(--faint);font-size:11.5px;display:block;margin-top:3px;}
   .secct{font-size:12px;color:var(--faint);font-weight:400;margin-left:8px;}
   .foot{color:var(--faint);font-size:11.5px;margin-top:30px;text-align:center;}
-  a{color:var(--rt);}
+  a{color:var(--accent);}
 </style>
 </head>
 <body>
 
 <nav class="nav"><div class="nav-inner">
-  <a class="brand" href="../about/">Tanomude</a>
-  <a class="nav-link" href="../about/"><span class="en">At a glance</span><span class="ja" lang="ja">全体像</span></a>
+  <a class="brand" href="../">Tanomude</a>
   <a class="nav-link current" href="./"><span class="en">Status &amp; roadmap</span><span class="ja" lang="ja">実装状況</span></a>
-  <a class="nav-link" href="../operations/"><span class="en">Operations note</span><span class="ja" lang="ja">運用設計ノート</span></a>
-  <a class="nav-link" href="../"><span class="en">Interactive mock</span><span class="ja" lang="ja">インタラクティブモック</span></a>
+  <a class="nav-link" href="../operations/"><span class="en">Design &amp; technology choices</span><span class="ja" lang="ja">設計と技術選定</span></a>
+  <a class="nav-link" href="../mock/"><span class="en">Interactive mock</span><span class="ja" lang="ja">インタラクティブモック</span></a>
   <div class="lang">
     <button class="lang-btn" type="button" data-lang="en">English</button>
     <button class="lang-btn" type="button" data-lang="ja">日本語</button>
@@ -133,8 +115,8 @@
   </div>
 
   <div class="legend">
-    <p style="margin:0;" class="en"><b>Point in time</b> — this page assesses the 2026-06-07 snapshot. Shipped since: the 5250-style green-screen replay renderer in the console, a code-enforced revise-immunity seam, Japanese refusal reasons, and the <a href="../">public interactive mock</a>. The published eval numbers were re-confirmed unchanged at the public release commit — five identical runs, every metric and per-case outcome matching.</p>
-    <p style="margin:0;" class="ja" lang="ja"><b>時点について</b> — 本ページは 2026-06-07 のスナップショットを判定したものです。その後の出荷分：コンソール内の 5250 風グリーンスクリーン・リプレイレンダラー、コード強制の修正上書き不可シーム、日本語の却下文言、<a href="../">公開インタラクティブモック</a>。公表済みの評価数値は公開コミットにおいて再確認され、5回の同一実行で全指標・全ケース結果が一致して変化なしでした。</p>
+    <p style="margin:0;" class="en"><b>Point in time</b> — this page assesses the 2026-06-07 snapshot. Shipped since: the 5250-style green-screen replay renderer in the console, a code-enforced revise-immunity seam, Japanese refusal reasons, and the <a href="../mock/">public interactive mock</a>. The published eval numbers were re-confirmed unchanged at the public release commit — five identical runs, every metric and per-case outcome matching.</p>
+    <p style="margin:0;" class="ja" lang="ja"><b>時点について</b> — 本ページは 2026-06-07 のスナップショットを判定したものです。その後の出荷分：コンソール内の 5250 風グリーンスクリーン・リプレイレンダラー、コード強制の修正上書き不可シーム、日本語の却下文言、<a href="../mock/">公開インタラクティブモック</a>。公表済みの評価数値は公開コミットにおいて再確認され、5回の同一実行で全指標・全ケース結果が一致して変化なしでした。</p>
   </div>
 
   <div class="legend">
