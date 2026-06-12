@@ -4,6 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="icon" type="image/svg+xml" href="../favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700&display=swap" rel="stylesheet">
 <title>Tanomude — at a glance</title>
 <style>
   :root{
@@ -13,7 +16,7 @@
   }
   *{box-sizing:border-box;}
   body{margin:0;background:var(--bg);color:var(--ink);
-    font-family:"Segoe UI",system-ui,-apple-system,"Hiragino Sans","Yu Gothic",sans-serif;
+    font-family:"Noto Sans JP","Segoe UI",system-ui,-apple-system,"Hiragino Sans","Yu Gothic",sans-serif;
     font-size:15px;line-height:1.65;padding:0 0 80px;}
   [data-lang="en"] .ja{display:none;}
   [data-lang="ja"] .en{display:none;}
@@ -84,7 +87,7 @@
   <p class="en">Manufacturing back offices still run on green screens, and the operators who can drive them are retiring. How an application actually gets filed — which menu, which keys, which codes, what the next screen should look like — rarely exists as a document. It lives as tacit skill, and it leaves with the person.</p>
   <p class="ja" lang="ja">製造業の基幹業務は今もグリーンスクリーンの上で動いており、それを操作できる熟練オペレーターの退職が進んでいます。申請が実際にどう登録されるのか — どのメニューで、どのキーで、どのコードで、次にどの画面が来るべきか — が文書として残っていることはまれです。その知識は暗黙知として人に宿り、人とともに職場を去ります。</p>
   <p class="en">Tanomude is a system-operation answer to the skilled-worker succession problem. Operating manuals become retrievable grounding for a planner; a one-line instruction becomes a concrete, checkable key-sequence plan; and each operator's corrections persist as knowledge the assistant applies the next time. What the veteran knew starts accumulating in the system instead of disappearing from it.</p>
-  <p class="ja" lang="ja">Tanomude は、この技能伝承の問題へのシステム操作の側からの一つの答えです。手順書は計画の検索可能な根拠となり、一行の指示は具体的で検証可能なキー操作の計画になり、オペレーターの修正は個人修正として永続化されて次の計画に生かされます。熟練者だけが知っていたことが、人と一緒に消えるのではなく、システムに蓄積され始めます。</p>
+  <p class="ja" lang="ja">Tanomude は、この技能伝承の問題に対する、システム操作の側からの一つの答えです。手順書は計画の検索可能な根拠となり、一行の指示は具体的で検証可能なキー操作の計画になり、オペレーターの修正は個人修正として永続化されて次の計画に生かされます。熟練者だけが知っていたことが、人と一緒に消えるのではなく、システムに蓄積され始めます。</p>
 
   <h2><span class="en">How it works</span><span class="ja" lang="ja">どう動くか</span></h2>
   <div class="flow">
@@ -136,7 +139,7 @@
   <p class="ja" lang="ja">アーキテクチャ自体も、構築の前の測定で決めています。対象業務での信頼性スパイクでは、キー操作列の自由生成は exact 精度 7.5% でした。操作列の骨格をコード側に置き、モデルにはスロット値と分岐判断だけを任せる方式で 87.5% に上がります（96 ラン、parse 失敗 0）。同じスパイクが、その後のすべてを方向づけた所見も出しました。96 ラン中、必須項目が空のときに正しい中断（abort）列を生成できたことは一度もなく、スロットフィルは幻覚された値を忠実に組み立ててしまう、というものです。だから安全はモデルの外側で作ります — コードによる必須項目ガード、スキーマで強制する却下表現、実行前の人手承認、実行後の画面検証です。</p>
 
   <p class="en">The repository runs under a gated discipline: a required CI verify check (lint, type-check, unit tests, golden-fixture parity and secret scanning), an independent automated review on every pull request, and multi-pass QC — including a five-run deterministic remeasure that re-established every published number at the public release commit.</p>
-  <p class="ja" lang="ja">リポジトリはゲートされた規律の下で運営されています。必須の CI verify チェック（lint・型チェック・ユニットテスト・ゴールデンフィクスチャ一致・シークレットスキャン）、全 PR への独立した自動レビュー、そして複数段の QC — 公開コミットにおいて全公表数値を5回の決定論的再測定で確かめ直すことを含みます。</p>
+  <p class="ja" lang="ja">リポジトリの運営には何重ものゲートを置いています。必須の CI verify チェック（lint・型チェック・ユニットテスト・ゴールデンフィクスチャ一致・シークレットスキャン）、全 PR への独立した自動レビュー、そして複数段の QC — 公開コミットで全公表数値を5回の決定論的再測定によって確かめ直したことを含みます。</p>
 
   <h2><span class="en">Architecture</span><span class="ja" lang="ja">アーキテクチャ</span></h2>
   <p class="en">A FastAPI backend; a local LLM served by Ollama (Gemma, temperature 0); local embeddings (multilingual-e5, 1024-dimensional) served by TEI; Postgres with pgvector for hybrid vector + full-text retrieval; a React + TypeScript approval console. The legacy target is a mock AS-400 modeled as a deterministic green-screen state machine behind a clean adapter seam — the same seam a real 5250 adapter would implement.</p>
