@@ -1,0 +1,387 @@
+<!doctype html>
+<html lang="en" data-lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" type="image/svg+xml" href="./favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="./shared.css">
+<title>Tanomude — 頼むで</title>
+<style>
+  .wrap{max-width:1040px;margin:0 auto;padding:0 22px;}
+  header.hero{padding:56px 0 8px;}
+  .hero-grid{display:grid;grid-template-columns:1fr auto;gap:44px;align-items:center;}
+  .eyebrow{font-size:.74rem;font-weight:600;letter-spacing:.22em;text-transform:uppercase;color:var(--faint);}
+  h1.thesis{font-weight:700;font-size:clamp(1.9rem,4.6vw,3rem);line-height:1.18;
+    letter-spacing:-.02em;margin:14px 0 0;}
+  h1.thesis .arrow{color:var(--accent);}
+  .sub{font-size:clamp(.98rem,1.6vw,1.08rem);color:var(--soft);max-width:62ch;margin:20px 0 0;}
+  .hero-rule{height:1px;background:var(--line);margin:44px 0 0;}
+  .crt{width:250px;height:auto;}
+  section{padding:34px 0 6px;}
+  .sec-head{display:flex;align-items:baseline;gap:14px;margin:0 0 14px;}
+  .sec-num{font-size:.78rem;font-weight:600;letter-spacing:.08em;color:var(--faint);}
+  h2{font-size:clamp(1.25rem,2.6vw,1.6rem);letter-spacing:-.01em;margin:0;line-height:1.2;}
+  .lead{font-size:1.02rem;max-width:72ch;margin:10px 0;}
+  .lead.soft{color:var(--soft);}
+  .steps{display:flex;flex-wrap:wrap;gap:10px;margin:14px 0 0;}
+  .step{flex:1 1 130px;background:var(--panel);border:1px solid var(--line);
+    border-radius:12px;padding:14px 16px 16px;min-width:130px;}
+  .step .n{font-size:.78rem;font-weight:700;color:var(--accent);}
+  .step .t{font-weight:600;font-size:1.02rem;margin:5px 0 0;}
+  .step .d{font-size:.78rem;color:var(--faint);margin:3px 0 0;}
+  .step.gate{border-color:var(--accent);background:linear-gradient(180deg,var(--accent-bg),var(--panel));}
+  .figure{background:var(--panel);border:1px solid var(--line);border-radius:14px;
+    padding:24px;margin:16px 0 0;}
+  .figure svg{width:100%;height:auto;display:block;}
+  .fig-cap{font-size:.8rem;color:var(--faint);text-align:center;margin:14px 0 0;}
+  .chips{display:flex;flex-wrap:wrap;gap:8px;margin:16px 0 0;}
+  .chip{border:1px solid var(--line);background:var(--panel);border-radius:999px;
+    padding:4px 14px;font-size:12.5px;color:var(--soft);white-space:nowrap;}
+  .cards{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin:14px 0 0;}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:18px 20px;}
+  .card h3{font-size:1rem;margin:0 0 8px;color:var(--accent);}
+  .card p{margin:0;font-size:.92rem;color:var(--soft);}
+  .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:16px 0 0;}
+  .stat{background:var(--panel);border:1px solid var(--line);border-left:5px solid var(--accent);
+    border-radius:10px;padding:14px 16px;}
+  .stat .n{font-size:30px;font-weight:700;line-height:1;color:var(--accent);}
+  .stat .l{font-size:12px;color:var(--soft);margin-top:7px;}
+  .spike{background:var(--panel);border:1px solid var(--line);border-radius:12px;
+    padding:20px 22px;margin:16px 0 0;}
+  .spike svg{width:100%;max-width:640px;height:auto;display:block;}
+  .small{font-size:.9rem;color:var(--soft);max-width:78ch;}
+  .doors{display:flex;gap:14px;flex-wrap:wrap;margin:16px 0;}
+  .door{flex:1 1 230px;background:var(--panel);border:1px solid var(--line);
+    border-radius:10px;padding:16px 18px;text-decoration:none;color:var(--ink);
+    border-left:5px solid var(--accent);}
+  .door:hover{border-color:var(--accent);}
+  .door b{display:block;margin-bottom:6px;}
+  .door span.desc{color:var(--soft);font-size:13px;display:block;}
+  .foot{color:var(--faint);font-size:12px;margin-top:40px;border-top:1px solid var(--line);
+    padding-top:14px;}
+  @media (max-width:720px){
+    .hero-grid{grid-template-columns:1fr;gap:24px;}
+    .crt{width:200px;}
+    .cards{grid-template-columns:1fr;}
+    .stats{grid-template-columns:repeat(2,1fr);}
+  }
+</style>
+</head>
+<body>
+
+<nav class="nav"><div class="nav-inner">
+  <a class="brand" href="./">Tanomude</a>
+  <a class="nav-link" href="./status/"><span class="en">Status &amp; roadmap</span><span class="ja" lang="ja">実装状況</span></a>
+  <a class="nav-link" href="./operations/"><span class="en">Design &amp; technology choices</span><span class="ja" lang="ja">設計と技術選定</span></a>
+  <a class="nav-link" href="./mock/"><span class="en">Interactive mock</span><span class="ja" lang="ja">インタラクティブモック</span></a>
+  <div class="lang">
+    <button class="lang-btn" type="button" data-lang="en">English</button>
+    <button class="lang-btn" type="button" data-lang="ja">日本語</button>
+  </div>
+</div></nav>
+
+<header class="hero"><div class="wrap">
+  <div class="hero-grid">
+    <div>
+      <div class="eyebrow">Tanomude — 頼むで</div>
+      <h1 class="thesis"><span class="en">A plain instruction <span class="arrow">&rarr;</span> a verified green-screen operation</span><span class="ja" lang="ja">一行の指示 <span class="arrow">&rarr;</span> 検証済みのグリーンスクリーン操作</span></h1>
+      <p class="sub en">An on-premise, human-in-the-loop AI assistant that operates an AS-400-style legacy green screen from natural-language instructions. The agent proposes a plan; a person approves it; every executed step is verified against the screen and recorded in an append-only audit trail. Nothing reaches the legacy system without a human decision.</p>
+      <p class="sub ja" lang="ja">自然言語の指示で AS-400 風レガシーシステムのグリーンスクリーンを操作する、オンプレミス・人手承認（HITL）型の AI アシスタントです。エージェントが計画を提案し、人が承認し、実行された各ステップは画面状態に照らして検証され、追記専用の監査証跡に記録されます。人の決定なしにレガシーシステムへ届く操作はありません。</p>
+    </div>
+    <svg class="crt" viewBox="0 0 250 175" role="img" aria-label="green-screen terminal with an approval seal">
+      <rect x="4" y="4" width="242" height="152" rx="10" fill="#222B36"/>
+      <rect x="14" y="14" width="222" height="132" rx="4" fill="#0B1F14"/>
+      <text x="26" y="36" font-family="Consolas,monospace" font-size="11" fill="#4ADE80">AS-400 出張申請</text>
+      <rect x="26" y="48" width="120" height="7" fill="#1C7A45" opacity=".55"/>
+      <rect x="26" y="62" width="160" height="7" fill="#1C7A45" opacity=".4"/>
+      <rect x="26" y="76" width="96" height="7" fill="#1C7A45" opacity=".5"/>
+      <rect x="26" y="90" width="140" height="7" fill="#1C7A45" opacity=".35"/>
+      <rect x="26" y="104" width="70" height="7" fill="#1C7A45" opacity=".5"/>
+      <rect x="26" y="124" width="9" height="11" fill="#4ADE80"/>
+      <g transform="rotate(-8 205 138)">
+        <circle cx="205" cy="138" r="27" fill="#FFF8F6" stroke="#C03B2B" stroke-width="2.5"/>
+        <circle cx="205" cy="138" r="22" fill="none" stroke="#C03B2B" stroke-width="1" opacity=".6"/>
+        <text x="205" y="134" text-anchor="middle" font-family="'Noto Sans JP',sans-serif" font-weight="700" font-size="13" fill="#C03B2B">承</text>
+        <text x="205" y="149" text-anchor="middle" font-family="'Noto Sans JP',sans-serif" font-weight="700" font-size="13" fill="#C03B2B">認</text>
+      </g>
+    </svg>
+  </div>
+  <div class="hero-rule"></div>
+</div></header>
+
+<section><div class="wrap">
+  <div class="sec-head"><span class="sec-num">01</span><h2><span class="en">Why it exists — 技能伝承</span><span class="ja" lang="ja">なぜ作ったか — 技能伝承</span></h2></div>
+  <p class="lead en">Manufacturing back offices still run on green screens, and the operators who can drive them are retiring. How an application actually gets filed — which menu, which keys, which codes, what the next screen should look like — rarely exists as a document. It lives as tacit skill, and it leaves with the person.</p>
+  <p class="lead ja" lang="ja">製造業の基幹業務は今もグリーンスクリーンの上で動いており、それを操作できる熟練オペレーターの退職が進んでいます。申請が実際にどう登録されるのか — どのメニューで、どのキーで、どのコードで、次にどの画面が来るべきか — が文書として残っていることはまれです。その知識は暗黙知として人に宿り、人とともに職場を去ります。</p>
+  <p class="lead soft en">Tanomude is a system-operation answer to the skilled-worker succession problem. Operating manuals become retrievable grounding for a planner; a one-line instruction becomes a concrete, checkable key-sequence plan; and each operator's corrections persist as knowledge the assistant applies the next time. What the veteran knew starts accumulating in the system instead of disappearing from it.</p>
+  <p class="lead soft ja" lang="ja">Tanomude は、この技能伝承の問題に対する、システム操作の側からの一つの答えです。手順書は計画の検索可能な根拠となり、一行の指示は具体的で検証可能なキー操作の計画になり、オペレーターの修正は個人修正として永続化されて次の計画に生かされます。熟練者だけが知っていたことが、人と一緒に消えるのではなく、システムに蓄積され始めます。</p>
+</div></section>
+
+<section><div class="wrap">
+  <div class="sec-head"><span class="sec-num">02</span><h2><span class="en">How it works</span><span class="ja" lang="ja">どう動くか</span></h2></div>
+  <div class="steps">
+    <div class="step"><div class="n">1</div><div class="t">指示</div><div class="d"><span class="en">instruction</span><span class="ja" lang="ja">自然言語</span></div></div>
+    <div class="step"><div class="n">2</div><div class="t">計画</div><div class="d"><span class="en">plan, grounded</span><span class="ja" lang="ja">根拠つき</span></div></div>
+    <div class="step gate"><div class="n">3</div><div class="t">承認</div><div class="d"><span class="en">human approval</span><span class="ja" lang="ja">人手承認</span></div></div>
+    <div class="step"><div class="n">4</div><div class="t">実行</div><div class="d"><span class="en">execute, key by key</span><span class="ja" lang="ja">キー単位</span></div></div>
+    <div class="step"><div class="n">5</div><div class="t">検証</div><div class="d"><span class="en">verify</span><span class="ja" lang="ja">画面照合</span></div></div>
+  </div>
+</div></section>
+
+<section><div class="wrap">
+  <div class="sec-head"><span class="sec-num">03</span><h2><span class="en">Architecture</span><span class="ja" lang="ja">アーキテクチャ</span></h2></div>
+  <div class="figure">
+    <svg id="archdiagram" viewBox="0 0 940 470" role="img" aria-label="Architecture: an instruction is planned over RAG grounding and personal corrections, gated by human approval, executed through a screen adapter against the mock AS-400, verified against the screen, and measured by an eval harness">
+      <defs>
+        <marker id="ah" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto">
+          <path d="M0,0 L9,4.5 L0,9 Z" fill="#8A94A6"/>
+        </marker>
+        <marker id="ahg" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto">
+          <path d="M0,0 L9,4.5 L0,9 Z" fill="#1C7A45"/>
+        </marker>
+        <marker id="aha" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto">
+          <path d="M0,0 L9,4.5 L0,9 Z" fill="#B7791F"/>
+        </marker>
+      </defs>
+      <g font-family="'Noto Sans JP','Segoe UI',sans-serif">
+        <g>
+          <rect x="16" y="58" width="118" height="78" rx="10" fill="#FFFFFF" stroke="#C9D2DD" stroke-width="1.4"/>
+          <text x="75" y="92" text-anchor="middle" font-weight="700" font-size="16" fill="#1A2230">指示</text>
+          <text class="en" x="75" y="114" text-anchor="middle" font-size="10.5" fill="#5A6678">natural language</text>
+          <text class="ja" x="75" y="114" text-anchor="middle" font-size="10.5" fill="#5A6678">自然言語</text>
+        </g>
+        <g>
+          <rect x="170" y="50" width="160" height="94" rx="10" fill="#FFFFFF" stroke="#C9D2DD" stroke-width="1.4"/>
+          <text x="250" y="80" text-anchor="middle" font-weight="700" font-size="16" fill="#1A2230">計画</text>
+          <text class="en" x="250" y="102" text-anchor="middle" font-size="10.5" fill="#5A6678">slot extraction</text>
+          <text class="ja" x="250" y="102" text-anchor="middle" font-size="10.5" fill="#5A6678">スロット抽出</text>
+          <text class="en" x="250" y="120" text-anchor="middle" font-size="10.5" fill="#5A6678">structured output + retry</text>
+          <text class="ja" x="250" y="120" text-anchor="middle" font-size="10.5" fill="#5A6678">構造化出力＋再試行</text>
+        </g>
+        <g>
+          <rect x="366" y="44" width="172" height="106" rx="10" fill="#E7F4EC" stroke="#1C7A45" stroke-width="2.2"/>
+          <text x="452" y="76" text-anchor="middle" font-weight="700" font-size="16" fill="#14532D">承認ゲート</text>
+          <text class="en" x="452" y="98" text-anchor="middle" font-size="10.5" fill="#1C7A45">human approval</text>
+          <text class="ja" x="452" y="98" text-anchor="middle" font-size="10.5" fill="#1C7A45">人手承認</text>
+          <text x="452" y="118" text-anchor="middle" font-size="10.5" fill="#1C7A45">承認 / 修正 / 却下</text>
+          <text class="en" x="452" y="136" text-anchor="middle" font-size="9.5" fill="#5A6678">the only path to execution</text>
+          <text class="ja" x="452" y="136" text-anchor="middle" font-size="9.5" fill="#5A6678">実行への唯一の経路</text>
+        </g>
+        <g>
+          <rect x="574" y="50" width="160" height="94" rx="10" fill="#FFFFFF" stroke="#C9D2DD" stroke-width="1.4"/>
+          <text x="654" y="80" text-anchor="middle" font-weight="700" font-size="16" fill="#1A2230">実行</text>
+          <text class="en" x="654" y="102" text-anchor="middle" font-size="10.5" fill="#5A6678">key by key, idempotent</text>
+          <text class="ja" x="654" y="102" text-anchor="middle" font-size="10.5" fill="#5A6678">キー単位・冪等</text>
+          <text class="en" x="654" y="120" text-anchor="middle" font-size="10.5" fill="#5A6678">via a screen adapter</text>
+          <text class="ja" x="654" y="120" text-anchor="middle" font-size="10.5" fill="#5A6678">画面アダプタ経由</text>
+        </g>
+        <g>
+          <rect x="770" y="50" width="154" height="94" rx="10" fill="#FFFFFF" stroke="#C9D2DD" stroke-width="1.4"/>
+          <text x="847" y="80" text-anchor="middle" font-weight="700" font-size="16" fill="#1A2230">検証</text>
+          <text class="en" x="847" y="102" text-anchor="middle" font-size="10.5" fill="#5A6678">assert screen state</text>
+          <text class="ja" x="847" y="102" text-anchor="middle" font-size="10.5" fill="#5A6678">画面照合</text>
+          <text class="en" x="847" y="120" text-anchor="middle" font-size="10.5" fill="#5A6678">after every action</text>
+          <text class="ja" x="847" y="120" text-anchor="middle" font-size="10.5" fill="#5A6678">各操作の後に</text>
+        </g>
+        <g fill="none" stroke="#8A94A6" stroke-width="1.6" marker-end="url(#ah)">
+          <line x1="134" y1="97" x2="164" y2="97"/>
+          <line x1="330" y1="97" x2="360" y2="97"/>
+          <line x1="538" y1="97" x2="568" y2="97"/>
+          <line x1="734" y1="97" x2="764" y2="97"/>
+        </g>
+        <g>
+          <rect x="770" y="196" width="154" height="140" rx="10" fill="#FFFFFF" stroke="#C9D2DD" stroke-width="1.4"/>
+          <text class="en" x="847" y="222" text-anchor="middle" font-weight="700" font-size="13" fill="#1A2230">outcome</text>
+          <text class="ja" x="847" y="222" text-anchor="middle" font-weight="700" font-size="13" fill="#1A2230">実行結果</text>
+          <text x="847" y="244" text-anchor="middle" font-size="11" fill="#1C7A45">送信済</text>
+          <text x="847" y="264" text-anchor="middle" font-size="11" fill="#B7791F">再入力／コード確認</text>
+          <text x="847" y="284" text-anchor="middle" font-size="11" fill="#5A6678">要調査</text>
+          <line x1="784" y1="296" x2="910" y2="296" stroke="#E2E6EC" stroke-width="1"/>
+          <text class="en" x="847" y="312" text-anchor="middle" font-size="9" fill="#5A6678">replan (≤2), then roll back</text>
+          <text class="ja" x="847" y="312" text-anchor="middle" font-size="9" fill="#5A6678">再計画は最大2回→ロールバック</text>
+          <text class="en" x="847" y="326" text-anchor="middle" font-size="9" fill="#B7791F">bad data → a person, no retry</text>
+          <text class="ja" x="847" y="326" text-anchor="middle" font-size="9" fill="#B7791F">入力不良は再試行せず人へ</text>
+        </g>
+        <line x1="847" y1="144" x2="847" y2="190" fill="none" stroke="#8A94A6" stroke-width="1.6" marker-end="url(#ah)"/>
+        <path d="M788 150 C 730 186, 690 168, 672 152" fill="none" stroke="#8A94A6" stroke-width="1.5" stroke-dasharray="5 4" marker-end="url(#ah)"/>
+        <text class="en" x="728" y="196" text-anchor="middle" font-size="10" fill="#5A6678">replan</text>
+        <text class="ja" x="728" y="196" text-anchor="middle" font-size="10" fill="#5A6678">再計画</text>
+        <line x1="654" y1="144" x2="654" y2="220" fill="none" stroke="#8A94A6" stroke-width="1.5" marker-end="url(#ah)"/>
+        <g>
+          <rect x="16" y="226" width="164" height="90" rx="10" fill="#FFF8E8" stroke="#E7CF94" stroke-width="1.4"/>
+          <text x="98" y="254" text-anchor="middle" font-weight="700" font-size="13" fill="#92600E">却下（実行前）</text>
+          <text class="en" x="98" y="276" text-anchor="middle" font-size="9.5" fill="#92600E">out-of-domain / missing fields</text>
+          <text class="ja" x="98" y="276" text-anchor="middle" font-size="9.5" fill="#92600E">ドメイン外・必須項目不足</text>
+          <text class="en" x="98" y="294" text-anchor="middle" font-size="9.5" fill="#92600E">refused before the gate</text>
+          <text class="ja" x="98" y="294" text-anchor="middle" font-size="9.5" fill="#92600E">ゲートの手前で却下</text>
+        </g>
+        <path d="M190 144 C 160 175, 130 195, 105 220" fill="none" stroke="#B7791F" stroke-width="1.5" stroke-dasharray="5 4" marker-end="url(#aha)"/>
+        <g>
+          <rect x="200" y="226" width="168" height="90" rx="10" fill="#EDF0F4" stroke="#C9D2DD" stroke-width="1.4"/>
+          <text x="284" y="254" text-anchor="middle" font-weight="700" font-size="13" fill="#1A2230">手順書 RAG</text>
+          <text class="en" x="284" y="276" text-anchor="middle" font-size="10" fill="#5A6678">hybrid retrieval</text>
+          <text class="ja" x="284" y="276" text-anchor="middle" font-size="10" fill="#5A6678">ハイブリッド検索</text>
+          <text class="en" x="284" y="294" text-anchor="middle" font-size="10" fill="#5A6678">vector + full-text, rank-fused</text>
+          <text class="ja" x="284" y="294" text-anchor="middle" font-size="10" fill="#5A6678">ベクトル＋全文の融合</text>
+        </g>
+        <g>
+          <rect x="388" y="226" width="160" height="90" rx="10" fill="#EDF0F4" stroke="#C9D2DD" stroke-width="1.4"/>
+          <text x="468" y="254" text-anchor="middle" font-weight="700" font-size="13" fill="#1A2230">個人修正（育成）</text>
+          <text class="en" x="468" y="276" text-anchor="middle" font-size="10" fill="#5A6678">per-operator corrections</text>
+          <text class="ja" x="468" y="276" text-anchor="middle" font-size="10" fill="#5A6678">利用者ごとに永続化</text>
+          <text class="en" x="468" y="294" text-anchor="middle" font-size="10" fill="#5A6678">reshape the next plan</text>
+          <text class="ja" x="468" y="294" text-anchor="middle" font-size="10" fill="#5A6678">次の計画を作り直す</text>
+        </g>
+        <g>
+          <rect x="574" y="226" width="176" height="90" rx="10" fill="#F0FDF4" stroke="#86EFAC" stroke-width="1.4"/>
+          <text x="662" y="254" text-anchor="middle" font-weight="700" font-size="13" fill="#14532D">モック AS-400</text>
+          <text class="en" x="662" y="276" text-anchor="middle" font-size="9.5" fill="#15803D">a deterministic screen state machine</text>
+          <text class="ja" x="662" y="276" text-anchor="middle" font-size="9.5" fill="#15803D">決定論的な画面状態機械</text>
+          <text class="en" x="662" y="294" text-anchor="middle" font-size="9.5" fill="#15803D">the same seam as a real 5250</text>
+          <text class="ja" x="662" y="294" text-anchor="middle" font-size="9.5" fill="#15803D">実機5250と同じ継ぎ目</text>
+        </g>
+        <g fill="none" stroke="#8A94A6" stroke-width="1.5" marker-end="url(#ah)">
+          <path d="M284 226 C 268 196, 252 172, 240 152"/>
+          <path d="M430 226 C 378 196, 330 176, 302 154"/>
+        </g>
+        <path d="M452 150 C 462 178, 472 200, 480 220" fill="none" stroke="#1C7A45" stroke-width="1.6" marker-end="url(#ahg)"/>
+        <text class="en" x="468" y="338" text-anchor="middle" font-size="10" fill="#1C7A45">a reject / revise note persists as a personal correction</text>
+        <text class="ja" x="468" y="338" text-anchor="middle" font-size="10" fill="#1C7A45">却下・修正のメモが個人修正として永続化</text>
+        <text class="en" x="468" y="354" text-anchor="middle" font-size="10" fill="#5A6678">grounded slots are correction-immune, enforced in code</text>
+        <text class="ja" x="468" y="354" text-anchor="middle" font-size="10" fill="#5A6678">根拠スロットは上書き不可（コード強制）</text>
+        <g>
+          <rect x="60" y="390" width="864" height="66" rx="10" fill="none" stroke="#8A94A6" stroke-width="1.4" stroke-dasharray="6 5"/>
+          <text x="492" y="416" text-anchor="middle" font-weight="700" font-size="13" fill="#1A2230">評価ハーネス</text>
+          <text class="en" x="492" y="438" text-anchor="middle" font-size="10.5" fill="#5A6678">scores planning · retrieval · recovery · growth Δ · boundary respect — runs locally with the model; CI gates a deterministic subset</text>
+          <text class="ja" x="492" y="438" text-anchor="middle" font-size="10.5" fill="#5A6678">計画・検索・リカバリ・育成Δ・境界尊重を採点 — モデルとともにローカル実行、CI は決定論的サブセットをゲート</text>
+        </g>
+      </g>
+    </svg>
+    <div class="fig-cap"><span class="en">The real serving path: grounded plan &rarr; human gate &rarr; verified execution, with the growth loop and the eval harness around it.</span><span class="ja" lang="ja">実際の実行経路：根拠づいた計画 &rarr; 人のゲート &rarr; 検証つき実行。その周りに育成ループと評価ハーネス。</span></div>
+  </div>
+  <div class="chips">
+    <span class="chip">FastAPI</span>
+    <span class="chip">Ollama &middot; Gemma (temperature 0)</span>
+    <span class="chip">TEI &middot; multilingual-e5 (1024-dim)</span>
+    <span class="chip">Postgres + pgvector</span>
+    <span class="chip">React + TypeScript</span>
+    <span class="chip"><span class="en">fully on-premises</span><span class="ja" lang="ja">完全オンプレミス</span></span>
+  </div>
+  <p class="small en">The agent core is a custom loop rather than a framework: existing agent frameworks were weighed against the safety and verification requirements and declined for the serving path, so that approval gating, screen-state verification, idempotency and rollback live in plain code that can be read and tested. Everything runs on-premises; nothing leaves the building.</p>
+  <p class="small ja" lang="ja">エージェントのコアはフレームワークではなく独自ループです。既存のエージェントフレームワークを安全性・検証要件に照らして評価したうえで本番経路には採用せず、承認ゲート・画面状態の検証・冪等性・ロールバックを、読めてテストできる素のコードに置きました。すべてオンプレミスで動作し、データは社外に出ません。</p>
+</div></section>
+
+<section><div class="wrap">
+  <div class="sec-head"><span class="sec-num">04</span><h2><span class="en">The core mechanisms</span><span class="ja" lang="ja">核となる仕組み</span></h2></div>
+  <div class="cards">
+    <div class="card">
+      <h3><span class="en">Grounded planning</span><span class="ja" lang="ja">根拠づいた計画</span></h3>
+      <p class="en">The model extracts the request's slots — destination, dates, project, purpose — grounded by hybrid retrieval over the ingested operating manual (vector + full-text search, rank-fused) and by the operator's own persisted corrections. Every model response is a schema-validated structured output with retry; free-form text where a schema is required is treated as a defect.</p>
+      <p class="ja" lang="ja">モデルは依頼からスロット（目的地・日付・案件・目的）を抽出します。その根拠は、取り込んだ手順書へのハイブリッド検索（ベクトル検索と全文検索の融合）と、そのオペレーター自身の個人修正です。モデルの応答はすべてスキーマ検証付きの構造化出力（再試行つき）として強制され、スキーマが必要な箇所の自由テキストは欠陥として扱います。</p>
+    </div>
+    <div class="card">
+      <h3><span class="en">Human approval</span><span class="ja" lang="ja">人手承認</span></h3>
+      <p class="en">The plan is presented on a structured approval card — the analysis, the key-by-key plan, and the retrieved grounds it stands on. 承認 (approve), 修正 (revise) and 却下 (reject) are human acts, and approval is the only path to execution.</p>
+      <p class="ja" lang="ja">計画は構造化された承認カード — 分析・キー単位の計画・その根拠 — として提示されます。承認・修正・却下は人の行為であり、実行への唯一の経路は承認です。</p>
+    </div>
+    <div class="card">
+      <h3><span class="en">Execute, then verify</span><span class="ja" lang="ja">実行し、検証する</span></h3>
+      <p class="en">An approved plan replays key-by-key through a narrow screen adapter against the legacy target. After each action the screen state is asserted; a mismatch triggers replanning and rollback instead of a silent wrong submit, and bad input data is short-circuited to a person rather than retried blindly.</p>
+      <p class="ja" lang="ja">承認された計画は、狭い画面アダプタ越しにキー単位でレガシー対象へ再生されます。各操作の後に画面状態を検証し、不一致なら黙った誤送信ではなく再計画とロールバックに入ります。入力データの不良は盲目的に再試行せず、人へ引き渡します。</p>
+    </div>
+    <div class="card">
+      <h3><span class="en">Per-operator growth — 育成</span><span class="ja" lang="ja">育成 — 利用者ごとの成長</span></h3>
+      <p class="en">A reject or revise with a note persists a personal correction that reshapes that operator's next plan. Corrections can move only the model's inference slots: whatever the request itself grounds is correction-immune, enforced in code rather than left to the model, and a revise aimed at a grounded slot is declined with a notice.</p>
+      <p class="ja" lang="ja">却下や修正に添えたメモは個人修正として永続化され、そのオペレーターの次の計画を作り直します。修正が動かせるのはモデルの推論スロットだけです。依頼自体が根拠づける値は上書き不可で、これはモデル任せではなくコードで強制され、根拠づいたスロットを狙った修正は通知とともに反映されません。</p>
+    </div>
+    <div class="card">
+      <h3><span class="en">A built-in eval harness</span><span class="ja" lang="ja">組み込みの評価ハーネス</span></h3>
+      <p class="en">An in-repo eval harness scores planning, retrieval, recovery and the growth loop. It runs locally with the model; CI gates a deterministic, model-free subset on every pull request.</p>
+      <p class="ja" lang="ja">リポジトリ内蔵の評価ハーネスが、計画・検索・リカバリ・育成ループを採点します。モデルとともにローカルで実行され、CI は決定論的なモデル非依存サブセットを全 PR でゲートします。</p>
+    </div>
+    <div class="card">
+      <h3><span class="en">A gated repository</span><span class="ja" lang="ja">ゲートで守られたリポジトリ</span></h3>
+      <p class="en">The repository runs under a gated discipline: a required CI verify check (lint, type-check, unit tests, golden-fixture parity and secret scanning), an independent automated review on every pull request, and multi-pass QC — including a five-run deterministic remeasure that re-established every published number at the public release commit.</p>
+      <p class="ja" lang="ja">リポジトリの運営には何重ものゲートを置いています。必須の CI verify チェック（lint・型チェック・ユニットテスト・ゴールデンフィクスチャ一致・シークレットスキャン）、全 PR への独立した自動レビュー、そして複数段の QC — 公開コミットで全公表数値を5回の決定論的再測定によって確かめ直したことを含みます。</p>
+    </div>
+  </div>
+</div></section>
+
+<section><div class="wrap">
+  <div class="sec-head"><span class="sec-num">05</span><h2><span class="en">Measured, not asserted</span><span class="ja" lang="ja">主張ではなく測定</span></h2></div>
+  <p class="lead soft en">Every number below comes from running the eval harness locally with the model, is identical across five consecutive full runs, and was re-confirmed by an independent QC pass at the exact commit that went public.</p>
+  <p class="lead soft ja" lang="ja">以下の数値はすべて、評価ハーネスをモデルとともにローカル実行した結果です。連続5回のフル実行で完全に一致し、公開されたまさにそのコミットにおいて独立した QC により再確認されています。</p>
+  <div class="stats">
+    <div class="stat"><div class="n">1.0</div><div class="l"><span class="en">Planning — success &middot; routing &middot; field accuracy</span><span class="ja" lang="ja">計画 — 成功率・ルーティング・フィールド精度</span></div></div>
+    <div class="stat"><div class="n">1.0</div><div class="l"><span class="en">Retrieval — recall@3 &middot; precision@expected &middot; MRR</span><span class="ja" lang="ja">検索 — recall@3・precision@expected・MRR</span></div></div>
+    <div class="stat"><div class="n">0.625</div><div class="l"><span class="en">Personal-correction growth — &Delta; (inference-tier policy slots)</span><span class="ja" lang="ja">個人修正による育成 — Δ（推論ティアの方針スロット）</span></div></div>
+    <div class="stat"><div class="n">1.0</div><div class="l"><span class="en">Boundary respect — a correction must not override grounded input</span><span class="ja" lang="ja">境界尊重 — 修正が根拠づいた入力を上書きしないこと</span></div></div>
+  </div>
+  <p class="small en">The numbers that are not 1.0 are reported as they are. Recovery on transient faults is 0.5 — by design, bad input data is not blindly retried but handed to a person. Verify pass rate is 0.667 — a failed verify is a detection event that triggers rollback and replanning instead of a silent wrong submit. precision@3 is 0.5 — an artifact of fixed k=3 against expected sets smaller than three; precision@expected on the same runs is 1.0. An executed run takes 9.56 steps on average. Growth &Delta; 0.625 means the movable reuse-previous-project slot moves on four of four policy cases and the overseas policy slot on one of four, against a zero control baseline — the limiter is the model's judgment on the ambiguous slot, not the correction plumbing.</p>
+  <p class="small ja" lang="ja">1.0 でない数値もそのまま報告しています。一時障害のリカバリは 0.5 — 設計上、不正な入力データは盲目的に再試行せず人へ引き渡します。verify 通過率は 0.667 — verify の不一致は検知イベントであり、黙った誤送信ではなくロールバックと再計画をトリガーします。precision@3 は 0.5 — 期待集合が 3 未満でも k=3 で割ることによる構造上のアーティファクトで、同じ実行の precision@expected は 1.0 です。実行あたりの平均ステップ数は 9.56。育成 Δ 0.625 は、可動スロットの前回案件再利用が方針4ケースすべてで動き、海外フラグの方針スロットは4ケース中1ケースで動くという意味です（修正なしでは何も動かないゼロの制御ベースラインに対して）。律速はモデルの曖昧スロットに対する判断であり、修正の配線ではありません。</p>
+  <div class="spike">
+    <svg viewBox="0 0 640 110" role="img" aria-label="free-form generation 7.5 percent versus skeleton plus slot-fill 87.5 percent exact accuracy">
+      <g font-family="'Noto Sans JP','Segoe UI',sans-serif">
+        <text class="en" x="0" y="22" font-size="12" fill="#5A6678">free-form key-sequence generation</text>
+        <text class="ja" x="0" y="22" font-size="12" fill="#5A6678">キー操作列の自由生成</text>
+        <rect x="0" y="30" width="600" height="14" rx="7" fill="#EDF0F4"/>
+        <rect x="0" y="30" width="45" height="14" rx="7" fill="#B7791F"/>
+        <text x="56" y="42" font-size="12.5" font-weight="700" fill="#B7791F">7.5%</text>
+        <text class="en" x="0" y="74" font-size="12" fill="#5A6678">sequence skeleton in code + slot values from the model</text>
+        <text class="ja" x="0" y="74" font-size="12" fill="#5A6678">操作列の骨格はコード側＋スロット値はモデル</text>
+        <rect x="0" y="82" width="600" height="14" rx="7" fill="#EDF0F4"/>
+        <rect x="0" y="82" width="525" height="14" rx="7" fill="#1C7A45"/>
+        <text x="536" y="94" font-size="12.5" font-weight="700" fill="#1C7A45">87.5%</text>
+      </g>
+    </svg>
+    <p class="small en" style="margin:14px 0 0;">The architecture itself was set by measurement before the product was built. A reliability spike on the target task measured free-form key-sequence generation at 7.5% exact accuracy; keeping the sequence skeleton in code and asking the model only for slot values and branch decisions raised it to 87.5% (96 runs, zero parse failures). The same spike produced the finding that shaped everything after it: across all 96 runs the model never once generated the correct abort sequence when a required field was empty — and slot-filling will faithfully assemble a hallucinated value. Safety is therefore engineered outside the model: code-level required-field guards, schema-enforced refusal, human approval before execution, and screen verification after it.</p>
+    <p class="small ja" lang="ja" style="margin:14px 0 0;">アーキテクチャ自体も、構築の前の測定で決めています。対象業務での信頼性スパイクでは、キー操作列の自由生成は exact 精度 7.5% でした。操作列の骨格をコード側に置き、モデルにはスロット値と分岐判断だけを任せる方式で 87.5% に上がります（96 ラン、parse 失敗 0）。同じスパイクが、その後のすべてを方向づけた所見も出しました。96 ラン中、必須項目が空のときに正しい中断（abort）列を生成できたことは一度もなく、スロットフィルは幻覚された値を忠実に組み立ててしまう、というものです。だから安全はモデルの外側で作ります — コードによる必須項目ガード、スキーマで強制する却下表現、実行前の人手承認、実行後の画面検証です。</p>
+  </div>
+</div></section>
+
+<section><div class="wrap">
+  <div class="sec-head"><span class="sec-num">06</span><h2><span class="en">Where to look next</span><span class="ja" lang="ja">次に見るもの</span></h2></div>
+  <div class="doors">
+    <a class="door" href="./mock/">
+      <b><span class="en">Interactive mock</span><span class="ja" lang="ja">インタラクティブモック</span></b>
+      <span class="desc en">The approval console in the browser, on hand-authored recorded data — not a live LLM. Walk instruction &rarr; plan &rarr; approve / reject &rarr; green-screen replay.</span>
+      <span class="desc ja" lang="ja">ブラウザで動く承認コンソール。手書きの記録済みデータ上で動作し、ライブ LLM ではありません。指示 → 計画 → 承認／却下 → グリーンスクリーン再生を体験できます。</span>
+    </a>
+    <a class="door" href="./status/">
+      <b><span class="en">Status &amp; roadmap</span><span class="ja" lang="ja">実装状況とロードマップ</span></b>
+      <span class="desc en">What is built, what is partial, what is deliberately deferred — item by item, with the honest numbers kept in view.</span>
+      <span class="desc ja" lang="ja">何が実装済みで、何が部分実装で、何を意図して延期したか — 項目ごとに、正直な数値とともに。</span>
+    </a>
+    <a class="door" href="./operations/">
+      <b><span class="en">Operations design note</span><span class="ja" lang="ja">運用設計ノート</span></b>
+      <span class="desc en">How the system is designed to be operated — alerts, dashboard, drill-down, growth hygiene. Design intent only; none of it is running today.</span>
+      <span class="desc ja" lang="ja">このシステムをどう運用する設計か — アラート、ダッシュボード、ドリルダウン、育成の衛生管理。設計意図のみであり、現時点で稼働しているものはありません。</span>
+    </a>
+  </div>
+  <p class="foot">
+    <span class="en">All identifiers in the demo data are synthetic (ABC商事, 製品X, …). The source repository is private; these pages and the mock are its public face.</span>
+    <span class="ja" lang="ja">デモデータ中の識別子はすべて架空のものです（ABC商事、製品X など）。ソースリポジトリは非公開であり、これらのページとモックがその公開面です。</span>
+  </p>
+</div></section>
+
+<script>
+(function(){
+  var root=document.documentElement;
+  var buttons=document.querySelectorAll(".lang-btn");
+  function apply(lang){
+    root.setAttribute("data-lang",lang);
+    root.setAttribute("lang",lang);
+    buttons.forEach(function(b){b.classList.toggle("active",b.getAttribute("data-lang")===lang);});
+    try{localStorage.setItem("tanomude-lang",lang);}catch(e){}
+  }
+  buttons.forEach(function(b){b.addEventListener("click",function(){apply(b.getAttribute("data-lang"));});});
+  var saved=null;
+  try{saved=localStorage.getItem("tanomude-lang");}catch(e){}
+  apply(saved==="ja"?"ja":"en");
+})();
+</script>
+</body>
+</html>
