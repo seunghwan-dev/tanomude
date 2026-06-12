@@ -8,38 +8,74 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../shared.css">
-<title>Tanomude — operations design note</title>
+<title>Tanomude — design &amp; technology choices</title>
 <style>
   :root{
     --warn:#92600E; --warn-bg:#FFF8E8; --warn-line:#E7CF94;
     --built:#1C7A45; --built-bg:#E7F4EC;
     --design:#475569; --design-bg:#EEF1F5;
   }
-  body{line-height:1.7;}
-  .wrap{max-width:820px;margin:0 auto;padding:34px 22px 0;}
-  h1{font-size:26px;margin:0 0 10px;line-height:1.3;}
-  h2{font-size:19px;margin:42px 0 10px;padding-bottom:7px;border-bottom:2px solid var(--line);}
+  .wrap{max-width:1040px;margin:0 auto;padding:0 22px;}
+  header.page{padding:40px 0 4px;}
+  h1{font-size:clamp(1.6rem,3.4vw,2.2rem);letter-spacing:-.01em;margin:0 0 10px;line-height:1.25;}
+  .lede{font-size:1.02rem;color:var(--soft);max-width:74ch;margin:0;}
+  section{padding:30px 0 6px;}
+  .sec-head{display:flex;align-items:baseline;gap:14px;margin:0 0 12px;}
+  .sec-num{font-size:.78rem;font-weight:600;letter-spacing:.08em;color:var(--faint);}
+  h2{font-size:clamp(1.2rem,2.4vw,1.5rem);letter-spacing:-.01em;margin:0;line-height:1.2;}
+  .src{font-size:.76rem;color:var(--faint);margin-left:auto;}
+  .src code{font-size:.74rem;}
   p{margin:10px 0;}
+  .note{font-size:.9rem;color:var(--soft);max-width:78ch;}
+  code{font-family:"Cascadia Code",Consolas,monospace;font-size:.86em;
+    background:var(--sunk);padding:1px 5px;border-radius:4px;}
+  table.dec{width:100%;border-collapse:collapse;background:var(--panel);
+    border:1px solid var(--line);border-radius:10px;overflow:hidden;margin:12px 0;font-size:13.5px;}
+  table.dec thead th{background:var(--sunk);text-align:left;padding:9px 12px;font-size:12.5px;
+    color:var(--soft);font-weight:600;border-bottom:1px solid var(--line);}
+  table.dec td{padding:9px 12px;border-bottom:1px solid var(--line);vertical-align:top;}
+  table.dec tbody tr:last-child td{border-bottom:none;}
+  table.dec td.d{font-weight:600;width:32%;}
+  .figure{background:var(--panel);border:1px solid var(--line);border-radius:14px;
+    padding:22px;margin:14px 0 0;}
+  .figure svg{width:100%;height:auto;display:block;}
+  .fig-cap{font-size:.8rem;color:var(--faint);text-align:center;margin:12px 0 0;}
+  .chips{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0 0;}
+  .chip{border:1px solid var(--line);background:var(--panel);border-radius:999px;
+    padding:3px 13px;font-size:12px;color:var(--soft);white-space:nowrap;}
+  .chip b{color:var(--ink);font-weight:600;}
+  .cards{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin:14px 0 0;}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px 18px;}
+  .card h3{font-size:.98rem;margin:0 0 8px;color:var(--accent);}
+  .card p{margin:0 0 6px;font-size:.88rem;color:var(--soft);}
+  .card p:last-child{margin-bottom:0;}
+  .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:14px 0 0;}
+  .stat{background:var(--panel);border:1px solid var(--line);border-left:5px solid var(--accent);
+    border-radius:10px;padding:12px 14px;}
+  .stat .n{font-size:26px;font-weight:700;line-height:1;color:var(--accent);}
+  .stat .l{font-size:11.5px;color:var(--soft);margin-top:6px;}
   .standing{background:var(--warn-bg);border:1px solid var(--warn-line);
-    border-left:5px solid var(--warn);border-radius:10px;padding:14px 18px;margin:18px 0;}
+    border-left:5px solid var(--warn);border-radius:10px;padding:13px 17px;margin:14px 0;}
   .standing b{color:var(--warn);}
+  .standing p{margin:0;font-size:.92rem;}
   .tag{display:inline-block;padding:1px 8px;border-radius:5px;font-size:11px;
     font-weight:700;vertical-align:middle;margin-right:6px;white-space:nowrap;}
   .t-built{background:var(--built-bg);color:var(--built);}
   .t-design{background:var(--design-bg);color:var(--design);}
-  table{width:100%;border-collapse:collapse;background:var(--panel);
-    border:1px solid var(--line);border-radius:10px;overflow:hidden;margin:14px 0;font-size:13.5px;}
-  thead th{background:var(--sunk);text-align:left;padding:9px 12px;font-size:12.5px;
+  table.ops{width:100%;border-collapse:collapse;background:var(--panel);
+    border:1px solid var(--line);border-radius:10px;overflow:hidden;margin:12px 0;font-size:13px;}
+  table.ops thead th{background:var(--sunk);text-align:left;padding:8px 11px;font-size:12px;
     color:var(--soft);font-weight:600;border-bottom:1px solid var(--line);}
-  td{padding:9px 12px;border-bottom:1px solid var(--line);vertical-align:top;width:50%;}
-  tbody tr:last-child td{border-bottom:none;}
-  code{font-family:"Cascadia Code",Consolas,monospace;font-size:13px;
-    background:var(--sunk);padding:1px 5px;border-radius:4px;}
-  ul{margin:10px 0;padding-left:24px;}
-  li{margin:6px 0;}
-  .foot{color:var(--faint);font-size:12px;margin-top:48px;border-top:1px solid var(--line);
+  table.ops td{padding:8px 11px;border-bottom:1px solid var(--line);vertical-align:top;}
+  table.ops tbody tr:last-child td{border-bottom:none;}
+  table.ops td.item{font-weight:600;width:26%;}
+  .foot{color:var(--faint);font-size:12px;margin-top:40px;border-top:1px solid var(--line);
     padding-top:14px;}
   a{color:var(--accent);}
+  @media (max-width:760px){
+    .cards{grid-template-columns:1fr;}
+    .stats{grid-template-columns:repeat(2,1fr);}
+  }
 </style>
 </head>
 <body>
@@ -55,107 +91,368 @@
   </div>
 </div></nav>
 
-<div class="wrap">
+<header class="page"><div class="wrap">
+  <h1><span class="en">Design &amp; technology choices</span><span class="ja" lang="ja">設計と技術選定</span></h1>
+  <p class="lede en">The engineering choices behind Tanomude and the reasons they were made, followed by the actual structure of the core loop, the retrieval pipeline, and the eval harness — drawn from the implementation as it ships, with the source module named on every diagram. The final section keeps the operations design: intent for a layer that is not built yet.</p>
+  <p class="lede ja" lang="ja">Tanomude を支える技術選定とその理由、そしてコアループ・検索パイプライン・評価ハーネスの実際の構造を、出荷済みの実装から起こして整理したページです。各図には出典のモジュールを明記しています。最後の節には運用設計を残しています — まだ作られていない層の、設計意図です。</p>
+</div></header>
 
-  <h1><span class="en">Operations design note</span><span class="ja" lang="ja">運用設計ノート</span></h1>
-
-  <div class="standing">
-    <p style="margin:0;" class="en"><b>This note is design intent, not an operations report.</b> Nothing described below is built or running: there is no deployment, no alert has ever fired, no dashboard exists, and no on-call rotation is in place. The product this note would operate does exist, and where one of its shipped behaviors is load-bearing for the design, the note marks it <span class="tag t-built">built</span>; everything else is <span class="tag t-design">design</span> — future work, recorded now so the eventual build has a target it can be checked against.</p>
-    <p style="margin:0;" class="ja" lang="ja"><b>ここに書いてあるのは運用の設計であって、運用した記録ではありません。</b>以下のものは、まだ何ひとつ作られておらず、動いてもいません。デプロイは存在せず、アラートが鳴ったことは一度もなく、ダッシュボードもオンコール体制もまだありません。運用の対象になる製品そのものは存在するので、出荷済みの挙動が設計を支えている箇所には <span class="tag t-built">built</span> の印を付けています。それ以外はすべて <span class="tag t-design">design</span> — まだ作っていない将来のものを、いざ作るときに照らし合わせられる目標として、いまのうちに書き残しておくものです。</p>
-  </div>
-
-  <h2><span class="en">Why write this before building it</span><span class="ja" lang="ja">なぜ作る前に書くのか</span></h2>
-  <p class="en">An agent that operates a legacy system has an unusual failure profile: the dangerous failures do not crash. They submit. A model that has started flailing produces well-formed keystrokes that pass through the adapter exactly as faithfully as correct ones, and ordinary error logging — built to catch exceptions — sees nothing wrong. Operating such a system is therefore less about uptime and more about noticing wrongness early, diagnosing it fast, and bounding what a wrong action can cost. That conviction already shaped the product: every executed step asserts the resulting screen state, failures roll back, and nothing executes without a human approval. This note extends the same conviction past the product's edge, to the layer that would watch it day after day.</p>
-  <p class="ja" lang="ja">レガシーシステムを操作するエージェントの故障の形は独特です。危険な故障はクラッシュしません — 送信されてしまうのです。挙動の崩れたモデルが整形式のキー入力を生成すれば、アダプタは正しい入力と同じ忠実さでそれを流し、例外を捕まえるために作られた通常のエラーロギングには何の異常も映りません。したがってこのシステムの運用は、稼働率の話である以上に、「誤りに早く気づくこと」「速く診断すること」「誤った操作の被害を限定すること」の話になります。この確信は製品自体をすでに形づくっています — 実行された各ステップは画面状態を検証し、失敗はロールバックし、人の承認なしには何も実行されません。本ノートは同じ確信を製品の縁の外、つまり日々それを見守る層へと延長するものです。</p>
-
-  <h2><span class="en">The three-layer funnel</span><span class="ja" lang="ja">3層の漏斗</span></h2>
-  <p class="en"><span class="tag t-design">design</span> Operations is structured as a funnel of three layers, ordered by how the operator encounters a problem: first you are <i>called</i> (alerts), then you <i>see</i> (a dashboard), then you ask <i>why</i> (drill-down). The deliberate principle behind the funnel: operations is not a separate system bolted on later, but a reader of records the product already writes — task steps, approval decisions, verify outcomes, the audit log — plus one instrumentation point that is itself still unbuilt: a wrapper around the LLM client logging tokens, cost, latency, retries and model per call.</p>
-  <p class="ja" lang="ja"><span class="tag t-design">design</span> 運用は3層の漏斗として設計します。並び順は、運用者が問題に出会う順序そのものです — まず<i>呼ばれる</i>（アラート）、つぎに<i>見る</i>（ダッシュボード）、最後に<i>なぜかを問う</i>（ドリルダウン）。漏斗の背後にある意図的な原則：運用は後付けの別システムではなく、製品がもともと書き残す記録 — タスクステップ・承認の決定・verify の結果・監査ログ — の読み手である、ということです。これに、それ自体まだ未構築の計測点が一つ加わります。LLM クライアントを包み、呼び出しごとにトークン・コスト・レイテンシ・再試行・モデルを記録するラッパーです。</p>
-
-  <h2><span class="en">Layer 1 — alerts: being called</span><span class="ja" lang="ja">第1層 — アラート：呼ばれる</span></h2>
-  <p class="en"><span class="tag t-design">design</span> The design calls for four families of alert rules, each tied to a distinct failure mode:</p>
-  <p class="ja" lang="ja"><span class="tag t-design">design</span> 設計しているアラートルールは4系統で、それぞれ別の故障モードを受け持ちます。</p>
-  <ul>
-    <li><span class="en"><b>Heartbeat death</b> — a health endpoint stops answering: the plain outage case.</span><span class="ja" lang="ja"><b>ハートビートの死</b> — ヘルスエンドポイントが応答しなくなる、素朴な停止のケース。</span></li>
-    <li><span class="en"><b>Verify-failure-rate spike</b> — the screen keeps disagreeing with the plan. This is the tripwire for silent malfunction: the system has started doing the wrong thing without crashing.</span><span class="ja" lang="ja"><b>verify 失敗率の急騰</b> — 画面が計画と食い違い続ける。クラッシュなしに誤った動作が始まったことを捕まえる、静かな誤作動への仕掛け線です。</span></li>
-    <li><span class="en"><b>Error / retry-rate spike</b> — the adapter or the legacy target has changed under the agent's feet.</span><span class="ja" lang="ja"><b>エラー／再試行率の急騰</b> — アダプタかレガシー側が、エージェントの足元で変わったことの兆候。</span></li>
-    <li><span class="en"><b>Token / cost surge with a budget cap</b> — the runaway-loop safeguard: calls per task climbing past the budget means the loop is spinning, not working.</span><span class="ja" lang="ja"><b>トークン／コストの急増と予算上限</b> — 暴走ループへの安全装置。タスクあたりの呼び出しが予算を超えて伸びるのは、働いているのではなく空回りしている兆候です。</span></li>
-  </ul>
-  <p class="en">The designed channel is the same messenger the assistant itself uses, so the operator's phone is the pager — an alert like "verify failure rate is climbing" arrives as a push message. Thresholds are deliberately not stated in this note: inventing them on paper would be exactly the kind of unmeasured claim the rest of this project avoids. They would be set from observed baselines during a measurement period, then tightened.</p>
-  <p class="ja" lang="ja">通知チャネルの設計は、アシスタント自身が使うのと同じメッセンジャーです。運用者の携帯がそのままポケベルになり、「verify 失敗率が上昇中」のようなアラートがプッシュ通知で届きます。しきい値をこのノートにあえて書かないのは意図的です。紙の上でしきい値をでっち上げることは、このプロジェクトが一貫して避けてきた「測っていない主張」そのものだからです。しきい値は計測期間に観測されたベースラインから定め、その後で絞り込みます。</p>
-
-  <h2><span class="en">Layer 2 — the dashboard: seeing at a glance</span><span class="ja" lang="ja">第2層 — ダッシュボード：一目で見る</span></h2>
-  <p class="en"><span class="tag t-design">design</span> One screen, answerable in five seconds: is it green or red right now? The designed panel set: live status; a feed of recent task successes and failures; verify pass rate; error and retry rates; LLM calls per task (the loop detector); and latency p50/p95. An anomaly should be visible as a line falling or a tile turning red — before anyone writes a query. The dashboard reads the same records as the alerts; it is the alert rules made continuously visible.</p>
-  <p class="ja" lang="ja"><span class="tag t-design">design</span> 一枚の画面で、5秒で答えられること — いま緑か、赤か。設計上のパネル構成は、ライブ状態、直近タスクの成功・失敗フィード、verify 通過率、エラー率と再試行率、タスクあたりの LLM 呼び出し数（ループ検知器）、レイテンシ p50/p95 です。異常は、誰かがクエリを書くより先に、線が落ちる・タイルが赤くなるという形で見えるべきです。ダッシュボードはアラートと同じ記録を読みます — アラートルールを常時可視化したものです。</p>
-
-  <h2><span class="en">Layer 3 — drill-down: asking why</span><span class="ja" lang="ja">第3層 — ドリルダウン：なぜかを問う</span></h2>
-  <p class="en"><span class="tag t-built">built</span> This is the one layer whose substrate already ships in the product. Every task persists its step-by-step timeline; the inspector drills from an intent to the exact key sequence sent; the console renders the screen states the run produced; and every approval decision lands in an append-only audit log. <span class="tag t-design">design</span> What the operations layer would add on top: clicking a failure in the dashboard's feed and landing directly on the full trace — retrieval, plan, keys sent, the assertion that failed, the screen that came back — so that "it broke" becomes "the screen returned X where the plan expected Y, here." The aggregation queries and the dashboard-to-trace navigation are the unbuilt part; the trace itself is recorded today.</p>
-  <p class="ja" lang="ja"><span class="tag t-built">built</span> この層だけは、その基盤がすでに製品として出荷されています。すべてのタスクはステップ単位のタイムラインを永続化し、インスペクタは意図から実際に送られたキー列までを掘り下げ、コンソールは実行が生んだ画面状態を表示し、すべての承認の決定は追記専用の監査ログに残ります。<span class="tag t-design">design</span> 運用層がその上に足すのは、ダッシュボードのフィードで失敗をクリックすると完全なトレース — 検索・計画・送出キー・失敗した検証・返ってきた画面 — に直接着地する動線です。「壊れた」を「計画は Y を期待したが画面は X を返した、ここで」に変えるためのものです。未構築なのは集計クエリとダッシュボードからトレースへの導線で、トレース自体は今日すでに記録されています。</p>
-
-  <h2><span class="en">SLOs — which signals would carry objectives</span><span class="ja" lang="ja">SLO — どの信号に目標を載せるか</span></h2>
-  <p class="en"><span class="tag t-design">design</span> The signals that would carry service-level objectives are the ones the funnel already watches: verify pass rate, the rate of executions that complete without needing human rescue, replan frequency, and plan latency at p95. Two honesty rules govern them. First, no target is stated in this note — the eval harness's published figures are measurements of a fixed 24-case suite, not operational baselines, and borrowing them as SLO targets would conflate the two. Targets come from a baseline period in real operation. Second, a verify failure spends error budget even when recovery succeeds: the system noticing its own mistake is better than not noticing, but the objective is to need the recovery less.</p>
-  <p class="ja" lang="ja"><span class="tag t-design">design</span> SLO を載せる信号は、漏斗がすでに見ているものと同じです — verify 通過率、人の救援なしで完了した実行の割合、再計画の頻度、計画レイテンシの p95。これらを律する正直さのルールが2つあります。第一に、本ノートには目標値を書きません。評価ハーネスの公表数値は固定された24ケースのスイートに対する測定であって運用ベースラインではなく、それを SLO 目標に流用するのは両者の混同です。目標値は実運用のベースライン期間から定めます。第二に、リカバリが成功しても verify の失敗はエラーバジェットを消費します。自分の誤りに気づくシステムは気づかないものよりましですが、目標はリカバリの必要自体を減らすことだからです。</p>
-
-  <h2><span class="en">On-call — who gets called, with what in hand</span><span class="ja" lang="ja">オンコール — 誰が、何を手にして呼ばれるか</span></h2>
-  <p class="en"><span class="tag t-design">design</span> The honest on-call design for a single-maintainer system is one person: the maintainer is the rotation. What makes that survivable is the funnel — the design goal is that an alert never arrives naked. It carries the failing signal, and the diagnosis is one click deep, because layer 3 already holds the trace. Escalation in the usual sense (a second responder) is a non-goal at this scale; the meaningful escalation path already exists in the product itself, where any execution the system cannot defend lands on a human's desk as a re-entry or needs-investigation outcome rather than being retried into the legacy system.</p>
-  <p class="ja" lang="ja"><span class="tag t-design">design</span> 保守者が一人のシステムにおける正直なオンコール設計は、一人 — 保守者自身が当番表です。それを成り立たせるのが漏斗です。設計目標は、アラートが裸で届かないこと。アラートは異常を起こした信号を携えて届き、第3層がすでにトレースを保持しているため、診断は1クリック先にあります。通常の意味でのエスカレーション（第二応答者）はこの規模では目標にしません。意味のあるエスカレーション経路はすでに製品の中にあります — システムが正当化できない実行は、レガシーシステムへ再試行されるのではなく、再入力または要調査の結果として人の机に届きます。</p>
-
-  <h2><span class="en">Automatic rollback — two different things by the same name</span><span class="ja" lang="ja">自動ロールバック — 同じ名前の異なる二つ</span></h2>
-  <p class="en"><span class="tag t-built">built</span> Inside a single execution, rollback already exists and runs on the product path: a failed screen assertion triggers replanning up to a hard cap, then rolls the session back to a safe screen state instead of leaving a half-entered application behind; bad input data short-circuits straight to a person; and idempotency keys make a re-submission yield one application, not two. <span class="tag t-design">design</span> What this note designs is rollback at the operations level — above executions, over the knowledge the system accumulates. The canonical case is a personal correction that turns out to be wrong: the designed mechanism rolls the correction set back to its previous version — the versioned, supersedes-chained storage this requires already ships — and quarantines the offending entry for human review rather than deleting it silently.</p>
-  <p class="ja" lang="ja"><span class="tag t-built">built</span> 単一の実行の内側では、ロールバックはすでに存在し、製品の経路で動いています。画面検証の失敗は上限つきの再計画をトリガーし、それでも駄目ならセッションを安全な画面状態へ巻き戻し、入力途中の申請を残しません。不正な入力データは人へ直行し、冪等キーにより再送信しても申請は2件ではなく1件になります。<span class="tag t-design">design</span> 本ノートが設計するのは、その上の運用レベルのロールバック — 実行の上位、システムが蓄積する知識に対するものです。典型例は、誤りだと判明した個人修正です。設計上の機構は、修正セットを前のバージョンへ巻き戻し（これに必要なバージョン管理と supersedes 連鎖つきの保存はすでに出荷済み）、問題のエントリを黙って消すのではなく隔離して人のレビューに回します。</p>
-
-  <h2><span class="en">育成 hygiene — detecting contamination</span><span class="ja" lang="ja">育成の衛生 — 汚染の検知</span></h2>
-  <p class="en"><span class="tag t-design">design</span> The growth loop is the product's most distinctive surface and its most distinctive risk: a wrong correction does not crash anything — it quietly bends every future plan for that operator. The boundary that limits the blast radius is already enforced in code (a correction cannot touch what the request grounds; that invariant measures 1.0 and is re-verified on every eval run). What remains is detecting contamination inside the territory corrections legitimately govern. The designed mechanism couples the growth loop to the eval harness: corrections enter versioned, as they already do; the eval suite re-runs on a schedule and after correction changes; and a metric regression that coincides with a correction version becomes a flagged, quarantinable event — fall back to the prior version, surface the correction for review. True unlearning (removing a correction's influence entirely) is listed in the product's stretch scope and is unbuilt; until it exists, quarantine-and-fallback is the designed containment.</p>
-  <p class="ja" lang="ja"><span class="tag t-design">design</span> 育成ループはこの製品の最も特徴的な面であり、同時に最も特徴的なリスクです。誤った修正は何もクラッシュさせません — そのオペレーターの将来のすべての計画を静かに歪めます。被害半径を限定する境界はすでにコードで強制されています（修正は依頼が根拠づける値に触れられない。この不変条件の測定値は 1.0 で、評価実行のたびに再検証されます）。残る課題は、修正が正当に支配する領域の内側での汚染の検知です。設計上の機構は育成ループを評価ハーネスに結合します。修正は現状どおりバージョン付きで入り、評価スイートは定期と修正変更後に再実行され、修正バージョンと時を同じくする指標の後退は、フラグ付きの隔離可能なイベントになります — 前バージョンへフォールバックし、当該修正をレビューに浮上させる。真の unlearn（修正の影響の完全な除去）は製品のストレッチ範囲に記録されており未構築です。それが存在するまでは、隔離とフォールバックが設計上の封じ込めです。</p>
-
-  <h2><span class="en">The daily loop</span><span class="ja" lang="ja">日々のループ</span></h2>
-  <p class="en"><span class="tag t-design">design</span> The designed steady state, by trigger rather than by clock: the dashboard and alerts stand watch continuously. A guideline change triggers an eval regression run before it is trusted. A change on the legacy side announces itself as verify failures — the adapter is fixed, not the symptom. A model update means the full eval suite re-runs before the new model serves. And growth hygiene is periodic: corrections are reviewed and pruned, because the previous section's detector only catches what regresses a metric, not what merely accumulates.</p>
-  <p class="ja" lang="ja"><span class="tag t-design">design</span> 設計上の定常運転は、時刻ではなくトリガーで回ります。ダッシュボードとアラートは常時の見張り。指針の変更は、信頼する前に評価回帰の実行をトリガーします。レガシー側の変更は verify の失敗として自己申告してくるので、直すのは症状ではなくアダプタです。モデルの更新は、新モデルが本番に就く前に評価スイートの全再実行を意味します。そして育成の衛生は定期作業です — 前節の検知器が捕まえるのは指標を後退させるものだけで、ただ溜まっていくものは捕まえないため、修正は定期的にレビューし、剪定します。</p>
-
-  <h2><span class="en">One instrumentation point, two cost regimes</span><span class="ja" lang="ja">一つの計測点、二つのコスト体系</span></h2>
-  <p class="en"><span class="tag t-design">design</span> The wrapper that instruments the LLM client is designed provider-agnostic, because the numbers worth watching change with the serving path: an on-premise deployment watches GPU utilization, throughput and VRAM headroom, while an API-served deployment watches tokens and spend. Only the cost arithmetic differs per path; the instrumentation point, the usage table, and the alert rules above it stay the same.</p>
-  <p class="ja" lang="ja"><span class="tag t-design">design</span> LLM クライアントを計測するラッパーはプロバイダ非依存に設計します。見るべき数値が配信経路で変わるからです — オンプレミス配備では GPU 使用率・スループット・VRAM の余裕を、API 配信ではトークンと支出を見ます。経路ごとに異なるのはコストの算術だけで、計測点・利用量テーブル・その上のアラートルールは同一のままです。</p>
-
-  <h2><span class="en">What exists today, what this note designs</span><span class="ja" lang="ja">今日あるもの、このノートが設計するもの</span></h2>
-  <table>
-    <thead><tr>
-      <th><span class="tag t-built">built</span> <span class="en">ships in the product today</span><span class="ja" lang="ja">今日、製品として出荷済み</span></th>
-      <th><span class="tag t-design">design</span> <span class="en">designed here, not built</span><span class="ja" lang="ja">ここで設計・未構築</span></th>
-    </tr></thead>
+<section><div class="wrap">
+  <div class="sec-head"><span class="sec-num">01</span><h2><span class="en">Engineering decisions, and why</span><span class="ja" lang="ja">技術選定と、その理由</span></h2></div>
+  <table class="dec">
+    <thead><tr><th><span class="en">Decision</span><span class="ja" lang="ja">選定</span></th><th><span class="en">Why</span><span class="ja" lang="ja">理由</span></th></tr></thead>
     <tbody>
       <tr>
-        <td><span class="en">Per-step screen verification; replan with a hard cap; rollback to a safe screen state</span><span class="ja" lang="ja">ステップ単位の画面検証。上限つき再計画。安全な画面状態へのロールバック</span></td>
-        <td><span class="en">Alert rules (heartbeat, verify-failure rate, error/retry rate, cost surge) and the messenger channel</span><span class="ja" lang="ja">アラートルール（ハートビート・verify 失敗率・エラー／再試行率・コスト急増）と通知チャネル</span></td>
+        <td class="d"><span class="en">The key-sequence skeleton lives in code; the model fills slots only</span><span class="ja" lang="ja">キー操作列の骨格はコード側、モデルはスロットのみ</span></td>
+        <td><span class="en">Measured, not assumed: free-form generation scored 7.5% exact vs 87.5% for skeleton + slot-fill (96 runs, zero parse failures) — and in all 96 runs the model never once produced the correct abort sequence on a missing required field. So dates, day counts, branching and required-field guards are code; the model returns two normalized values and two branch decisions.</span><span class="ja" lang="ja">前提ではなく測定で決定：自由生成は exact 7.5%、骨格＋スロットフィルは 87.5%（96ラン・parse失敗0）。さらに96ラン中、必須項目欠落時の正しい中断列は一度も生成されませんでした。だから日付・日数・分岐・必須項目ガードはコード側に置き、モデルは2つの値の正規化と2つの分岐判断だけを返します。</span></td>
       </tr>
       <tr>
-        <td><span class="en">Bad-input short-circuit to a person; idempotency keys on submission</span><span class="ja" lang="ja">入力不良の人への短絡。送信の冪等キー</span></td>
-        <td><span class="en">The operations dashboard and its panels</span><span class="ja" lang="ja">運用ダッシュボードとその各パネル</span></td>
+        <td class="d"><span class="en">A custom agent loop, not a framework</span><span class="ja" lang="ja">フレームワークではなく独自ループ</span></td>
+        <td><span class="en">Existing agent frameworks were weighed against the safety and verification requirements and declined for the serving path: approval gating, screen-state verification, idempotency and rollback stay in plain code that can be read and tested.</span><span class="ja" lang="ja">既存のエージェントフレームワークを安全性・検証要件に照らして評価したうえで本番経路には不採用。承認ゲート・画面状態の検証・冪等性・ロールバックを、読めてテストできる素のコードに置くためです。</span></td>
       </tr>
       <tr>
-        <td><span class="en">Step timeline, intent→key inspector, screen-state rendering, append-only audit log</span><span class="ja" lang="ja">ステップタイムライン、意図→キーのインスペクタ、画面状態の表示、追記専用の監査ログ</span></td>
-        <td><span class="en">SLOs and their baseline-derived targets; error-budget accounting</span><span class="ja" lang="ja">SLO とベースライン由来の目標値。エラーバジェットの会計</span></td>
+        <td class="d"><span class="en">Human approval is the only path to execution</span><span class="ja" lang="ja">実行への唯一の経路は人手承認</span></td>
+        <td><span class="en">A dangerous failure does not crash — it submits. Planning and execution are two separate calls: a plan stops at <code>awaiting_approval</code>, execution exists only inside the approve endpoint, and a decision on a task not awaiting approval is rejected with 409.</span><span class="ja" lang="ja">危険な故障はクラッシュせず、送信されてしまいます。計画と実行は別々の呼び出しで、計画は <code>awaiting_approval</code> で停止し、実行は承認エンドポイントの内側にしか存在せず、承認待ち以外のタスクへの決定は 409 で拒否されます。</span></td>
       </tr>
       <tr>
-        <td><span class="en">Correction versioning with a supersedes chain; fallback to a prior version</span><span class="ja" lang="ja">supersedes 連鎖つきの修正バージョン管理。前バージョンへのフォールバック</span></td>
-        <td><span class="en">On-call tooling; dashboard-to-trace navigation and aggregation queries</span><span class="ja" lang="ja">オンコールのツール群。ダッシュボードからトレースへの導線と集計クエリ</span></td>
+        <td class="d"><span class="en">Hybrid retrieval — vector + full-text, rank-fused</span><span class="ja" lang="ja">ハイブリッド検索 — ベクトル＋全文を順位融合</span></td>
+        <td><span class="en">Queries are Japanese prose, but the load-bearing tokens are screen codes (<code>DEST</code>, <code>P-###</code>). The vector channel carries meaning; the full-text channel (the unstemmed <code>simple</code> dictionary) carries exact tokens; reciprocal-rank fusion (k=60) combines the two rankings without having to calibrate two unrelated score scales.</span><span class="ja" lang="ja">問い合わせは日本語の文章ですが、効いてくるのは画面コード（<code>DEST</code>・<code>P-###</code>）のような正確なトークンです。ベクトル側が意味を、全文検索側（語幹処理なしの <code>simple</code> 辞書）が正確な字面を受け持ち、RRF（k=60）が二つの異なるスコア尺度を調整せずに順位だけで融合します。</span></td>
       </tr>
       <tr>
-        <td><span class="en">Code-enforced correction immunity for grounded input (measures 1.0)</span><span class="ja" lang="ja">根拠づいた入力へのコード強制の修正上書き不可（測定値 1.0）</span></td>
-        <td><span class="en">Operations-level automatic rollback of correction versions; contamination auto-detection coupled to eval; unlearn</span><span class="ja" lang="ja">運用レベルの修正バージョン自動ロールバック。評価と結合した汚染の自動検知。unlearn</span></td>
+        <td class="d"><span class="en">Structure-aware chunking</span><span class="ja" lang="ja">構造認識チャンキング</span></td>
+        <td><span class="en">The manual is split at its headings — one chunk per numbered section, the section number preserved — so a retrieved unit is one complete procedure step, and the retrieval eval can assert expected section numbers instead of fuzzy overlap.</span><span class="ja" lang="ja">手順書は見出し単位で分割します — 番号つきの節ごとに1チャンク、節番号も保持。検索の戻り単位が「完結した手順1つ」になり、検索評価も曖昧な一致ではなく期待節番号で検証できます。</span></td>
       </tr>
       <tr>
-        <td><span class="en">The eval harness itself (runs locally with the model); a deterministic model-free CI gate</span><span class="ja" lang="ja">評価ハーネス本体（モデルとともにローカル実行）。決定論的なモデル非依存の CI ゲート</span></td>
-        <td><span class="en">LLM-usage instrumentation (tokens · cost · latency); scheduled eval re-runs as an operational trigger; the eval regression gate in CI</span><span class="ja" lang="ja">LLM 利用量の計測（トークン・コスト・レイテンシ）。運用トリガーとしての評価の定期再実行。CI の評価回帰ゲート</span></td>
+        <td class="d"><span class="en">One Postgres (+pgvector) as the whole platform store</span><span class="ja" lang="ja">プラットフォームの保存層は Postgres（+pgvector）一つ</span></td>
+        <td><span class="en">Chunks, vectors, full-text indexes, tasks, plans, approvals, the audit log, personal corrections and eval runs all live in one relational database — one backup, one transaction model, and no separate vector service to operate on-premises.</span><span class="ja" lang="ja">チャンク・ベクトル・全文索引・タスク・計画・承認・監査ログ・個人修正・評価結果のすべてが一つのリレーショナル DB に載ります — バックアップは一つ、トランザクションモデルも一つ、オンプレで別途運用すべきベクトルサービスもありません。</span></td>
+      </tr>
+      <tr>
+        <td class="d"><span class="en">A second, separate Postgres for the mock AS-400</span><span class="ja" lang="ja">モック AS-400 には別の Postgres</span></td>
+        <td><span class="en">The legacy stand-in keeps its own database, so the "AS-400" state is genuinely external to the platform: execution is verified by reading back across a real service boundary, not by inspecting the platform's own writes.</span><span class="ja" lang="ja">レガシーの代役には専用 DB を持たせ、「AS-400」の状態をプラットフォームの外側に置いています。実行の検証は自分の書き込みをのぞき込むのではなく、実在のサービス境界越しの読み戻しで行われます。</span></td>
+      </tr>
+      <tr>
+        <td class="d"><span class="en">Local models, fully on-premises</span><span class="ja" lang="ja">ローカルモデル・完全オンプレミス</span></td>
+        <td><span class="en">Ollama serves Gemma (<code>gemma4:e4b</code>) and TEI serves <code>multilingual-e5-large</code> (1024-dim, the bilingual corpus needs a multilingual embedder); nothing leaves the building. The embedding service is deliberately pinned to CPU so the 12 GB GPU stays free for the LLM.</span><span class="ja" lang="ja">Ollama が Gemma（<code>gemma4:e4b</code>）を、TEI が <code>multilingual-e5-large</code>（1024次元。日英二言語コーパスには多言語埋め込みが必要）を配信し、データは社外に出ません。埋め込みサービスは意図的に CPU 固定 — 12GB の GPU を LLM 専用に空けるためです。</span></td>
+      </tr>
+      <tr>
+        <td class="d"><span class="en">Determinism first</span><span class="ja" lang="ja">決定論を最優先</span></td>
+        <td><span class="en">temperature 0, a fixed seed, JSON-forced output; only after a parse failure does a retry step both the seed and the temperature (+0.3). The published numbers were identical across five consecutive runs because the serving path is deterministic by construction.</span><span class="ja" lang="ja">temperature 0・固定シード・JSON 強制出力。parse 失敗時の再試行に限り、シードと temperature（+0.3 ずつ）を進めます。公表数値が連続5回の実行で完全一致したのは、本番経路が構成からして決定論的だからです。</span></td>
+      </tr>
+      <tr>
+        <td class="d"><span class="en">Idempotency at the session seam</span><span class="ja" lang="ja">セッション境界での冪等性</span></td>
+        <td><span class="en">Every execution opens its screen session with the key <code>task:{task_id}</code>; the target enforces a unique constraint on it, so a duplicate submission yields one application, not two.</span><span class="ja" lang="ja">すべての実行は <code>task:{task_id}</code> という冪等キーで画面セッションを開きます。対象側がこのキーに一意制約を張るため、重複送信しても申請は2件ではなく1件になります。</span></td>
       </tr>
     </tbody>
   </table>
+</div></section>
 
+<section><div class="wrap">
+  <div class="sec-head"><span class="sec-num">02</span><h2><span class="en">The core loop</span><span class="ja" lang="ja">コアループ</span></h2><span class="src"><code>backend/coreloop.py</code> · <code>slotfill.py</code></span></div>
+  <p class="note en">Planning is a code → LLM → code sandwich: deterministic guards refuse before the model is ever asked, the model only normalizes values and decides branches, and code assembles the actual keystrokes. Execution then drives the screen adapter step by step, asserting state after every action.</p>
+  <p class="note ja" lang="ja">計画は「コード → LLM → コード」のサンドイッチです。決定論的なガードがモデルに尋ねる前に却下し、モデルは値の正規化と分岐判断だけを行い、実際のキー操作はコードが組み立てます。実行は画面アダプタをステップ単位で駆動し、各操作の後に状態を検証します。</p>
+  <div class="figure">
+    <svg id="loopdiagram" viewBox="0 0 940 470" role="img" aria-label="Core loop: code guards refuse before the LLM, the model fills slots, code assembles keys; after human approval the adapter session opens with an idempotency key, every step is driven and asserted, mismatches replan up to twice then roll back, bad input goes to a person">
+      <defs>
+        <marker id="ah" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto">
+          <path d="M0,0 L9,4.5 L0,9 Z" fill="#8A94A6"/>
+        </marker>
+        <marker id="aha" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto">
+          <path d="M0,0 L9,4.5 L0,9 Z" fill="#B7791F"/>
+        </marker>
+      </defs>
+      <g font-family="'Noto Sans JP','Segoe UI',sans-serif">
+        <text class="en" x="16" y="32" font-size="11" font-weight="700" fill="#8A94A6" letter-spacing="2">PLAN — fill()</text>
+        <text class="ja" x="16" y="32" font-size="11" font-weight="700" fill="#8A94A6" letter-spacing="2">計画 — fill()</text>
+        <g>
+          <rect x="16" y="44" width="250" height="96" rx="10" fill="#FFFFFF" stroke="#C9D2DD" stroke-width="1.4"/>
+          <text x="141" y="68" text-anchor="middle" font-weight="700" font-size="13.5" fill="#1A2230"><tspan class="en">code: deterministic guards</tspan><tspan class="ja">コード：決定論ガード</tspan></text>
+          <text class="en" x="141" y="88" text-anchor="middle" font-size="10" fill="#5A6678">domain cue · required fields</text>
+          <text class="ja" x="141" y="88" text-anchor="middle" font-size="10" fill="#5A6678">ドメイン語・必須項目</text>
+          <text class="en" x="141" y="104" text-anchor="middle" font-size="10" fill="#5A6678">date format · extraction presence</text>
+          <text class="ja" x="141" y="104" text-anchor="middle" font-size="10" fill="#5A6678">日付形式・抽出値の有無</text>
+          <text class="en" x="141" y="124" text-anchor="middle" font-size="9.5" fill="#92600E">each failure → schema-typed refusal</text>
+          <text class="ja" x="141" y="124" text-anchor="middle" font-size="9.5" fill="#92600E">失敗はスキーマ型の却下に</text>
+        </g>
+        <g>
+          <rect x="312" y="44" width="280" height="96" rx="10" fill="#EDF0F4" stroke="#C9D2DD" stroke-width="1.4"/>
+          <text x="452" y="68" text-anchor="middle" font-weight="700" font-size="13.5" fill="#1A2230"><tspan class="en">LLM: slot extraction only</tspan><tspan class="ja">LLM：スロット抽出のみ</tspan></text>
+          <text class="en" x="452" y="88" text-anchor="middle" font-size="10" fill="#5A6678">dest_code · purpose · overseas · reuse_prev_proj</text>
+          <text class="ja" x="452" y="88" text-anchor="middle" font-size="10" fill="#5A6678">dest_code・purpose・overseas・reuse_prev_proj</text>
+          <text class="en" x="452" y="104" text-anchor="middle" font-size="10" fill="#5A6678">JSON-forced · temp 0 · fixed seed</text>
+          <text class="ja" x="452" y="104" text-anchor="middle" font-size="10" fill="#5A6678">JSON 強制・temp 0・固定シード</text>
+          <text class="en" x="452" y="124" text-anchor="middle" font-size="9.5" fill="#5A6678">parse retry ≤2 — seed &amp; temp step each time</text>
+          <text class="ja" x="452" y="124" text-anchor="middle" font-size="9.5" fill="#5A6678">parse 再試行 ≤2 — シードと temp を毎回加算</text>
+        </g>
+        <g>
+          <rect x="638" y="44" width="286" height="96" rx="10" fill="#FFFFFF" stroke="#C9D2DD" stroke-width="1.4"/>
+          <text x="781" y="68" text-anchor="middle" font-weight="700" font-size="13.5" fill="#1A2230"><tspan class="en">code: assemble()</tspan><tspan class="ja">コード：assemble()</tspan></text>
+          <text class="en" x="781" y="88" text-anchor="middle" font-size="10" fill="#5A6678">fixed keystroke skeleton, slot values inserted</text>
+          <text class="ja" x="781" y="88" text-anchor="middle" font-size="10" fill="#5A6678">固定のキー骨格にスロット値を差し込む</text>
+          <text class="en" x="781" y="104" text-anchor="middle" font-size="10" fill="#5A6678">day count recomputed in code</text>
+          <text class="ja" x="781" y="104" text-anchor="middle" font-size="10" fill="#5A6678">日数はコードで再計算</text>
+          <text class="en" x="781" y="124" text-anchor="middle" font-size="9.5" fill="#5A6678">branches: F9 reuse / F4 picker · overseas Y</text>
+          <text class="ja" x="781" y="124" text-anchor="middle" font-size="9.5" fill="#5A6678">分岐：F9 再利用／F4 選択・海外 Y</text>
+        </g>
+        <g fill="none" stroke="#8A94A6" stroke-width="1.6" marker-end="url(#ah)">
+          <line x1="266" y1="92" x2="306" y2="92"/>
+          <line x1="592" y1="92" x2="632" y2="92"/>
+        </g>
+        <path d="M141 140 C 141 168, 141 180, 141 196" fill="none" stroke="#B7791F" stroke-width="1.5" stroke-dasharray="5 4" marker-end="url(#aha)"/>
+        <g>
+          <rect x="56" y="200" width="170" height="44" rx="10" fill="#FFF8E8" stroke="#E7CF94" stroke-width="1.4"/>
+          <text x="141" y="219" text-anchor="middle" font-weight="700" font-size="12" fill="#92600E">却下</text>
+          <text class="en" x="141" y="235" text-anchor="middle" font-size="9.5" fill="#92600E">refused before approval</text>
+          <text class="ja" x="141" y="235" text-anchor="middle" font-size="9.5" fill="#92600E">承認の手前で却下</text>
+        </g>
+        <g>
+          <rect x="312" y="186" width="612" height="58" rx="10" fill="#E7F4EC" stroke="#1C7A45" stroke-width="2.2"/>
+          <text x="618" y="210" text-anchor="middle" font-weight="700" font-size="14" fill="#14532D"><tspan class="en">human approval — the only path to execution</tspan><tspan class="ja">人手承認 — 実行への唯一の経路</tspan></text>
+          <text class="en" x="618" y="231" text-anchor="middle" font-size="10" fill="#1C7A45">plan stops at awaiting_approval · execute lives only in the approve endpoint · wrong-state decisions → 409</text>
+          <text class="ja" x="618" y="231" text-anchor="middle" font-size="10" fill="#1C7A45">計画は awaiting_approval で停止・実行は承認エンドポイントの内側のみ・状態外の決定は 409</text>
+        </g>
+        <line x1="781" y1="140" x2="781" y2="180" fill="none" stroke="#8A94A6" stroke-width="1.6" marker-end="url(#ah)"/>
+        <text class="en" x="16" y="290" font-size="11" font-weight="700" fill="#8A94A6" letter-spacing="2">EXECUTE — execute()</text>
+        <text class="ja" x="16" y="290" font-size="11" font-weight="700" fill="#8A94A6" letter-spacing="2">実行 — execute()</text>
+        <line x1="618" y1="244" x2="618" y2="298" fill="none" stroke="#8A94A6" stroke-width="1.6" marker-end="url(#ah)"/>
+        <g>
+          <rect x="16" y="302" width="180" height="92" rx="10" fill="#FFFFFF" stroke="#C9D2DD" stroke-width="1.4"/>
+          <text x="106" y="328" text-anchor="middle" font-weight="700" font-size="13" fill="#1A2230"><tspan class="en">open session</tspan><tspan class="ja">セッション開始</tspan></text>
+          <text x="106" y="348" text-anchor="middle" font-size="10" fill="#5A6678">key = task:{task_id}</text>
+          <text class="en" x="106" y="366" text-anchor="middle" font-size="9.5" fill="#5A6678">duplicate submit → one trip</text>
+          <text class="ja" x="106" y="366" text-anchor="middle" font-size="9.5" fill="#5A6678">重複送信でも申請は1件</text>
+          <text class="en" x="106" y="382" text-anchor="middle" font-size="9.5" fill="#5A6678">closed in finally</text>
+          <text class="ja" x="106" y="382" text-anchor="middle" font-size="9.5" fill="#5A6678">finally で必ず close</text>
+        </g>
+        <g>
+          <rect x="242" y="302" width="300" height="92" rx="10" fill="#FFFFFF" stroke="#C9D2DD" stroke-width="1.4"/>
+          <text x="392" y="328" text-anchor="middle" font-weight="700" font-size="13" fill="#1A2230"><tspan class="en">drive, step by step</tspan><tspan class="ja">ステップ単位で駆動</tspan></text>
+          <text class="en" x="392" y="348" text-anchor="middle" font-size="10" fill="#5A6678">send_keys → wait_for_screen (poll, no sleep)</text>
+          <text class="ja" x="392" y="348" text-anchor="middle" font-size="10" fill="#5A6678">send_keys → wait_for_screen（ポーリング・sleep なし）</text>
+          <text class="en" x="392" y="366" text-anchor="middle" font-size="9.5" fill="#5A6678">every step observed → timeline + live events</text>
+          <text class="ja" x="392" y="366" text-anchor="middle" font-size="9.5" fill="#5A6678">全ステップを観測 → タイムライン＋ライブ配信</text>
+          <text class="en" x="392" y="382" text-anchor="middle" font-size="9.5" fill="#B7791F">screen error = bad input → stop, to a person</text>
+          <text class="ja" x="392" y="382" text-anchor="middle" font-size="9.5" fill="#B7791F">画面エラー＝入力不良 → 中断して人へ</text>
+        </g>
+        <g>
+          <rect x="588" y="302" width="180" height="92" rx="10" fill="#FFFFFF" stroke="#C9D2DD" stroke-width="1.4"/>
+          <text x="678" y="328" text-anchor="middle" font-weight="700" font-size="13" fill="#1A2230"><tspan class="en">final assert</tspan><tspan class="ja">最終照合</tspan></text>
+          <text class="en" x="678" y="348" text-anchor="middle" font-size="10" fill="#5A6678">screen = submitted</text>
+          <text class="ja" x="678" y="348" text-anchor="middle" font-size="10" fill="#5A6678">画面 = submitted</text>
+          <text class="en" x="678" y="366" text-anchor="middle" font-size="10" fill="#5A6678">trip actually saved</text>
+          <text class="ja" x="678" y="366" text-anchor="middle" font-size="10" fill="#5A6678">申請が実際に保存済みか</text>
+        </g>
+        <g>
+          <rect x="814" y="302" width="110" height="92" rx="10" fill="#E7F4EC" stroke="#1C7A45" stroke-width="1.6"/>
+          <text x="869" y="344" text-anchor="middle" font-weight="700" font-size="13" fill="#14532D">送信済</text>
+          <text class="en" x="869" y="364" text-anchor="middle" font-size="9.5" fill="#1C7A45">with the trip id</text>
+          <text class="ja" x="869" y="364" text-anchor="middle" font-size="9.5" fill="#1C7A45">申請番号つき</text>
+        </g>
+        <g fill="none" stroke="#8A94A6" stroke-width="1.6" marker-end="url(#ah)">
+          <line x1="196" y1="348" x2="236" y2="348"/>
+          <line x1="542" y1="348" x2="582" y2="348"/>
+          <line x1="768" y1="348" x2="808" y2="348"/>
+        </g>
+        <path d="M620 394 C 560 428, 470 428, 420 398" fill="none" stroke="#8A94A6" stroke-width="1.5" stroke-dasharray="5 4" marker-end="url(#ah)"/>
+        <text class="en" x="520" y="441" text-anchor="middle" font-size="10" fill="#5A6678">mismatch → recover (F3) and replan, at most 2 — then roll back (F3 ≤3, to a safe screen) as a correction candidate</text>
+        <text class="ja" x="520" y="441" text-anchor="middle" font-size="10" fill="#5A6678">不一致 → F3 で復帰し再計画（最大2回）。それでも駄目なら F3（≤3）で安全な画面までロールバックし、修正候補として記録</text>
+        <text class="en" x="520" y="458" text-anchor="middle" font-size="10" fill="#B7791F">bad input data never replans — it short-circuits to a person (再入力／コード確認)</text>
+        <text class="ja" x="520" y="458" text-anchor="middle" font-size="10" fill="#B7791F">入力不良は再計画せず、人へ直行します（再入力／コード確認）</text>
+      </g>
+    </svg>
+    <div class="fig-cap"><span class="en">Control flow of <code>plan()</code> + <code>execute()</code>, with the constants the code actually uses.</span><span class="ja" lang="ja"><code>plan()</code> と <code>execute()</code> の制御フロー。定数はコードが実際に使う値。</span></div>
+  </div>
+  <div class="chips">
+    <span class="chip"><b>MAX_REPLAN</b> = 2</span>
+    <span class="chip"><b>ROLLBACK_MAX_NAV</b> = 3</span>
+    <span class="chip"><b>PURPOSE_MAX</b> = 20</span>
+    <span class="chip"><b>MAX_PARSE_RETRY</b> = 2</span>
+    <span class="chip"><b>temperature</b> 0 (+0.3/retry)</span>
+    <span class="chip"><b>seed</b> fixed (steps on retry)</span>
+    <span class="chip"><b>idempotency</b> task:{task_id}</span>
+  </div>
+</div></section>
+
+<section><div class="wrap">
+  <div class="sec-head"><span class="sec-num">03</span><h2><span class="en">The retrieval pipeline (RAG)</span><span class="ja" lang="ja">検索パイプライン（RAG）</span></h2><span class="src"><code>chunker.py</code> · <code>ingest.py</code> · <code>retrieval.py</code> · <code>corrections.py</code></span></div>
+  <div class="figure">
+    <svg id="ragdiagram" viewBox="0 0 940 430" role="img" aria-label="RAG pipeline: the manual is chunked by heading structure, embedded with e5 passage prefixes into pgvector plus full-text; a query is embedded, both channels return top-20, RRF fuses with k 60, top-5 becomes the grounding context, personal corrections are layered above it with an override header">
+      <defs>
+        <marker id="ah2" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto">
+          <path d="M0,0 L9,4.5 L0,9 Z" fill="#8A94A6"/>
+        </marker>
+        <marker id="ahg2" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto">
+          <path d="M0,0 L9,4.5 L0,9 Z" fill="#1C7A45"/>
+        </marker>
+      </defs>
+      <g font-family="'Noto Sans JP','Segoe UI',sans-serif">
+        <text class="en" x="16" y="32" font-size="11" font-weight="700" fill="#8A94A6" letter-spacing="2">INGEST</text>
+        <text class="ja" x="16" y="32" font-size="11" font-weight="700" fill="#8A94A6" letter-spacing="2">取り込み</text>
+        <g>
+          <rect x="16" y="44" width="178" height="78" rx="10" fill="#FFFFFF" stroke="#C9D2DD" stroke-width="1.4"/>
+          <text x="105" y="72" text-anchor="middle" font-weight="700" font-size="12.5" fill="#1A2230"><tspan class="en">operating manual</tspan><tspan class="ja">操作マニュアル</tspan></text>
+          <text class="en" x="105" y="92" text-anchor="middle" font-size="10" fill="#5A6678">markdown, numbered sections</text>
+          <text class="ja" x="105" y="92" text-anchor="middle" font-size="10" fill="#5A6678">markdown・番号つきの節</text>
+          <text class="en" x="105" y="108" text-anchor="middle" font-size="9.5" fill="#5A6678">seeded at startup</text>
+          <text class="ja" x="105" y="108" text-anchor="middle" font-size="9.5" fill="#5A6678">起動時にシード</text>
+        </g>
+        <g>
+          <rect x="240" y="44" width="200" height="78" rx="10" fill="#FFFFFF" stroke="#C9D2DD" stroke-width="1.4"/>
+          <text x="340" y="72" text-anchor="middle" font-weight="700" font-size="12.5" fill="#1A2230"><tspan class="en">structure chunker</tspan><tspan class="ja">構造チャンカー</tspan></text>
+          <text class="en" x="340" y="92" text-anchor="middle" font-size="10" fill="#5A6678">one chunk per heading + body</text>
+          <text class="ja" x="340" y="92" text-anchor="middle" font-size="10" fill="#5A6678">見出し＋本文ごとに1チャンク</text>
+          <text class="en" x="340" y="108" text-anchor="middle" font-size="9.5" fill="#5A6678">section number preserved (e.g. 3.2)</text>
+          <text class="ja" x="340" y="108" text-anchor="middle" font-size="9.5" fill="#5A6678">節番号を保持（例：3.2）</text>
+        </g>
+        <g>
+          <rect x="486" y="44" width="200" height="78" rx="10" fill="#FFFFFF" stroke="#C9D2DD" stroke-width="1.4"/>
+          <text x="586" y="72" text-anchor="middle" font-weight="700" font-size="12.5" fill="#1A2230"><tspan class="en">embed (TEI)</tspan><tspan class="ja">埋め込み（TEI）</tspan></text>
+          <text x="586" y="92" text-anchor="middle" font-size="10" fill="#5A6678">multilingual-e5-large · 1024d</text>
+          <text class="en" x="586" y="108" text-anchor="middle" font-size="9.5" fill="#5A6678">"passage: " prefix (e5 convention)</text>
+          <text class="ja" x="586" y="108" text-anchor="middle" font-size="9.5" fill="#5A6678">「passage: 」接頭辞（e5 規約）</text>
+        </g>
+        <g>
+          <rect x="732" y="44" width="192" height="78" rx="10" fill="#EDF0F4" stroke="#C9D2DD" stroke-width="1.4"/>
+          <text x="828" y="72" text-anchor="middle" font-weight="700" font-size="12.5" fill="#1A2230">knowledge_chunks</text>
+          <text class="en" x="828" y="92" text-anchor="middle" font-size="10" fill="#5A6678">Postgres: pgvector + FTS</text>
+          <text class="ja" x="828" y="92" text-anchor="middle" font-size="10" fill="#5A6678">Postgres：pgvector＋全文索引</text>
+          <text class="en" x="828" y="108" text-anchor="middle" font-size="9.5" fill="#5A6678">one store, both indexes</text>
+          <text class="ja" x="828" y="108" text-anchor="middle" font-size="9.5" fill="#5A6678">一つの保存層に両索引</text>
+        </g>
+        <g fill="none" stroke="#8A94A6" stroke-width="1.6" marker-end="url(#ah2)">
+          <line x1="194" y1="83" x2="234" y2="83"/>
+          <line x1="440" y1="83" x2="480" y2="83"/>
+          <line x1="686" y1="83" x2="726" y2="83"/>
+        </g>
+        <text class="en" x="16" y="178" font-size="11" font-weight="700" fill="#8A94A6" letter-spacing="2">QUERY</text>
+        <text class="ja" x="16" y="178" font-size="11" font-weight="700" fill="#8A94A6" letter-spacing="2">検索</text>
+        <g>
+          <rect x="16" y="190" width="150" height="70" rx="10" fill="#FFFFFF" stroke="#C9D2DD" stroke-width="1.4"/>
+          <text x="91" y="218" text-anchor="middle" font-weight="700" font-size="12.5" fill="#1A2230"><tspan class="en">instruction</tspan><tspan class="ja">指示文</tspan></text>
+          <text class="en" x="91" y="238" text-anchor="middle" font-size="9.5" fill="#5A6678">embedded with "query: "</text>
+          <text class="ja" x="91" y="238" text-anchor="middle" font-size="9.5" fill="#5A6678">「query: 」で埋め込み</text>
+        </g>
+        <g>
+          <rect x="212" y="156" width="190" height="58" rx="10" fill="#FFFFFF" stroke="#C9D2DD" stroke-width="1.4"/>
+          <text x="307" y="180" text-anchor="middle" font-weight="700" font-size="12" fill="#1A2230"><tspan class="en">vector channel</tspan><tspan class="ja">ベクトル側</tspan></text>
+          <text class="en" x="307" y="200" text-anchor="middle" font-size="9.5" fill="#5A6678">cosine distance · top 20</text>
+          <text class="ja" x="307" y="200" text-anchor="middle" font-size="9.5" fill="#5A6678">コサイン距離・上位20</text>
+        </g>
+        <g>
+          <rect x="212" y="228" width="190" height="58" rx="10" fill="#FFFFFF" stroke="#C9D2DD" stroke-width="1.4"/>
+          <text x="307" y="252" text-anchor="middle" font-weight="700" font-size="12" fill="#1A2230"><tspan class="en">full-text channel</tspan><tspan class="ja">全文検索側</tspan></text>
+          <text class="en" x="307" y="272" text-anchor="middle" font-size="9.5" fill="#5A6678">ts_rank, unstemmed · top 20</text>
+          <text class="ja" x="307" y="272" text-anchor="middle" font-size="9.5" fill="#5A6678">ts_rank・語幹処理なし・上位20</text>
+        </g>
+        <g>
+          <rect x="448" y="190" width="150" height="70" rx="10" fill="#FFFFFF" stroke="#C9D2DD" stroke-width="1.4"/>
+          <text x="523" y="218" text-anchor="middle" font-weight="700" font-size="12.5" fill="#1A2230"><tspan class="en">RRF fusion</tspan><tspan class="ja">RRF 融合</tspan></text>
+          <text x="523" y="238" text-anchor="middle" font-size="10" fill="#5A6678">k = 60</text>
+          <text class="en" x="523" y="252" text-anchor="middle" font-size="9.5" fill="#5A6678">ranks only, no score mixing</text>
+          <text class="ja" x="523" y="252" text-anchor="middle" font-size="9.5" fill="#5A6678">順位のみ・スコアは混ぜない</text>
+        </g>
+        <g>
+          <rect x="644" y="190" width="130" height="70" rx="10" fill="#EDF0F4" stroke="#C9D2DD" stroke-width="1.4"/>
+          <text x="709" y="218" text-anchor="middle" font-weight="700" font-size="12.5" fill="#1A2230"><tspan class="en">top 5</tspan><tspan class="ja">上位5件</tspan></text>
+          <text class="en" x="709" y="238" text-anchor="middle" font-size="9.5" fill="#5A6678">grounding context</text>
+          <text class="ja" x="709" y="238" text-anchor="middle" font-size="9.5" fill="#5A6678">根拠コンテキスト</text>
+        </g>
+        <g fill="none" stroke="#8A94A6" stroke-width="1.5" marker-end="url(#ah2)">
+          <path d="M166 210 C 186 200, 192 192, 206 188"/>
+          <path d="M166 240 C 186 250, 192 254, 206 256"/>
+          <path d="M402 185 C 422 192, 428 200, 442 208"/>
+          <path d="M402 257 C 422 250, 428 244, 442 238"/>
+          <line x1="598" y1="225" x2="638" y2="225"/>
+        </g>
+        <path d="M828 122 C 828 160, 600 165, 420 172" fill="none" stroke="#8A94A6" stroke-width="1.3" stroke-dasharray="4 4"/>
+        <g>
+          <rect x="160" y="318" width="620" height="84" rx="10" fill="#F0FDF4" stroke="#86EFAC" stroke-width="1.4"/>
+          <text x="470" y="344" text-anchor="middle" font-weight="700" font-size="12.5" fill="#14532D"><tspan class="en">the prompt the model actually sees</tspan><tspan class="ja">モデルが実際に見るプロンプト</tspan></text>
+          <text x="470" y="366" text-anchor="middle" font-size="10.5" fill="#15803D">【個人修正・最優先（手順書より優先）】 → 【手順書】</text>
+          <text class="en" x="470" y="386" text-anchor="middle" font-size="9.5" fill="#15803D">matching active personal corrections are layered above the manual context — validated, versioned, trigger = exact field match</text>
+          <text class="ja" x="470" y="386" text-anchor="middle" font-size="9.5" fill="#15803D">一致した有効な個人修正を手順書コンテキストの上に重ねる — 検証済み・バージョン管理・トリガーは項目の完全一致</text>
+        </g>
+        <path d="M709 260 C 709 290, 600 305, 540 314" fill="none" stroke="#1C7A45" stroke-width="1.6" marker-end="url(#ahg2)"/>
+        <text class="en" x="470" y="424" text-anchor="middle" font-size="10" fill="#5A6678">grounded slots stay correction-immune: a separate grounded pass pins dest/purpose, enforced in code, measured 1.0</text>
+        <text class="ja" x="470" y="424" text-anchor="middle" font-size="10" fill="#5A6678">根拠スロットは修正で動きません：別建ての根拠パスが dest／purpose を固定（コード強制・測定値 1.0）</text>
+      </g>
+    </svg>
+    <div class="fig-cap"><span class="en">Ingest and query paths as implemented; both retrieval channels read the same Postgres store.</span><span class="ja" lang="ja">実装どおりの取り込み・検索経路。二つの検索チャネルは同じ Postgres 保存層を読む。</span></div>
+  </div>
+</div></section>
+
+<section><div class="wrap">
+  <div class="sec-head"><span class="sec-num">04</span><h2><span class="en">The eval harness</span><span class="ja" lang="ja">評価ハーネス</span></h2><span class="src"><code>eval_runner.py</code> · <code>retrieval_eval.py</code> · <code>growth_eval.py</code></span></div>
+  <p class="note en">The harness does not test a copy of the logic — it drives the same HTTP surface the console uses (plan → approve), injects transient faults by swapping the execute runner, and checks field accuracy by reading the created application back out of the mock AS-400. Results persist to eval tables in the platform store.</p>
+  <p class="note ja" lang="ja">ハーネスはロジックの複製をテストしません。コンソールと同じ HTTP 面（計画 → 承認）をそのまま駆動し、一時障害は実行ランナーの差し替えで注入し、フィールド精度は作成された申請をモック AS-400 から読み戻して照合します。結果はプラットフォーム保存層の評価テーブルに永続化されます。</p>
+  <div class="cards">
+    <div class="card">
+      <h3><span class="en">Core-loop eval — 24 cases</span><span class="ja" lang="ja">コアループ評価 — 24ケース</span></h3>
+      <p><span class="en">8 normal · 4 missing-field · 4 wrong-code · 4 transient · 4 duplicate. Each runs the real plan → approve path; expected outcome per case (submitted / refusal / 再入力 / 要調査 / idempotent).</span><span class="ja" lang="ja">正常8・必須欠落4・誤コード4・一時障害4・重複4。各ケースが実際の計画→承認経路を実行し、期待結果（送信済／却下／再入力／要調査／冪等）と照合します。</span></p>
+      <p><span class="en">Metrics: success rate · routing accuracy · field accuracy (trip read-back) · verify pass rate · average steps · recovery rate.</span><span class="ja" lang="ja">指標：成功率・ルーティング精度・フィールド精度（申請の読み戻し）・verify 通過率・平均ステップ数・リカバリ率。</span></p>
+    </div>
+    <div class="card">
+      <h3><span class="en">Retrieval eval — 4 queries</span><span class="ja" lang="ja">検索評価 — 4クエリ</span></h3>
+      <p><span class="en">Each query carries the manual sections it must surface; vector, full-text and hybrid results are scored separately, so the fusion's contribution is visible.</span><span class="ja" lang="ja">各クエリに「返すべき手順書の節」を持たせ、ベクトル・全文・ハイブリッドを別々に採点します。融合の寄与が見える設計です。</span></p>
+      <p><span class="en">Metrics: precision@k · recall@k · precision@expected · MRR, at k=3.</span><span class="ja" lang="ja">指標：precision@k・recall@k・precision@expected・MRR（k=3）。</span></p>
+    </div>
+    <div class="card">
+      <h3><span class="en">Growth eval — 12 cases, A/B</span><span class="ja" lang="ja">育成評価 — 12ケースの A/B</span></h3>
+      <p><span class="en">The same plan endpoint runs twice per case: control (no corrections) vs treatment (corrections seeded). Growth Δ = treatment − control on the 8 policy cases; the 4 boundary cases assert that protected slots did not move.</span><span class="ja" lang="ja">同じ計画エンドポイントをケースごとに2回 — 対照（修正なし）と処置（修正あり）で実行します。育成 Δ ＝ 処置 − 対照（方針8ケース）。境界4ケースは保護スロットが動かないことを検証します。</span></p>
+      <p><span class="en">Metrics: growth Δ · boundary respect rate (+ a control sanity check).</span><span class="ja" lang="ja">指標：育成 Δ・境界尊重率（＋対照側の健全性チェック）。</span></p>
+    </div>
+  </div>
+  <div class="stats">
+    <div class="stat"><div class="n">1.0</div><div class="l"><span class="en">Planning — success &middot; routing &middot; field accuracy</span><span class="ja" lang="ja">計画 — 成功率・ルーティング・フィールド精度</span></div></div>
+    <div class="stat"><div class="n">1.0</div><div class="l"><span class="en">Retrieval — recall@3 &middot; precision@expected &middot; MRR</span><span class="ja" lang="ja">検索 — recall@3・precision@expected・MRR</span></div></div>
+    <div class="stat"><div class="n">0.625</div><div class="l"><span class="en">Growth Δ — inference-tier policy slots</span><span class="ja" lang="ja">育成 Δ — 推論ティアの方針スロット</span></div></div>
+    <div class="stat"><div class="n">1.0</div><div class="l"><span class="en">Boundary respect — code-enforced</span><span class="ja" lang="ja">境界尊重 — コード強制</span></div></div>
+  </div>
+  <p class="note en">The numbers that are not 1.0 are published as they are: recovery on transient faults 0.5 (bad input is handed to a person, not retried), verify pass rate 0.667 (a failed verify is a detection event), precision@3 0.5 (a fixed-k artifact; precision@expected on the same runs is 1.0), 9.56 steps per executed run. All figures were identical across five consecutive runs; CI gates a deterministic, model-free subset on every pull request, and the model-scored runs execute locally. The full ledger is on the <a href="../status/"><span class="en">status page</span><span class="ja" lang="ja">実装状況ページ</span></a>.</p>
+  <p class="note ja" lang="ja">1.0 でない数値もそのまま公表しています：一時障害のリカバリ 0.5（入力不良は再試行せず人へ）、verify 通過率 0.667（verify の失敗は検知イベント）、precision@3 0.5（固定 k による構造上の値。同じ実行の precision@expected は 1.0）、実行あたり平均 9.56 ステップ。全数値は連続5回の実行で完全に一致しました。CI は全 PR で決定論的なモデル非依存サブセットをゲートし、モデル採点の実行はローカルで行います。全項目の台帳は<a href="../status/">実装状況ページ</a>にあります。</p>
+</div></section>
+
+<section><div class="wrap">
+  <div class="sec-head"><span class="sec-num">05</span><h2><span class="en">Operations design — intent, not a report</span><span class="ja" lang="ja">運用設計 — 記録ではなく設計意図</span></h2></div>
+  <div class="standing">
+    <p class="en"><b>Nothing in this section is built or running.</b> There is no deployment, no alert has ever fired, no dashboard exists, and no on-call rotation is in place. It is recorded now so the eventual build has a target it can be checked against; rows below mark what already ships <span class="tag t-built">built</span> versus what is only designed <span class="tag t-design">design</span>.</p>
+    <p class="ja" lang="ja"><b>この節にあるものは、まだ何ひとつ作られておらず、動いてもいません。</b>デプロイは存在せず、アラートが鳴ったことは一度もなく、ダッシュボードもオンコール体制もまだありません。いざ作るときに照らし合わせられる目標として、いまのうちに書き残しておくものです。以下の行では、出荷済みの部分を <span class="tag t-built">built</span>、設計のみの部分を <span class="tag t-design">design</span> で区別します。</p>
+  </div>
+  <p class="note en">The premise: this system's dangerous failures do not crash — they submit. Operating it is about noticing wrongness early, diagnosing fast, and bounding what a wrong action can cost. Operations is therefore designed as a reader of records the product already writes (steps, decisions, verify outcomes, the audit log) plus one unbuilt instrumentation point: a wrapper logging tokens, cost, latency and retries per LLM call.</p>
+  <p class="note ja" lang="ja">前提：このシステムの危険な故障はクラッシュせず、送信されてしまいます。だから運用の中心は「誤りに早く気づく・速く診断する・誤操作の被害を限定する」ことです。運用は、製品がもともと書き残す記録（ステップ・決定・verify 結果・監査ログ）の読み手として設計し、そこに未構築の計測点を一つ — LLM 呼び出しごとのトークン・コスト・レイテンシ・再試行を記録するラッパー — を加えます。</p>
+  <table class="ops">
+    <thead><tr><th><span class="en">Layer</span><span class="ja" lang="ja">層</span></th><th><span class="en">Design intent</span><span class="ja" lang="ja">設計意図</span></th></tr></thead>
+    <tbody>
+      <tr>
+        <td class="item"><span class="en">Alerts</span><span class="ja" lang="ja">アラート</span></td>
+        <td><span class="tag t-design">design</span><span class="en">Four families: heartbeat death · verify-failure-rate spike (the silent-malfunction tripwire) · error/retry spike · token-cost surge with a budget cap. Thresholds deliberately unstated until a measured baseline exists.</span><span class="ja" lang="ja">4系統：ハートビートの死・verify 失敗率の急騰（静かな誤作動への仕掛け線）・エラー／再試行の急騰・トークンコスト急増と予算上限。しきい値は測定ベースラインができるまで意図的に定めません。</span></td>
+      </tr>
+      <tr>
+        <td class="item"><span class="en">Dashboard</span><span class="ja" lang="ja">ダッシュボード</span></td>
+        <td><span class="tag t-design">design</span><span class="en">One screen, answerable in five seconds: live status, recent successes/failures, verify pass rate, error/retry rates, LLM calls per task, latency p50/p95 — the alert rules made continuously visible.</span><span class="ja" lang="ja">一枚の画面で5秒で答える：ライブ状態・直近の成否・verify 通過率・エラー／再試行率・タスクあたり LLM 呼び出し・レイテンシ p50/p95 — アラートルールの常時可視化です。</span></td>
+      </tr>
+      <tr>
+        <td class="item"><span class="en">Drill-down</span><span class="ja" lang="ja">ドリルダウン</span></td>
+        <td><span class="tag t-built">built</span><span class="en">The substrate ships today: per-step timeline, intent→key inspector, screen-state rendering, an append-only audit log. </span><span class="ja" lang="ja">基盤は出荷済み：ステップ単位のタイムライン、意図→キーのインスペクタ、画面状態の表示、追記専用の監査ログ。</span><span class="tag t-design">design</span><span class="en">What remains: dashboard-to-trace navigation and the aggregation queries.</span><span class="ja" lang="ja">残るのはダッシュボードからトレースへの導線と集計クエリです。</span></td>
+      </tr>
+      <tr>
+        <td class="item"><span class="en">SLOs &amp; on-call</span><span class="ja" lang="ja">SLO とオンコール</span></td>
+        <td><span class="tag t-design">design</span><span class="en">Signals: verify pass rate, completion without human rescue, replan frequency, plan latency p95. No targets stated — the eval figures measure a fixed suite, not an operational baseline. On-call is honestly one person; the design goal is that an alert never arrives naked, because the trace already exists one click deep.</span><span class="ja" lang="ja">信号：verify 通過率・人の救援なしでの完了率・再計画頻度・計画レイテンシ p95。目標値は書きません — 評価数値は固定スイートの測定であり運用ベースラインではないからです。オンコールは正直に一人。アラートが裸で届かないこと（トレースが1クリック先にあること）が設計目標です。</span></td>
+      </tr>
+      <tr>
+        <td class="item"><span class="en">Rollback, two levels</span><span class="ja" lang="ja">ロールバック（2階層）</span></td>
+        <td><span class="tag t-built">built</span><span class="en">Inside one execution: capped replan, rollback to a safe screen, bad-input short-circuit, idempotency keys — all on the product path today. </span><span class="ja" lang="ja">単一実行の内側：上限つき再計画・安全画面へのロールバック・入力不良の人への短絡・冪等キー — すべて製品経路で稼働済み。</span><span class="tag t-design">design</span><span class="en">Above executions: rolling a wrong correction back to its prior version (the versioned, supersedes-chained storage and a quarantine status already ship) — the automatic trigger is the unbuilt part.</span><span class="ja" lang="ja">実行の上位：誤った個人修正の前バージョンへの巻き戻し（バージョン管理・supersedes 連鎖・隔離ステータスは出荷済み）。未構築なのは自動トリガーの部分です。</span></td>
+      </tr>
+      <tr>
+        <td class="item"><span class="en">育成 hygiene</span><span class="ja" lang="ja">育成の衛生</span></td>
+        <td><span class="tag t-built">built</span><span class="en">The blast-radius boundary is code-enforced today (a correction cannot move what the request grounds; measured 1.0). </span><span class="ja" lang="ja">被害半径の境界は今日コードで強制されています（修正は依頼が根拠づける値を動かせない。測定値 1.0）。</span><span class="tag t-design">design</span><span class="en">Contamination detection inside the movable territory: scheduled eval re-runs, and a metric regression coinciding with a correction version becomes a flagged, quarantinable event. True unlearning stays unbuilt; quarantine-and-fallback is the containment until it exists.</span><span class="ja" lang="ja">可動領域内の汚染検知：評価の定期再実行と、修正バージョンに重なる指標後退のフラグ化・隔離。真の unlearn は未構築のままで、それまでは隔離とフォールバックが封じ込めです。</span></td>
+      </tr>
+    </tbody>
+  </table>
   <p class="foot">
-    <span class="en">Design intent throughout — see the standing note at the top. The implementation inventory behind the built/design split is on the <a href="../status/">status &amp; roadmap page</a>; the measured numbers referenced here are the published eval figures, unchanged.</span>
-    <span class="ja" lang="ja">全文が設計意図です — 冒頭の注記をご覧ください。built／design の区分の根拠となる実装一覧は<a href="../status/">実装状況ページ</a>に、ここで言及した測定数値は公表済みの評価数値のままです。</span>
+    <span class="en">Sections 01–04 are drawn from the implementation at the current commit, with source modules named per diagram; every figure is a published eval number or a constant the code defines. Section 05 is design intent only — see the standing note. The item-by-item implementation ledger is on the <a href="../status/">status &amp; roadmap page</a>.</span>
+    <span class="ja" lang="ja">01〜04節は現行コミットの実装から起こしたもので、各図に出典モジュールを明記しています。数値はすべて公表済みの評価数値またはコードが定義する定数です。05節は設計意図のみ — 冒頭の注記をご覧ください。項目別の実装台帳は<a href="../status/">実装状況ページ</a>にあります。</span>
   </p>
-
-</div>
+</div></section>
 
 <script>
 (function(){
