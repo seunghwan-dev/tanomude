@@ -1,0 +1,22 @@
+:root{
+  --ink:#1A2230; --soft:#5A6678; --faint:#8A94A6;
+  --line:#E2E6EC; --panel:#FFFFFF; --bg:#F5F7FA; --sunk:#EDF0F4;
+  --accent:#1C7A45; --accent-bg:#E7F4EC;
+}
+*{box-sizing:border-box;}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:"Noto Sans JP","Segoe UI",system-ui,-apple-system,"Hiragino Sans","Yu Gothic",sans-serif;
+  font-size:15px;line-height:1.65;padding:0 0 80px;}
+[data-lang="en"] .ja{display:none;}
+[data-lang="ja"] .en{display:none;}
+.nav{background:var(--panel);border-bottom:1px solid var(--line);}
+.nav-inner{max-width:1160px;margin:0 auto;padding:10px 22px;display:flex;
+  align-items:center;gap:18px;flex-wrap:wrap;}
+.brand{font-weight:700;font-size:15px;color:var(--ink);text-decoration:none;}
+.nav a.nav-link{color:var(--soft);text-decoration:none;font-size:13px;}
+.nav a.nav-link:hover{color:var(--ink);}
+.nav a.nav-link.current{color:var(--accent);font-weight:600;}
+.lang{margin-left:auto;display:flex;gap:4px;}
+.lang-btn{border:1px solid var(--line);background:var(--panel);color:var(--soft);
+  font-size:12px;padding:3px 10px;border-radius:14px;cursor:pointer;}
+.lang-btn.active{background:var(--ink);color:#fff;border-color:var(--ink);}

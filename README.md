@@ -12,7 +12,7 @@ The project is built end-to-end as production AI/LLM engineering. It owns the ar
 
 A no-backend, hand-authored interactive mock of the approval console — **not a live LLM**. Walk the approval flow (instruction → plan → approve / reject → green-screen replay) on recorded data, right in the browser:
 
-**[Open the live mock](https://seunghwan-dev.github.io/tanomude/)**
+**[Open the live mock](https://seunghwan-dev.github.io/tanomude/mock/)**
 
 > Scope: the mock demonstrates the approval and refusal flow on recorded data. The correction-learning loop — a 修正 (revise) reshaping the next plan, and the immunity notice that declines a revise aimed at a grounded slot — runs in the full local product, not in this mock.
 
@@ -20,7 +20,7 @@ A no-backend, hand-authored interactive mock of the approval console — **not a
 
 Three companion pages put the mock in context:
 
-- **[Tanomude at a glance](https://seunghwan-dev.github.io/tanomude/about/)** — the through-line on one page: what it is, why (技能伝承), how it works, the measured proof, and the architecture.
+- **[Tanomude at a glance](https://seunghwan-dev.github.io/tanomude/)** — the through-line on one page: what it is, why (技能伝承), how it works, the measured proof, and the architecture.
 - **[Status & roadmap](https://seunghwan-dev.github.io/tanomude/status/)** — the honest implementation ledger, item by item: 73 implemented · 11 partial · 27 deferred by decision, 111 rows, with the deferred items openly marked.
 - **[Operations design note](https://seunghwan-dev.github.io/tanomude/operations/)** — how the system is designed to be operated: SLOs, alerting, on-call, rollback, and 育成 contamination detection. Design intent only — none of it is running today.
 
