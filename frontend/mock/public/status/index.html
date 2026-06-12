@@ -6,16 +6,16 @@
 <link rel="icon" type="image/svg+xml" href="../favicon.svg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Noto+Sans+JP:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../shared.css">
-<title>Tanomude — implementation status &amp; roadmap</title>
+<title>Tanomude — 実装状況とロードマップ</title>
 <style>
   :root{
-    --impl:#1C7A45; --impl-bg:#E7F4EC;
-    --partial:#B7791F; --partial-bg:#FBF1DF;
-    --deferred:#475569; --deferred-bg:#EEF1F5;
-    --gap:#B91C1C; --gap-bg:#FBE9E9;
-    --rt:#0F766E; --rt-bg:#DEF2F0; --ca:#64748B; --ca-bg:#EEF1F5;
+    --impl:#1C7A45; --impl-bg:#E4EDE0;
+    --partial:#B45309; --partial-bg:#FBEEDC;
+    --deferred:#4A463F; --deferred-bg:#ECE6D8;
+    --gap:#B23A26; --gap-bg:#F2D9D1;
+    --rt:#1C7A45; --rt-bg:#E4EDE0; --ca:#4A463F; --ca-bg:#ECE6D8;
   }
   body{font-size:14px;line-height:1.55;}
   .wrap{max-width:1160px;margin:0 auto;padding:28px 22px 0;}
@@ -56,11 +56,11 @@
     color:var(--soft);font-weight:600;border-bottom:1px solid var(--line);}
   td{padding:8px 11px;border-bottom:1px solid var(--line);vertical-align:top;}
   tbody tr:last-child td{border-bottom:none;}
-  tbody tr:hover{background:#FAFBFC;}
+  tbody tr:hover{background:#F4F1EA;}
   td.item{font-weight:500;width:34%;}
   td.st{width:118px;}
-  code{font-family:"Cascadia Code",Consolas,monospace;font-size:12px;
-    background:var(--sunk);padding:1px 4px;border-radius:4px;color:#33405A;}
+  code{font-family:"JetBrains Mono",Consolas,monospace;font-size:12px;
+    background:var(--sunk);padding:1px 4px;border-radius:4px;color:#4A463F;}
   .ui{color:var(--soft);font-size:12.5px;}
   .note{color:var(--faint);font-size:11.5px;display:block;margin-top:3px;}
   .secct{font-size:12px;color:var(--faint);font-weight:400;margin-left:8px;}
@@ -72,9 +72,9 @@
 
 <nav class="nav"><div class="nav-inner">
   <a class="brand" href="../">Tanomude</a>
+  <a class="nav-link" href="../mock/"><span class="en">Interactive mock</span><span class="ja" lang="ja">インタラクティブモック</span></a>
   <a class="nav-link current" href="./"><span class="en">Status &amp; roadmap</span><span class="ja" lang="ja">実装状況</span></a>
   <a class="nav-link" href="../operations/"><span class="en">Design &amp; technology choices</span><span class="ja" lang="ja">設計と技術選定</span></a>
-  <a class="nav-link" href="../mock/"><span class="en">Interactive mock</span><span class="ja" lang="ja">インタラクティブモック</span></a>
   <div class="lang">
     <button class="lang-btn" type="button" data-lang="en">English</button>
     <button class="lang-btn" type="button" data-lang="ja">日本語</button>
@@ -361,6 +361,8 @@
 
 </div>
 
+<button class="totop" type="button" aria-label="Back to top">&uarr;</button>
+
 <script>
 (function(){
   var root=document.documentElement;
@@ -375,6 +377,11 @@
   var saved=null;
   try{saved=localStorage.getItem("tanomude-lang");}catch(e){}
   apply(saved==="ja"?"ja":"en");
+  var totop=document.querySelector(".totop");
+  function onScroll(){totop.classList.toggle("show",window.scrollY>480);}
+  window.addEventListener("scroll",onScroll,{passive:true});
+  onScroll();
+  totop.addEventListener("click",function(){window.scrollTo({top:0,behavior:"smooth"});});
 })();
 </script>
 </body>

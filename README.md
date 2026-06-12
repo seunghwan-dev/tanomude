@@ -2,9 +2,18 @@
 
 **English** · [日本語](./README.ja.md)
 
+**The project, on four readable pages** (the interactive mock runs on recorded data — **not a live LLM**):
+
+1. **[Tanomude at a glance](https://seunghwan-dev.github.io/tanomude/)** — the through-line on one page: what it is, why (ナレッジ継承), how it works, the measured proof, and the architecture.
+2. **[Interactive mock](https://seunghwan-dev.github.io/tanomude/mock/)** — a no-backend, hand-authored interactive mock of the approval console; walk the approval flow on recorded data, right in the browser.
+3. **[Status & roadmap](https://seunghwan-dev.github.io/tanomude/status/)** — the honest implementation ledger, item by item: 73 implemented · 11 partial · 27 deferred by decision, 111 rows, with the deferred items openly marked.
+4. **[Design & technology choices](https://seunghwan-dev.github.io/tanomude/operations/)** — the engineering decisions and their reasons, the real structure of the core loop, retrieval, and eval harness, and the operations design — design intent only; none of it is running today.
+
+---
+
 A human-in-the-loop AI agent that operates legacy mainframe (green-screen) systems through natural language — fully on-premises, with every action gated by human approval and recorded in an append-only audit trail.
 
-**Encoding tacit operational knowledge.** The veterans who operate manufacturing's legacy back-office systems are retiring, and the knowledge of *how* to drive those green screens leaves with them. Tanomude turns that tacit know-how into explicit natural-language instructions, grounded in the retrieved operating manuals, so an AS-400-style workflow that once required a seasoned operator can be carried out — and verified — from a plain instruction. It is a system-operation answer to the skilled-worker succession problem (技能伝承).
+**Encoding tacit operational knowledge.** The veterans who operate manufacturing's legacy back-office systems are retiring, and the knowledge of *how* to drive those green screens leaves with them. Tanomude turns that tacit know-how into explicit natural-language instructions, grounded in the retrieved operating manuals, so an AS-400-style workflow that once required a seasoned operator can be carried out — and verified — from a plain instruction. It is a system-operation answer to the skilled-worker succession problem (ナレッジ継承).
 
 The project is built end-to-end as production AI/LLM engineering. It owns the architecture of the agent core loop, retrieval, and eval harness, and carries it through the full PoC → implementation → evaluation → operation lifecycle. It improves by measurement (boundary respect raised from 0.25 to a code-enforced 1.0; per-user growth reported honestly at 0.625, not rounded up) under layered quality gates: a required CI `verify` check, `@claude` review, and multi-pass QC. The custom agent loop was built only after weighing existing frameworks against these safety and verification needs, and a person and a check stay on every write — approval before execution, screen-state verification, and rollback on mismatch.
 
@@ -17,12 +26,6 @@ A no-backend, hand-authored interactive mock of the approval console — **not a
 > Scope: the mock demonstrates the approval and refusal flow on recorded data. The correction-learning loop — a 修正 (revise) reshaping the next plan, and the immunity notice that declines a revise aimed at a grounded slot — runs in the full local product, not in this mock.
 
 > **Demo video — coming soon**
-
-Three companion pages put the mock in context:
-
-- **[Tanomude at a glance](https://seunghwan-dev.github.io/tanomude/)** — the through-line on one page: what it is, why (技能伝承), how it works, the measured proof, and the architecture.
-- **[Status & roadmap](https://seunghwan-dev.github.io/tanomude/status/)** — the honest implementation ledger, item by item: 73 implemented · 11 partial · 27 deferred by decision, 111 rows, with the deferred items openly marked.
-- **[Operations design note](https://seunghwan-dev.github.io/tanomude/operations/)** — how the system is designed to be operated: SLOs, alerting, on-call, rollback, and 育成 contamination detection. Design intent only — none of it is running today.
 
 ---
 
@@ -37,17 +40,10 @@ Three companion pages put the mock in context:
 
 ## Architecture
 
-```mermaid
-flowchart LR
-  B["Browser<br/>React approval card"] <--> API["FastAPI<br/>same-origin /api · /ws/agent"]
-  API --> P["Plan<br/>slot extraction (Gemma / Ollama)<br/>+ hybrid retrieval (pgvector + FTS)<br/>+ personal corrections"]
-  P --> H["HITL approval"]
-  H --> C["Core loop"]
-  C --> AD["Clean screen adapter"]
-  AD --> M["Mock AS-400<br/>green-screen state machine"]
-  EV["Eval harness (local, model-run)<br/>+ deterministic CI subset"]
-  C -.-> EV
-```
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="./docs/architecture-en-dark.svg">
+  <img src="./docs/architecture-en-light.svg" alt="Architecture: an instruction is planned over RAG grounding and personal corrections, gated by human approval, executed through a screen adapter against the mock AS-400, verified against the screen, and measured by an eval harness" width="940">
+</picture>
 
 The agent **proposes**; a human **decides**. Only approved plans execute, replayed key-by-key through a narrow screen adapter against the legacy system.
 
