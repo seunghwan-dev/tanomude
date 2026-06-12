@@ -40,17 +40,10 @@
 
 ## アーキテクチャ
 
-```mermaid
-flowchart LR
-  B["ブラウザ<br/>React 承認カード"] <--> API["FastAPI<br/>同一オリジン /api · /ws/agent"]
-  API --> P["計画<br/>スロット抽出 (Gemma / Ollama)<br/>+ ハイブリッド検索 (pgvector + 全文検索)<br/>+ 個人修正"]
-  P --> H["人手承認 (HITL)"]
-  H --> C["コアループ"]
-  C --> AD["クリーンな画面アダプタ"]
-  AD --> M["モック AS-400<br/>グリーンスクリーン状態機械"]
-  EV["評価ハーネス（ローカル・モデル実行）<br/>+ 決定論的 CI サブセット"]
-  C -.-> EV
-```
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="./docs/architecture-ja-dark.svg">
+  <img src="./docs/architecture-ja-light.svg" alt="アーキテクチャ：指示は手順書 RAG と個人修正に根拠づけて計画され、人手承認のゲートを経て、画面アダプタ越しにモック AS-400 へ実行・検証され、評価ハーネスが採点する" width="940">
+</picture>
 
 エージェントは **提案** し、人が **決定** します。承認された計画だけが実行され、狭いアダプタ越しにキー単位でレガシーシステムへ再生されます。
 

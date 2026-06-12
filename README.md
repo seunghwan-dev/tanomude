@@ -40,17 +40,10 @@ A no-backend, hand-authored interactive mock of the approval console — **not a
 
 ## Architecture
 
-```mermaid
-flowchart LR
-  B["Browser<br/>React approval card"] <--> API["FastAPI<br/>same-origin /api · /ws/agent"]
-  API --> P["Plan<br/>slot extraction (Gemma / Ollama)<br/>+ hybrid retrieval (pgvector + FTS)<br/>+ personal corrections"]
-  P --> H["HITL approval"]
-  H --> C["Core loop"]
-  C --> AD["Clean screen adapter"]
-  AD --> M["Mock AS-400<br/>green-screen state machine"]
-  EV["Eval harness (local, model-run)<br/>+ deterministic CI subset"]
-  C -.-> EV
-```
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="./docs/architecture-en-dark.svg">
+  <img src="./docs/architecture-en-light.svg" alt="Architecture: an instruction is planned over RAG grounding and personal corrections, gated by human approval, executed through a screen adapter against the mock AS-400, verified against the screen, and measured by an eval harness" width="940">
+</picture>
 
 The agent **proposes**; a human **decides**. Only approved plans execute, replayed key-by-key through a narrow screen adapter against the legacy system.
 
