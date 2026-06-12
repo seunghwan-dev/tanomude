@@ -31,5 +31,8 @@ export default defineConfig({
   build: {
     outDir: fromHere("./dist-mock"),
     emptyOutDir: true,
+    rollupOptions: {
+      input: fromHere("./mock/mock/index.html"),
+    },
   },
 });
