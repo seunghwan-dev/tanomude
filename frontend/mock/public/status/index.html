@@ -1,0 +1,396 @@
+<!doctype html>
+<html lang="en" data-lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" type="image/svg+xml" href="../favicon.svg">
+<title>Tanomude — implementation status &amp; roadmap</title>
+<style>
+  :root{
+    --impl:#1C7A45; --impl-bg:#E7F4EC;
+    --partial:#B7791F; --partial-bg:#FBF1DF;
+    --deferred:#475569; --deferred-bg:#EEF1F5;
+    --gap:#B91C1C; --gap-bg:#FBE9E9;
+    --ink:#1A2230; --soft:#5A6678; --faint:#8A94A6;
+    --line:#E2E6EC; --panel:#FFFFFF; --bg:#F5F7FA; --sunk:#EDF0F4;
+    --rt:#0F766E; --rt-bg:#DEF2F0; --ca:#64748B; --ca-bg:#EEF1F5;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Segoe UI",system-ui,-apple-system,"Hiragino Sans","Yu Gothic",sans-serif;
+    font-size:14px;line-height:1.55;padding:0 0 80px;}
+  [data-lang="en"] .ja{display:none;}
+  [data-lang="ja"] .en{display:none;}
+  .nav{background:var(--panel);border-bottom:1px solid var(--line);}
+  .nav-inner{max-width:1160px;margin:0 auto;padding:10px 22px;display:flex;
+    align-items:center;gap:18px;flex-wrap:wrap;}
+  .brand{font-weight:700;font-size:15px;color:var(--ink);text-decoration:none;}
+  .nav a.nav-link{color:var(--soft);text-decoration:none;font-size:13px;}
+  .nav a.nav-link:hover{color:var(--ink);}
+  .nav a.nav-link.current{color:var(--impl);font-weight:600;}
+  .lang{margin-left:auto;display:flex;gap:4px;}
+  .lang-btn{border:1px solid var(--line);background:var(--panel);color:var(--soft);
+    font-size:12px;padding:3px 10px;border-radius:14px;cursor:pointer;}
+  .lang-btn.active{background:var(--ink);color:#fff;border-color:var(--ink);}
+  .wrap{max-width:1160px;margin:0 auto;padding:28px 22px 0;}
+  h1{font-size:24px;margin:0 0 4px;}
+  .sub{color:var(--soft);font-size:13px;margin:0 0 2px;}
+  h2{font-size:18px;margin:34px 0 6px;padding-bottom:6px;border-bottom:2px solid var(--line);}
+  h3{font-size:15px;margin:20px 0 6px;color:var(--ink);}
+  .cards{display:flex;gap:12px;flex-wrap:wrap;margin:20px 0 8px;}
+  .card{flex:1 1 150px;background:var(--panel);border:1px solid var(--line);
+    border-radius:10px;padding:14px 16px;border-left-width:5px;border-left-style:solid;}
+  .card .n{font-size:30px;font-weight:700;line-height:1;}
+  .card .l{font-size:12px;color:var(--soft);margin-top:6px;}
+  .card.impl{border-left-color:var(--impl);} .card.impl .n{color:var(--impl);}
+  .card.partial{border-left-color:var(--partial);} .card.partial .n{color:var(--partial);}
+  .card.deferred{border-left-color:var(--deferred);} .card.deferred .n{color:var(--deferred);}
+  .card.gap{border-left-color:var(--gap);} .card.gap .n{color:var(--gap);}
+  .card.total{border-left-color:var(--ink);} .card.total .n{color:var(--ink);}
+  .bar{display:flex;height:16px;border-radius:8px;overflow:hidden;margin:10px 0 4px;border:1px solid var(--line);}
+  .bar span{display:block;}
+  .bar .si{background:var(--impl);} .bar .sp{background:var(--partial);}
+  .bar .sd{background:var(--deferred);} .bar .sg{background:var(--gap);}
+  .barlabel{font-size:12px;color:var(--faint);}
+  .legend{background:var(--panel);border:1px solid var(--line);border-radius:10px;
+    padding:12px 16px;margin:14px 0;font-size:12.5px;color:var(--soft);}
+  .legend b{color:var(--ink);}
+  .badge{display:inline-block;padding:2px 9px;border-radius:20px;font-size:12px;
+    font-weight:600;white-space:nowrap;}
+  .b-impl{background:var(--impl-bg);color:var(--impl);}
+  .b-partial{background:var(--partial-bg);color:var(--partial);}
+  .b-deferred{background:var(--deferred-bg);color:var(--deferred);}
+  .pill{display:inline-block;padding:1px 7px;border-radius:5px;font-size:11px;font-weight:600;}
+  .p-rt{background:var(--rt-bg);color:var(--rt);}
+  .p-ca{background:var(--ca-bg);color:var(--ca);}
+  .p-none{color:var(--faint);}
+  table{width:100%;border-collapse:collapse;background:var(--panel);
+    border:1px solid var(--line);border-radius:10px;overflow:hidden;margin:6px 0 4px;font-size:13px;}
+  thead th{background:var(--sunk);text-align:left;padding:8px 11px;font-size:12px;
+    color:var(--soft);font-weight:600;border-bottom:1px solid var(--line);}
+  td{padding:8px 11px;border-bottom:1px solid var(--line);vertical-align:top;}
+  tbody tr:last-child td{border-bottom:none;}
+  tbody tr:hover{background:#FAFBFC;}
+  td.item{font-weight:500;width:34%;}
+  td.st{width:118px;}
+  code{font-family:"Cascadia Code",Consolas,monospace;font-size:12px;
+    background:var(--sunk);padding:1px 4px;border-radius:4px;color:#33405A;}
+  .ui{color:var(--soft);font-size:12.5px;}
+  .note{color:var(--faint);font-size:11.5px;display:block;margin-top:3px;}
+  .secct{font-size:12px;color:var(--faint);font-weight:400;margin-left:8px;}
+  .foot{color:var(--faint);font-size:11.5px;margin-top:30px;text-align:center;}
+  a{color:var(--rt);}
+</style>
+</head>
+<body>
+
+<nav class="nav"><div class="nav-inner">
+  <a class="brand" href="../about/">Tanomude</a>
+  <a class="nav-link" href="../about/"><span class="en">At a glance</span><span class="ja" lang="ja">全体像</span></a>
+  <a class="nav-link current" href="./"><span class="en">Status &amp; roadmap</span><span class="ja" lang="ja">実装状況</span></a>
+  <a class="nav-link" href="../operations/"><span class="en">Operations note</span><span class="ja" lang="ja">運用設計ノート</span></a>
+  <a class="nav-link" href="../"><span class="en">Interactive mock</span><span class="ja" lang="ja">インタラクティブモック</span></a>
+  <div class="lang">
+    <button class="lang-btn" type="button" data-lang="en">English</button>
+    <button class="lang-btn" type="button" data-lang="ja">日本語</button>
+  </div>
+</div></nav>
+
+<div class="wrap">
+
+  <h1><span class="en">Tanomude — implementation status &amp; roadmap</span><span class="ja" lang="ja">Tanomude — 実装状況とロードマップ</span></h1>
+  <p class="sub en">Every item of the internal master design, judged against the code at the 2026-06-07 snapshot and grouped the way the build was phased: MVP spine, stretch, roadmap. Each row carries its disposition and its evidence.</p>
+  <p class="sub ja" lang="ja">内部マスター設計の全項目を、2026-06-07 時点のコードスナップショットに照らして判定し、ビルドの段階分けどおりに整理したものです：MVP スパイン・ストレッチ・ロードマップ。各行に処分と証拠を併記します。</p>
+
+  <div class="cards">
+    <div class="card impl"><div class="n">73</div><div class="l">🟢 <span class="en">Implemented</span><span class="ja" lang="ja">実装済</span></div></div>
+    <div class="card partial"><div class="n">11</div><div class="l">🟡 <span class="en">Partial</span><span class="ja" lang="ja">部分実装</span></div></div>
+    <div class="card deferred"><div class="n">27</div><div class="l">⚪ <span class="en">Deferred by decision<br>(stretch · roadmap · descoped)</span><span class="ja" lang="ja">意図的延期<br>（ストレッチ・ロードマップ・スコープ外）</span></div></div>
+    <div class="card gap"><div class="n">0</div><div class="l">🔴 <span class="en">Unrecorded gap<br>(no disposition on record)</span><span class="ja" lang="ja">未分類ギャップ<br>（処分記録なし）</span></div></div>
+    <div class="card total"><div class="n">111</div><div class="l"><span class="en">Total (rows)</span><span class="ja" lang="ja">合計（行数）</span></div></div>
+  </div>
+  <div class="bar">
+    <span class="si" style="width:65.8%"></span>
+    <span class="sp" style="width:9.9%"></span>
+    <span class="sd" style="width:24.3%"></span>
+    <span class="sg" style="width:0%"></span>
+  </div>
+  <p class="barlabel">
+    <span class="en">Implemented 66% · partial 10% · deferred by decision 24% · gaps 0% &nbsp;|&nbsp; counted by row, excluding the workflow-flow mapping table; the 12 unimplemented API routes are grouped into 4 rows.</span>
+    <span class="ja" lang="ja">実装済 66%・部分実装 10%・意図的延期 24%・ギャップ 0%　|　行単位の集計（ワークフロー対応表は除外）。未実装の API ルート12本は4行に集約。</span>
+  </p>
+
+  <div class="legend">
+    <p style="margin:0 0 8px;" class="en"><b>Verdict</b> — the MVP spine (W1–W3) is effectively complete; W4 publication has one remaining item, the demo video. Zero unclassified gaps: every unimplemented item carries a recorded disposition — stretch, roadmap, or out of build scope.</p>
+    <p style="margin:0 0 8px;" class="ja" lang="ja"><b>判定</b> — MVP スパイン（W1〜W3）は実質的に完成。W4（公開）の残りはデモ動画の1項目です。未分類ギャップは0件：未実装の項目はすべて、ストレッチ・ロードマップ・ビルド範囲外のいずれかの処分記録を持ちます。</p>
+    <p style="margin:0 0 8px;" class="en"><b>Evidence honesty</b> — <span class="pill p-rt">runtime-verified</span> means a dedicated test executed and passed in CI; <span class="pill p-ca">code-anchor</span> means a static reading of the code. Tests that need the embedding service are skipped in CI, so model- and embedding-dependent rows stay code-anchor rather than being promoted.</p>
+    <p style="margin:0 0 8px;" class="ja" lang="ja"><b>証拠の正直さ</b> — <span class="pill p-rt">runtime-verified</span> は専用テストが CI で実行・通過したこと、<span class="pill p-ca">code-anchor</span> は静的なコード判読を意味します。埋め込みサービスを要するテストは CI ではスキップされるため、モデル・埋め込み依存の行は昇格させず code-anchor のままにしています。</p>
+    <p style="margin:0;" class="en"><b>Scope note</b> — the design's "screen" layer is realized inside the operator console (a screen-state inspector panel, joined just after this snapshot by a 5250-style replay renderer), not as a separately served terminal page.</p>
+    <p style="margin:0;" class="ja" lang="ja"><b>スコープ注記</b> — 設計の「画面」層は、独立して配信される端末ページとしてではなく、オペレーターコンソールの内部（画面状態インスペクタ。スナップショット直後に 5250 風リプレイレンダラーも追加）として実現されています。</p>
+  </div>
+
+  <div class="legend">
+    <p style="margin:0;" class="en"><b>Point in time</b> — this page assesses the 2026-06-07 snapshot. Shipped since: the 5250-style green-screen replay renderer in the console, a code-enforced revise-immunity seam, Japanese refusal reasons, and the <a href="../">public interactive mock</a>. The published eval numbers were re-confirmed unchanged at the public release commit — five identical runs, every metric and per-case outcome matching.</p>
+    <p style="margin:0;" class="ja" lang="ja"><b>時点について</b> — 本ページは 2026-06-07 のスナップショットを判定したものです。その後の出荷分：コンソール内の 5250 風グリーンスクリーン・リプレイレンダラー、コード強制の修正上書き不可シーム、日本語の却下文言、<a href="../">公開インタラクティブモック</a>。公表済みの評価数値は公開コミットにおいて再確認され、5回の同一実行で全指標・全ケース結果が一致して変化なしでした。</p>
+  </div>
+
+  <div class="legend">
+    <p style="margin:0;" class="en"><b>Roadmap item — LLM usage instrumentation.</b> A single instrumentation point in the LLM client wrapper (tokens, cost, latency, retries, model), a usage table, and the monitoring panel that reads them are designed but not yet built. They are tracked as a stretch/roadmap item, and the rows below reflect that disposition. The intended operations layer on top is written up in the <a href="../operations/">operations design note</a>.</p>
+    <p style="margin:0;" class="ja" lang="ja"><b>ロードマップ項目 — LLM 利用量の計測。</b> LLM クライアントラッパーの単一計測点（トークン・コスト・レイテンシ・再試行・モデル）、利用量テーブル、それを読むモニタリングパネルは、設計済みですが未構築です。ストレッチ／ロードマップ項目として管理しており、以下の行はその処分を反映しています。その上に載る運用層の設計は<a href="../operations/">運用設計ノート</a>に記しています。</p>
+  </div>
+
+  <h2><span class="en">MVP spine</span><span class="ja" lang="ja">MVP スパイン</span></h2>
+
+  <h3>W1 <span class="secct"><span class="en">spike · adapter · mock · core loop · RAG · validation · structured output · end-to-end — 13/13 implemented</span><span class="ja" lang="ja">スパイク・アダプタ・モック・コアループ・RAG・検証・構造化出力・一気通貫 — 13/13 実装済</span></span></h3>
+  <table>
+    <thead><tr><th><span class="en">Item</span><span class="ja" lang="ja">項目</span></th><th><span class="en">Status</span><span class="ja" lang="ja">状態</span></th><th><span class="en">Evidence</span><span class="ja" lang="ja">証拠</span></th><th>UI</th></tr></thead>
+    <tbody>
+      <tr><td class="item"><span class="en">Reliability spike first — measure before building: free-form generation 7.5% → template + slot-fill 87.5% exact (96 runs, zero parse failures)</span><span class="ja" lang="ja">信頼性スパイク先行 — 構築前に測定：自由生成 7.5% → テンプレート+スロットフィル 87.5% exact（96ラン・parse失敗0）</span><span class="note en">Abort success 0/96 — the model never produced the correct abort sequence on a missing required field; this safety finding drove W2's multi-layer guards.</span><span class="note ja" lang="ja">abort 成功 0/96 — 必須項目欠落時に正しい中断列を一度も生成できず。この安全所見が W2 の多層ガードを要件化。</span></td><td class="st"><span class="badge b-impl"><span class="en">Implemented</span><span class="ja" lang="ja">実装済</span></span></td><td><span class="en">internal spike record (measurement memo + raw run results)</span><span class="ja" lang="ja">内部スパイク記録（測定メモ+生ラン結果）</span> <span class="pill p-ca">code-anchor</span></td><td class="ui"><span class="en">none</span><span class="ja" lang="ja">なし</span></td></tr>
+      <tr><td class="item"><span class="en">Adapter interface — read_screen / send_keys / assert_state, plus open/close session ownership</span><span class="ja" lang="ja">アダプタIF — read_screen / send_keys / assert_state ＋ open/close のセッション所有</span></td><td class="st"><span class="badge b-impl"><span class="en">Implemented</span><span class="ja" lang="ja">実装済</span></span></td><td><code>adapter/adapter/base.py</code> <span class="pill p-ca">code-anchor</span></td><td class="ui"><span class="en">none</span><span class="ja" lang="ja">なし</span></td></tr>
+      <tr><td class="item"><span class="en">Mock layer ① screen — in-console realization (see the scope note above)</span><span class="ja" lang="ja">モック第①層 画面 — コンソール内で実現（上のスコープ注記参照）</span></td><td class="st"><span class="badge b-impl"><span class="en">Implemented</span><span class="ja" lang="ja">実装済</span></span></td><td><code>frontend/src/components/Inspector.tsx</code> <span class="pill p-ca">code-anchor</span></td><td class="ui"><span class="en">Inspector, right panel</span><span class="ja" lang="ja">Inspector 右パネル</span></td></tr>
+      <tr><td class="item"><span class="en">Mock layer ② behavior &amp; state — FastAPI + Postgres state machine</span><span class="ja" lang="ja">モック第②層 挙動・状態 — FastAPI + Postgres の状態機械</span></td><td class="st"><span class="badge b-impl"><span class="en">Implemented</span><span class="ja" lang="ja">実装済</span></span></td><td><code>mock-as400/app/statemachine.py</code>, <code>services/session_service.py</code> <span class="pill p-ca">code-anchor</span></td><td class="ui"><span class="en">none</span><span class="ja" lang="ja">なし</span></td></tr>
+      <tr><td class="item"><span class="en">Mock layer ③ adapter — MockAdapter + session endpoints</span><span class="ja" lang="ja">モック第③層 アダプタ — MockAdapter + セッションAPI</span></td><td class="st"><span class="badge b-impl"><span class="en">Implemented</span><span class="ja" lang="ja">実装済</span></span></td><td><code>adapter/adapter/mock_adapter.py</code>, <code>mock-as400/app/routers/session.py</code> <span class="pill p-ca">code-anchor</span></td><td class="ui"><span class="en">none</span><span class="ja" lang="ja">なし</span></td></tr>
+      <tr><td class="item"><span class="en">Core loop — run_task / execute (plan → execute → verify → recover)</span><span class="ja" lang="ja">コアループ — run_task / execute（計画→実行→検証→回復）</span></td><td class="st"><span class="badge b-impl"><span class="en">Implemented</span><span class="ja" lang="ja">実装済</span></span></td><td><code>backend/backend/coreloop.py</code> <span class="pill p-ca">code-anchor</span></td><td class="ui"><span class="en">none</span><span class="ja" lang="ja">なし</span></td></tr>
+      <tr><td class="item"><span class="en">RAG (a) structure-aware chunking</span><span class="ja" lang="ja">RAG (a) 構造認識チャンキング</span></td><td class="st"><span class="badge b-impl"><span class="en">Implemented</span><span class="ja" lang="ja">実装済</span></span></td><td><code>backend/backend/chunker.py</code> <span class="pill p-ca">code-anchor</span></td><td class="ui"><span class="en">none</span><span class="ja" lang="ja">なし</span></td></tr>
+      <tr><td class="item"><span class="en">RAG (b) hybrid vector + full-text retrieval</span><span class="ja" lang="ja">RAG (b) ベクトル+全文のハイブリッド検索</span></td><td class="st"><span class="badge b-impl"><span class="en">Implemented</span><span class="ja" lang="ja">実装済</span></span></td><td><code>backend/backend/retrieval.py</code> <span class="pill p-ca">code-anchor</span></td><td class="ui"><span class="en">none</span><span class="ja" lang="ja">なし</span></td></tr>
+      <tr><td class="item"><span class="en">RAG (c) reciprocal-rank fusion (k=60)</span><span class="ja" lang="ja">RAG (c) RRF 融合（k=60）</span></td><td class="st"><span class="badge b-impl"><span class="en">Implemented</span><span class="ja" lang="ja">実装済</span></span></td><td><code>backend/backend/retrieval.py</code> <span class="pill p-ca">code-anchor</span></td><td class="ui"><span class="en">none</span><span class="ja" lang="ja">なし</span></td></tr>
+      <tr><td class="item"><span class="en">Manual RAG injection + direct guideline injection</span><span class="ja" lang="ja">手順書 RAG 注入 + 指針の直接注入</span></td><td class="st"><span class="badge b-impl"><span class="en">Implemented</span><span class="ja" lang="ja">実装済</span></span></td><td><code>backend/backend/slotfill.py</code>, <code>agent/service.py</code> <span class="pill p-ca">code-anchor</span></td><td class="ui"><span class="en">none</span><span class="ja" lang="ja">なし</span></td></tr>
+      <tr><td class="item"><span class="en">Pre-validation — required fields / out-of-domain / dates</span><span class="ja" lang="ja">事前検証 — 必須項目／ドメイン外／日付</span></td><td class="st"><span class="badge b-impl"><span class="en">Implemented</span><span class="ja" lang="ja">実装済</span></span></td><td><code>backend/backend/slotfill.py</code> <span class="pill p-ca">code-anchor</span></td><td class="ui"><span class="en">refusal on the approval card</span><span class="ja" lang="ja">承認カードの却下表示</span></td></tr>
+      <tr><td class="item"><span class="en">Structured output enforced — Pydantic discriminated union + retry</span><span class="ja" lang="ja">構造化出力の強制 — Pydantic 判別共用体 + 再試行</span></td><td class="st"><span class="badge b-impl"><span class="en">Implemented</span><span class="ja" lang="ja">実装済</span></span></td><td><code>backend/backend/slotfill.py</code>, <code>ollama_client.py</code> <span class="pill p-rt">runtime-verified</span></td><td class="ui"><span class="en">none</span><span class="ja" lang="ja">なし</span></td></tr>
+      <tr><td class="item"><span class="en">End-to-end capstone — login → application plan → approve → execute</span><span class="ja" lang="ja">一気通貫の検収 — ログイン→申請計画→承認→実行</span></td><td class="st"><span class="badge b-impl"><span class="en">Implemented</span><span class="ja" lang="ja">実装済</span></span></td><td><code>backend/tests/test_w1_capstone.py</code> <span class="pill p-rt">runtime-verified</span></td><td class="ui"><span class="en">none</span><span class="ja" lang="ja">なし</span></td></tr>
+    </tbody>
+  </table>
+
+  <h3>W2 <span class="secct"><span class="en">verify loop · approval card · HITL · recovery — 9/9 implemented</span><span class="ja" lang="ja">verify ループ・承認カード・HITL・リカバリ — 9/9 実装済</span></span></h3>
+  <table>
+    <thead><tr><th><span class="en">Item</span><span class="ja" lang="ja">項目</span></th><th><span class="en">Status</span><span class="ja" lang="ja">状態</span></th><th><span class="en">Evidence</span><span class="ja" lang="ja">証拠</span></th><th>UI</th></tr></thead>
+    <tbody>
+      <tr><td class="item"><span class="en">Verify loop — act → assert screen state → replan / rollback</span><span class="ja" lang="ja">verify ループ — 実行→画面状態の検証→再計画／ロールバック</span></td><td class="st"><span class="badge b-impl"><span class="en">Implemented</span><span class="ja" lang="ja">実装済</span></span></td><td><code>backend/backend/coreloop.py</code> <span class="pill p-rt">runtime-verified</span></td><td class="ui">ExecutionPanel</td></tr>
+      <tr><td class="item"><span class="en">Replan tracking with a hard cap (MAX_REPLAN = 2)</span><span class="ja" lang="ja">再計画回数の追跡と上限（MAX_REPLAN = 2）</span></td><td class="st"><span class="badge b-impl"><span class="en">Implemented</span><span class="ja" lang="ja">実装済</span></span></td><td><code>backend/backend/coreloop.py</code> <span class="pill p-rt">runtime-verified</span></td><td class="ui"><span class="en">none</span><span class="ja" lang="ja">なし</span></td></tr>
+      <tr><td class="item"><span class="en">Rollback path + bad-input short-circuit to a person</span><span class="ja" lang="ja">ロールバック経路 + 入力データ不良の人への短絡</span></td><td class="st"><span class="badge b-impl"><span class="en">Implemented</span><span class="ja" lang="ja">実装済</span></span></td><td><code>backend/backend/coreloop.py</code> <span class="pill p-rt">runtime-verified</span></td><td class="ui"><span class="en">再入力/コード確認 badge</span><span class="ja" lang="ja">再入力/コード確認バッジ</span></td></tr>
+      <tr><td class="item"><span class="en">Approval gate — a plan lands as awaiting_approval, never auto-executes</span><span class="ja" lang="ja">承認ゲート — 計画は awaiting_approval で停止し、自動実行されない</span></td><td class="st"><span class="badge b-impl"><span class="en">Implemented</span><span class="ja" lang="ja">実装済</span></span></td><td><code>backend/backend/agent/router.py</code> <span class="pill p-ca">code-anchor</span></td><td class="ui"><span class="en">none</span><span class="ja" lang="ja">なし</span></td></tr>
+      <tr><td class="item"><span class="en">承認 / 修正 / 却下 decision endpoints</span><span class="ja" lang="ja">承認・修正・却下の決定エンドポイント</span></td><td class="st"><span class="badge b-impl"><span class="en">Implemented</span><span class="ja" lang="ja">実装済</span></span></td><td><code>backend/backend/agent/router.py</code> <span class="pill p-rt">runtime-verified</span></td><td class="ui"><span class="en">ActionBar buttons</span><span class="ja" lang="ja">ActionBar ボタン</span></td></tr>
+      <tr><td class="item"><span class="en">HITL state gate — a decision on a non-awaiting task is rejected (409)</span><span class="ja" lang="ja">HITL 状態ゲート — 承認待ち以外のタスクへの決定は 409 で拒否</span></td><td class="st"><span class="badge b-impl"><span class="en">Implemented</span><span class="ja" lang="ja">実装済</span></span></td><td><code>backend/backend/agent/router.py</code> <span class="pill p-rt">runtime-verified</span></td><td class="ui"><span class="en">none</span><span class="ja" lang="ja">なし</span></td></tr>
+      <tr><td class="item"><span class="en">Structured approval card — analysis → plan → grounds</span><span class="ja" lang="ja">構造化承認カード — 分析→計画→根拠</span></td><td class="st"><span class="badge b-impl"><span class="en">Implemented</span><span class="ja" lang="ja">実装済</span></span></td><td><code>frontend/src/components/ApprovalCard.tsx</code> + 3 tabs <span class="pill p-ca">code-anchor</span></td><td class="ui"><span class="en">approval card, 3 tabs</span><span class="ja" lang="ja">承認カード 3タブ</span></td></tr>
+      <tr><td class="item"><span class="en">Four-way execution outcome — submitted / 再入力・コード確認 / 要調査 / refused</span><span class="ja" lang="ja">実行結果の4分岐 — submitted／再入力・コード確認／要調査／却下</span></td><td class="st"><span class="badge b-impl"><span class="en">Implemented</span><span class="ja" lang="ja">実装済</span></span></td><td><code>frontend/src/components/ExecutionPanel.tsx</code> <span class="pill p-ca">code-anchor</span></td><td class="ui"><span class="en">ExecutionPanel badge</span><span class="ja" lang="ja">ExecutionPanel バッジ</span></td></tr>
+      <tr><td class="item"><span class="en">Out-of-domain / required-field refusal, byte-exact Japanese reasons</span><span class="ja" lang="ja">ドメイン外・必須項目不足の却下（バイト一致の日本語文言）</span></td><td class="st"><span class="badge b-impl"><span class="en">Implemented</span><span class="ja" lang="ja">実装済</span></span></td><td><code>backend/backend/slotfill.py</code> <span class="pill p-rt">runtime-verified</span></td><td class="ui"><span class="en">refusal on the approval card</span><span class="ja" lang="ja">承認カードの却下表示</span></td></tr>
+    </tbody>
+  </table>
+
+  <h3>W3 <span class="secct"><span class="en">eval harness + growth Δ — 6 implemented · 2 deferred by decision</span><span class="ja" lang="ja">評価ハーネス + 育成 Δ — 6 実装済・2 意図的延期</span></span></h3>
+  <table>
+    <thead><tr><th><span class="en">Item</span><span class="ja" lang="ja">項目</span></th><th><span class="en">Status</span><span class="ja" lang="ja">状態</span></th><th><span class="en">Evidence</span><span class="ja" lang="ja">証拠</span></th><th>UI</th></tr></thead>
+    <tbody>
+      <tr><td class="item"><span class="en">Eval harness skeleton — runs / cases / results + runner</span><span class="ja" lang="ja">評価ハーネスの骨格 — runs / cases / results + ランナー</span></td><td class="st"><span class="badge b-impl"><span class="en">Implemented</span><span class="ja" lang="ja">実装済</span></span></td><td><code>backend/backend/models.py</code>, <code>eval_runner.py</code> <span class="pill p-ca">code-anchor</span></td><td class="ui"><span class="en">none</span><span class="ja" lang="ja">なし</span></td></tr>
+      <tr><td class="item"><span class="en">Agent metrics — success · field accuracy · recovery · verify pass · average steps · routing</span><span class="ja" lang="ja">エージェント指標 — 成功率・フィールド精度・リカバリ・verify 通過・平均ステップ・ルーティング</span></td><td class="st"><span class="badge b-impl"><span class="en">Implemented</span><span class="ja" lang="ja">実装済</span></span></td><td><code>backend/backend/eval_runner.py</code> <span class="pill p-rt">runtime-verified</span></td><td class="ui"><span class="en">none</span><span class="ja" lang="ja">なし</span></td></tr>
+      <tr><td class="item"><span class="en">Dataset of 24 cases — normal 8 / missing-field 4 / wrong-code 4 / transient 4 / duplicate 4, with transient-fault injection</span><span class="ja" lang="ja">24ケースのデータセット — 正常8／必須欠落4／誤コード4／一時障害4／重複4、一時障害の注入つき</span></td><td class="st"><span class="badge b-impl"><span class="en">Implemented</span><span class="ja" lang="ja">実装済</span></span></td><td><code>backend/backend/eval_dataset.py</code>, <code>eval_transient.py</code> <span class="pill p-ca">code-anchor</span></td><td class="ui"><span class="en">none</span><span class="ja" lang="ja">なし</span></td></tr>
+      <tr><td class="item"><span class="en">Retrieval eval — precision / recall@k + MRR</span><span class="ja" lang="ja">検索評価 — precision / recall@k + MRR</span><span class="note en">Skipped in CI — needs the embedding service.</span><span class="note ja" lang="ja">CI ではスキップ — 埋め込みサービスが必要。</span></td><td class="st"><span class="badge b-impl"><span class="en">Implemented</span><span class="ja" lang="ja">実装済</span></span></td><td><code>backend/backend/retrieval_eval.py</code> <span class="pill p-ca">code-anchor</span></td><td class="ui"><span class="en">none</span><span class="ja" lang="ja">なし</span></td></tr>
+      <tr><td class="item"><span class="en">Growth effect — before/after Δ, control vs treatment</span><span class="ja" lang="ja">育成効果 — 修正前後の Δ（control vs treatment）</span><span class="note en">Measured Δ 0.625 — the reuse-previous-project slot moves on all four policy cases and the overseas slot on one of four, against a zero control baseline. Skipped in CI — needs the model.</span><span class="note ja" lang="ja">測定値 Δ 0.625 — 前回案件再利用スロットは方針4ケース中4、海外フラグは4ケース中1で動く（ゼロの対照ベースライン比）。CI ではスキップ — モデルが必要。</span></td><td class="st"><span class="badge b-impl"><span class="en">Implemented</span><span class="ja" lang="ja">実装済</span></span></td><td><code>backend/backend/growth_eval.py</code> <span class="pill p-ca">code-anchor</span></td><td class="ui"><span class="en">none</span><span class="ja" lang="ja">なし</span></td></tr>
+      <tr><td class="item"><span class="en">Growth dataset policy/boundary split + boundary-respect rate on protected slots</span><span class="ja" lang="ja">育成データセットの方針／境界の二系統 + 保護スロットの境界尊重率</span><span class="note en">Measured 1.0 — boundary respect is a code-enforced invariant, not a model probability.</span><span class="note ja" lang="ja">測定値 1.0 — 境界尊重はモデルの確率ではなくコード強制の不変条件。</span></td><td class="st"><span class="badge b-impl"><span class="en">Implemented</span><span class="ja" lang="ja">実装済</span></span></td><td><code>backend/backend/growth_eval.py</code> <span class="pill p-ca">code-anchor</span></td><td class="ui"><span class="en">none</span><span class="ja" lang="ja">なし</span></td></tr>
+      <tr><td class="item"><span class="en">LLM-as-judge</span><span class="ja" lang="ja">LLM-as-judge</span></td><td class="st"><span class="badge b-deferred"><span class="en">Deferred by decision</span><span class="ja" lang="ja">意図的延期</span></span></td><td><span class="en">recorded disposition: roadmap</span><span class="ja" lang="ja">処分記録：ロードマップ</span> <span class="pill p-none">—</span></td><td class="ui"><span class="en">none</span><span class="ja" lang="ja">なし</span></td></tr>
+      <tr><td class="item"><span class="en">Eval regression gate in CI (merge-blocking) — promotion is a documented next step</span><span class="ja" lang="ja">CI の評価回帰ゲート（マージブロック）— 昇格は文書化済みの次課題</span></td><td class="st"><span class="badge b-deferred"><span class="en">Deferred by decision</span><span class="ja" lang="ja">意図的延期</span></span></td><td><span class="en">recorded disposition: stretch</span><span class="ja" lang="ja">処分記録：ストレッチ</span> <span class="pill p-ca">code-anchor</span></td><td class="ui"><span class="en">none</span><span class="ja" lang="ja">なし</span></td></tr>
+    </tbody>
+  </table>
+
+  <h3>W4 <span class="secct"><span class="en">publication — 3 implemented · 1 remaining</span><span class="ja" lang="ja">公開 — 3 実装済・1 残</span></span></h3>
+  <table>
+    <thead><tr><th><span class="en">Item</span><span class="ja" lang="ja">項目</span></th><th><span class="en">Status</span><span class="ja" lang="ja">状態</span></th><th><span class="en">Evidence</span><span class="ja" lang="ja">証拠</span></th><th>UI</th></tr></thead>
+    <tbody>
+      <tr><td class="item"><span class="en">Showcase README — measurement-first, retrieval up front</span><span class="ja" lang="ja">ショーケース README — 測定を前面に</span></td><td class="st"><span class="badge b-impl"><span class="en">Implemented</span><span class="ja" lang="ja">実装済</span></span></td><td><code>README.md</code> <span class="pill p-ca">code-anchor</span></td><td class="ui">GitHub</td></tr>
+      <tr><td class="item"><span class="en">docker compose up reproduction — six services</span><span class="ja" lang="ja">docker compose up での再現 — 6サービス</span></td><td class="st"><span class="badge b-impl"><span class="en">Implemented</span><span class="ja" lang="ja">実装済</span></span></td><td><code>docker-compose.yml</code> <span class="pill p-ca">code-anchor</span></td><td class="ui">http://localhost:8000</td></tr>
+      <tr><td class="item"><span class="en">Pushed to GitHub with live CI (clone → run)</span><span class="ja" lang="ja">GitHub へのプッシュと稼働中の CI（clone→実行）</span></td><td class="st"><span class="badge b-impl"><span class="en">Implemented</span><span class="ja" lang="ja">実装済</span></span></td><td><span class="en">the required <code>verify</code> workflow</span><span class="ja" lang="ja">必須の <code>verify</code> ワークフロー</span> <span class="pill p-rt">runtime-verified</span></td><td class="ui">GitHub</td></tr>
+      <tr><td class="item"><span class="en">Demo video</span><span class="ja" lang="ja">デモ動画</span></td><td class="st"><span class="badge b-deferred"><span class="en">Deferred by decision</span><span class="ja" lang="ja">意図的延期</span></span></td><td><span class="en"><code>README.md</code> — "coming soon"</span><span class="ja" lang="ja"><code>README.md</code> —「近日公開」</span> <span class="pill p-ca">code-anchor</span></td><td class="ui"><span class="en">acknowledged, unproduced (the W4 remainder)</span><span class="ja" lang="ja">未制作と明記（W4 の残り）</span></td></tr>
+    </tbody>
+  </table>
+
+  <h2><span class="en">Stretch — after the spine, in impact order</span><span class="ja" lang="ja">ストレッチ — スパイン完成後・インパクト順</span> <span class="secct"><span class="en">5 partial · 2 deferred by decision</span><span class="ja" lang="ja">5 部分実装・2 意図的延期</span></span></h2>
+  <table>
+    <thead><tr><th><span class="en">Item</span><span class="ja" lang="ja">項目</span></th><th><span class="en">Status</span><span class="ja" lang="ja">状態</span></th><th><span class="en">Evidence</span><span class="ja" lang="ja">証拠</span></th><th>UI</th></tr></thead>
+    <tbody>
+      <tr><td class="item"><span class="en">RAG re-ranking + deeper retrieval eval</span><span class="ja" lang="ja">RAG リランキング + 検索評価の深化</span><span class="note en">Retrieval eval is built; re-ranking is not.</span><span class="note ja" lang="ja">検索評価は実装済み・リランキングは未実装。</span></td><td class="st"><span class="badge b-partial"><span class="en">Partial</span><span class="ja" lang="ja">部分実装</span></span></td><td><code>backend/backend/retrieval_eval.py</code> <span class="pill p-ca">code-anchor</span></td><td class="ui"><span class="en">none</span><span class="ja" lang="ja">なし</span></td></tr>
+      <tr><td class="item"><span class="en">MCP packaging + multi-client support</span><span class="ja" lang="ja">MCP 正式パッケージング + マルチクライアント</span><span class="note en">The adapter interface shipped in W1; the MCP wrapper is not built.</span><span class="note ja" lang="ja">アダプタIFは W1 で実装済み。MCP 包装は未実装。</span></td><td class="st"><span class="badge b-deferred"><span class="en">Deferred by decision</span><span class="ja" lang="ja">意図的延期</span></span></td><td><code>adapter/adapter/base.py</code> <span class="pill p-ca">code-anchor</span></td><td class="ui"><span class="en">none</span><span class="ja" lang="ja">なし</span></td></tr>
+      <tr><td class="item"><span class="en">Observability &amp; operations — console drill-down + the three-layer ops design</span><span class="ja" lang="ja">可観測性・運用 — コンソールのドリルダウン + 運用3層設計</span><span class="note en">Timeline / Inspector / step observer are built; alerting and the dashboard are deferred — see the <a href="../operations/">operations note</a>.</span><span class="note ja" lang="ja">Timeline／Inspector／観測フックは実装済み。アラートとダッシュボードは延期 — <a href="../operations/">運用設計ノート</a>参照。</span></td><td class="st"><span class="badge b-partial"><span class="en">Partial</span><span class="ja" lang="ja">部分実装</span></span></td><td><code>Timeline.tsx</code>, <code>Inspector.tsx</code>, <code>backend/backend/observer.py</code> <span class="pill p-ca">code-anchor</span></td><td class="ui">ExecutionPanel</td></tr>
+      <tr><td class="item"><span class="en">CI/CD full expansion</span><span class="ja" lang="ja">CI/CD のフル拡張</span><span class="note en">The minimal verify gate is live; the eval gate and a CD pipeline are deferred.</span><span class="note ja" lang="ja">最小の verify ゲートは稼働中。評価ゲートと CD は延期。</span></td><td class="st"><span class="badge b-partial"><span class="en">Partial</span><span class="ja" lang="ja">部分実装</span></span></td><td><code>.github/workflows/verify.yml</code> <span class="pill p-ca">code-anchor</span></td><td class="ui"><span class="en">none</span><span class="ja" lang="ja">なし</span></td></tr>
+      <tr><td class="item"><span class="en">Cloud LLM provider swap</span><span class="ja" lang="ja">クラウド LLM プロバイダ切替</span><span class="note en">The provider is local-only today; no swap seam exists yet.</span><span class="note ja" lang="ja">現状プロバイダはローカル専用・切替の継ぎ目は未実装。</span></td><td class="st"><span class="badge b-deferred"><span class="en">Deferred by decision</span><span class="ja" lang="ja">意図的延期</span></span></td><td><code>backend/backend/config.py</code> <span class="pill p-ca">code-anchor</span></td><td class="ui"><span class="en">none</span><span class="ja" lang="ja">なし</span></td></tr>
+      <tr><td class="item"><span class="en">Growth deepening — versioning / unlearn / fallback</span><span class="ja" lang="ja">育成の深化 — バージョン管理／unlearn／フォールバック</span><span class="note en">Versioning and fallback are built; unlearn is not.</span><span class="note ja" lang="ja">バージョン管理とフォールバックは実装済み。unlearn は未実装。</span></td><td class="st"><span class="badge b-partial"><span class="en">Partial</span><span class="ja" lang="ja">部分実装</span></span></td><td><code>backend/tests/test_correction_versioning.py</code> <span class="pill p-rt">runtime-verified</span></td><td class="ui"><span class="en">none</span><span class="ja" lang="ja">なし</span></td></tr>
+      <tr><td class="item"><span class="en">Second workflow (expense settlement) / thin voice</span><span class="ja" lang="ja">第二ワークフロー（出張精算）／薄い音声</span><span class="note en">TTS is built; voice input and the second workflow are not.</span><span class="note ja" lang="ja">読み上げ（TTS）は実装済み。音声入力と第二ワークフローは未実装。</span></td><td class="st"><span class="badge b-partial"><span class="en">Partial</span><span class="ja" lang="ja">部分実装</span></span></td><td><code>frontend/src/lib/voice.ts</code> <span class="pill p-ca">code-anchor</span></td><td class="ui"><span class="en">voice toggle</span><span class="ja" lang="ja">音声トグル</span></td></tr>
+    </tbody>
+  </table>
+
+  <h2><span class="en">Roadmap</span><span class="ja" lang="ja">ロードマップ</span> <span class="secct"><span class="en">all deferred by decision</span><span class="ja" lang="ja">すべて意図的延期</span></span></h2>
+  <table>
+    <thead><tr><th><span class="en">Item</span><span class="ja" lang="ja">項目</span></th><th><span class="en">Status</span><span class="ja" lang="ja">状態</span></th><th><span class="en">Disposition</span><span class="ja" lang="ja">処分</span></th></tr></thead>
+    <tbody>
+      <tr><td class="item"><span class="en">Advanced RAG — query rewriting / decomposition · multi-hop retrieval · HyDE</span><span class="ja" lang="ja">アドバンスト RAG — クエリ書き換え／分解・マルチホップ検索・HyDE</span></td><td class="st"><span class="badge b-deferred"><span class="en">Deferred by decision</span><span class="ja" lang="ja">意図的延期</span></span></td><td><span class="en">roadmap</span><span class="ja" lang="ja">ロードマップ</span></td></tr>
+      <tr><td class="item"><span class="en">System expansion — expense-settlement and reporting workflows; Notes / Access / SAP adapters</span><span class="ja" lang="ja">システム拡張 — 出張精算・報告のワークフロー、Notes／Access／SAP アダプタ</span><span class="note en">Extensible through the existing adapter interface.</span><span class="note ja" lang="ja">既存のアダプタIF経由で拡張可能。</span></td><td class="st"><span class="badge b-deferred"><span class="en">Deferred by decision</span><span class="ja" lang="ja">意図的延期</span></span></td><td><span class="en">roadmap</span><span class="ja" lang="ja">ロードマップ</span></td></tr>
+      <tr><td class="item"><span class="en">SRE platform — admin CRUD · multi-tenancy · role management · a full admin surface</span><span class="ja" lang="ja">SRE プラットフォーム — 管理 CRUD・マルチテナント・権限管理・管理画面フルセット</span></td><td class="st"><span class="badge b-deferred"><span class="en">Deferred by decision</span><span class="ja" lang="ja">意図的延期</span></span></td><td><span class="en">roadmap</span><span class="ja" lang="ja">ロードマップ</span></td></tr>
+      <tr><td class="item"><span class="en">Operations deepening — alert rules · SLO/SLA · on-call · automatic rollback · automatic growth-contamination detection</span><span class="ja" lang="ja">運用の深化 — アラートルール・SLO／SLA・オンコール・自動ロールバック・育成汚染の自動検知</span><span class="note en">Designed in the <a href="../operations/">operations design note</a>.</span><span class="note ja" lang="ja">設計は<a href="../operations/">運用設計ノート</a>に記載。</span></td><td class="st"><span class="badge b-deferred"><span class="en">Deferred by decision</span><span class="ja" lang="ja">意図的延期</span></span></td><td><span class="en">roadmap</span><span class="ja" lang="ja">ロードマップ</span></td></tr>
+      <tr><td class="item"><span class="en">Model &amp; eval — on-prem fine-tuning · eval-dataset expansion · LLM-as-judge deepening</span><span class="ja" lang="ja">モデルと評価 — オンプレ微調整・評価データセット拡張・LLM-as-judge の深化</span><span class="note en">The base eval harness shipped in W3.</span><span class="note ja" lang="ja">基本の評価ハーネスは W3 で実装済み。</span></td><td class="st"><span class="badge b-deferred"><span class="en">Deferred by decision</span><span class="ja" lang="ja">意図的延期</span></span></td><td><span class="en">roadmap</span><span class="ja" lang="ja">ロードマップ</span></td></tr>
+      <tr><td class="item"><span class="en">Cloud deepening — self-hosted GPU serving · managed deployment · infrastructure as code</span><span class="ja" lang="ja">クラウドの深化 — GPU 自己ホスティング・マネージド配備・IaC</span></td><td class="st"><span class="badge b-deferred"><span class="en">Deferred by decision</span><span class="ja" lang="ja">意図的延期</span></span></td><td><span class="en">roadmap</span><span class="ja" lang="ja">ロードマップ</span></td></tr>
+    </tbody>
+  </table>
+
+  <h2><span class="en">Workflow flow, node by node</span><span class="ja" lang="ja">ワークフローの流れ（ノード別）</span> <span class="secct"><span class="en">mapped to the sections above — not counted in the totals</span><span class="ja" lang="ja">上記セクションへの対応表 — 合計には不算入</span></span></h2>
+  <table>
+    <thead><tr><th><span class="en">Flow node</span><span class="ja" lang="ja">フローのノード</span></th><th><span class="en">Status</span><span class="ja" lang="ja">状態</span></th><th><span class="en">Mapping</span><span class="ja" lang="ja">対応</span></th></tr></thead>
+    <tbody>
+      <tr><td class="item"><span class="en">① Context assembly (RAG + direct injection)</span><span class="ja" lang="ja">① コンテキスト構成（RAG + 直接注入）</span></td><td class="st"><span class="badge b-impl"><span class="en">Implemented</span><span class="ja" lang="ja">実装済</span></span></td><td>W1 / <code>backend/backend/agent/service.py</code></td></tr>
+      <tr><td class="item"><span class="en">② Model input proposal (adapter screen operations)</span><span class="ja" lang="ja">② モデルの入力案（アダプタの画面操作）</span></td><td class="st"><span class="badge b-impl"><span class="en">Implemented</span><span class="ja" lang="ja">実装済</span></span></td><td>W1 / <code>backend/backend/coreloop.py</code></td></tr>
+      <tr><td class="item"><span class="en">③ Pre-validation</span><span class="ja" lang="ja">③ 事前検証</span></td><td class="st"><span class="badge b-impl"><span class="en">Implemented</span><span class="ja" lang="ja">実装済</span></span></td><td>W1 / <code>backend/backend/slotfill.py</code></td></tr>
+      <tr><td class="item"><span class="en">④ Approval gate (承認 / 修正 / 却下)</span><span class="ja" lang="ja">④ 承認ゲート（承認・修正・却下）</span></td><td class="st"><span class="badge b-impl"><span class="en">Implemented</span><span class="ja" lang="ja">実装済</span></span></td><td>W2 / <code>agent/router.py</code> + ActionBar</td></tr>
+      <tr><td class="item"><span class="en">⑤ Execute + audit log</span><span class="ja" lang="ja">⑤ 実行 + 監査ログ</span></td><td class="st"><span class="badge b-impl"><span class="en">Implemented</span><span class="ja" lang="ja">実装済</span></span></td><td>W2 / <code>backend/backend/observer.py</code> + audit log</td></tr>
+      <tr><td class="item"><span class="en">⑥ Verify (screen-state assertion)</span><span class="ja" lang="ja">⑥ verify（画面状態の検証）</span></td><td class="st"><span class="badge b-impl"><span class="en">Implemented</span><span class="ja" lang="ja">実装済</span></span></td><td>W2 / <code>backend/backend/coreloop.py</code></td></tr>
+      <tr><td class="item"><span class="en">Replan / rollback + growth candidate</span><span class="ja" lang="ja">再計画／ロールバック + 育成候補</span></td><td class="st"><span class="badge b-impl"><span class="en">Implemented</span><span class="ja" lang="ja">実装済</span></span></td><td>W2 / <code>backend/backend/coreloop.py</code></td></tr>
+      <tr><td class="item"><span class="en">Voice, two moments — "ready" / "done" read-outs</span><span class="ja" lang="ja">音声の2モーメント — 「準備完了」「完了」の読み上げ</span></td><td class="st"><span class="badge b-partial"><span class="en">Partial</span><span class="ja" lang="ja">部分実装</span></span></td><td><code>frontend/src/lib/voice.ts</code> <span class="en">(TTS only, no voice input)</span><span class="ja" lang="ja">（読み上げのみ・音声入力なし）</span></td></tr>
+    </tbody>
+  </table>
+
+  <h2><span class="en">Screens</span><span class="ja" lang="ja">画面</span> <span class="secct"><span class="en">4 implemented · 1 partial · 4 deferred by decision</span><span class="ja" lang="ja">4 実装済・1 部分実装・4 意図的延期</span></span></h2>
+  <table>
+    <thead><tr><th><span class="en">Item</span><span class="ja" lang="ja">項目</span></th><th><span class="en">Status</span><span class="ja" lang="ja">状態</span></th><th><span class="en">Evidence</span><span class="ja" lang="ja">証拠</span></th><th>UI</th></tr></thead>
+    <tbody>
+      <tr><td class="item"><span class="en">Voice-first + text input</span><span class="ja" lang="ja">音声優先 + テキスト入力</span></td><td class="st"><span class="badge b-partial"><span class="en">Partial</span><span class="ja" lang="ja">部分実装</span></span></td><td><code>frontend/src/lib/voice.ts</code> <span class="en">(TTS only)</span><span class="ja" lang="ja">（読み上げのみ）</span> <span class="pill p-ca">code-anchor</span></td><td class="ui"><span class="en">voice toggle</span><span class="ja" lang="ja">音声トグル</span></td></tr>
+      <tr><td class="item"><span class="en">Execution timeline</span><span class="ja" lang="ja">実行タイムライン</span></td><td class="st"><span class="badge b-impl"><span class="en">Implemented</span><span class="ja" lang="ja">実装済</span></span></td><td><code>frontend/src/components/Timeline.tsx</code> <span class="pill p-ca">code-anchor</span></td><td class="ui"><span class="en">ExecutionPanel, left</span><span class="ja" lang="ja">ExecutionPanel 左</span></td></tr>
+      <tr><td class="item"><span class="en">Inspector — intent → key-sequence drill-down</span><span class="ja" lang="ja">Inspector — 意図→キー列のドリルダウン</span></td><td class="st"><span class="badge b-impl"><span class="en">Implemented</span><span class="ja" lang="ja">実装済</span></span></td><td><code>frontend/src/components/Inspector.tsx</code> <span class="pill p-ca">code-anchor</span></td><td class="ui"><span class="en">ExecutionPanel, right</span><span class="ja" lang="ja">ExecutionPanel 右</span></td></tr>
+      <tr><td class="item"><span class="en">Trace replay</span><span class="ja" lang="ja">トレース再生</span><span class="note en">At this snapshot the replay control moved the step cursor only; a 5250-style replay renderer shipped just after it.</span><span class="note ja" lang="ja">スナップショット時点では再生はカーソル移動のみ。直後に 5250 風リプレイレンダラーが出荷。</span></td><td class="st"><span class="badge b-deferred"><span class="en">Deferred by decision</span><span class="ja" lang="ja">意図的延期</span></span></td><td><code>frontend/src/components/ExecutionPanel.tsx</code> <span class="pill p-ca">code-anchor</span></td><td class="ui"><span class="en">再生 / ライブ buttons</span><span class="ja" lang="ja">再生／ライブ ボタン</span></td></tr>
+      <tr><td class="item"><span class="en">Structured approval card (analysis → plan → grounds)</span><span class="ja" lang="ja">構造化承認カード（分析→計画→根拠）</span></td><td class="st"><span class="badge b-impl"><span class="en">Implemented</span><span class="ja" lang="ja">実装済</span></span></td><td><code>frontend/src/components/ApprovalCard.tsx</code> + 3 tabs <span class="pill p-ca">code-anchor</span></td><td class="ui"><span class="en">approval card</span><span class="ja" lang="ja">承認カード</span></td></tr>
+      <tr><td class="item"><span class="en">Growth view (育成)</span><span class="ja" lang="ja">育成ビュー</span><span class="note en">Data and the growth-candidate badge exist; no dedicated view.</span><span class="note ja" lang="ja">データと育成候補バッジのみ・専用ビューなし。</span></td><td class="st"><span class="badge b-deferred"><span class="en">Deferred by decision</span><span class="ja" lang="ja">意図的延期</span></span></td><td><code>frontend/src/components/AnalysisTab.tsx</code> <span class="pill p-ca">code-anchor</span></td><td class="ui"><span class="en">育成候補 badge (partial cue)</span><span class="ja" lang="ja">育成候補バッジ（部分的な手掛かり）</span></td></tr>
+      <tr><td class="item"><span class="en">Eval report view</span><span class="ja" lang="ja">評価レポートビュー</span><span class="note en">The backend eval is built; there is no report UI.</span><span class="note ja" lang="ja">バックエンドの評価は実装済み・レポート UI なし。</span></td><td class="st"><span class="badge b-deferred"><span class="en">Deferred by decision</span><span class="ja" lang="ja">意図的延期</span></span></td><td><span class="pill p-none">—</span></td><td class="ui"><span class="en">none</span><span class="ja" lang="ja">なし</span></td></tr>
+      <tr><td class="item"><span class="en">Monitoring panel</span><span class="ja" lang="ja">モニタリングパネル</span><span class="note en">Tracked with the instrumentation roadmap item (see the note above).</span><span class="note ja" lang="ja">計測ロードマップ項目として管理（上の注記参照）。</span></td><td class="st"><span class="badge b-deferred"><span class="en">Deferred by decision</span><span class="ja" lang="ja">意図的延期</span></span></td><td><span class="pill p-none">—</span></td><td class="ui"><span class="en">none</span><span class="ja" lang="ja">なし</span></td></tr>
+      <tr><td class="item"><span class="en">Approval is always a tap — never voice</span><span class="ja" lang="ja">承認は必ずタップ — 音声では承認しない</span></td><td class="st"><span class="badge b-impl"><span class="en">Implemented</span><span class="ja" lang="ja">実装済</span></span></td><td><code>frontend/src/components/ActionBar.tsx</code> <span class="pill p-ca">code-anchor</span></td><td class="ui">ActionBar</td></tr>
+    </tbody>
+  </table>
+
+  <h2><span class="en">API surface</span><span class="ja" lang="ja">API</span> <span class="secct"><span class="en">10 implemented · 4 deferred rows (12 routes)</span><span class="ja" lang="ja">10 実装済・4 延期行（12 ルート）</span></span></h2>
+  <table>
+    <thead><tr><th><span class="en">Route</span><span class="ja" lang="ja">ルート</span></th><th><span class="en">Status</span><span class="ja" lang="ja">状態</span></th><th><span class="en">Evidence</span><span class="ja" lang="ja">証拠</span></th><th>UI</th></tr></thead>
+    <tbody>
+      <tr><td class="item">POST /tasks <span class="en">(immediate execution)</span><span class="ja" lang="ja">（即時実行）</span></td><td class="st"><span class="badge b-impl"><span class="en">Implemented</span><span class="ja" lang="ja">実装済</span></span></td><td><code>backend/backend/agent/router.py</code> <span class="pill p-rt">runtime-verified</span></td><td class="ui"><span class="en">console submit</span><span class="ja" lang="ja">コンソールの送信</span></td></tr>
+      <tr><td class="item">POST /tasks/plan <span class="en">(plan → awaiting_approval)</span><span class="ja" lang="ja">（計画→承認待ち）</span></td><td class="st"><span class="badge b-impl"><span class="en">Implemented</span><span class="ja" lang="ja">実装済</span></span></td><td><code>backend/backend/agent/router.py</code> <span class="pill p-rt">runtime-verified</span></td><td class="ui"><span class="en">console submit</span><span class="ja" lang="ja">コンソールの送信</span></td></tr>
+      <tr><td class="item">GET /tasks <span class="en">(list)</span><span class="ja" lang="ja">（一覧）</span></td><td class="st"><span class="badge b-impl"><span class="en">Implemented</span><span class="ja" lang="ja">実装済</span></span></td><td><code>backend/backend/agent/router.py</code> <span class="pill p-rt">runtime-verified</span></td><td class="ui"><span class="en">none</span><span class="ja" lang="ja">なし</span></td></tr>
+      <tr><td class="item">GET /tasks/{id} <span class="en">(hydration / reload)</span><span class="ja" lang="ja">（復元／再読込）</span></td><td class="st"><span class="badge b-impl"><span class="en">Implemented</span><span class="ja" lang="ja">実装済</span></span></td><td><code>backend/backend/agent/router.py</code> <span class="pill p-rt">runtime-verified</span></td><td class="ui"><span class="en">restore on reload</span><span class="ja" lang="ja">再読込時の復元</span></td></tr>
+      <tr><td class="item">GET /tasks/{id}/plan</td><td class="st"><span class="badge b-impl"><span class="en">Implemented</span><span class="ja" lang="ja">実装済</span></span></td><td><code>backend/backend/agent/router.py</code> <span class="pill p-ca">code-anchor</span></td><td class="ui"><span class="en">none</span><span class="ja" lang="ja">なし</span></td></tr>
+      <tr><td class="item">WS /ws/agent</td><td class="st"><span class="badge b-impl"><span class="en">Implemented</span><span class="ja" lang="ja">実装済</span></span></td><td><code>backend/backend/agent/ws.py</code> <span class="pill p-rt">runtime-verified</span></td><td class="ui"><span class="en">live stream</span><span class="ja" lang="ja">ライブストリーム</span></td></tr>
+      <tr><td class="item">POST /tasks/{id}/approve</td><td class="st"><span class="badge b-impl"><span class="en">Implemented</span><span class="ja" lang="ja">実装済</span></span></td><td><code>backend/backend/agent/router.py</code> <span class="pill p-rt">runtime-verified</span></td><td class="ui"><span class="en">承認 on the approval card</span><span class="ja" lang="ja">承認カードの承認</span></td></tr>
+      <tr><td class="item">POST /tasks/{id}/reject</td><td class="st"><span class="badge b-impl"><span class="en">Implemented</span><span class="ja" lang="ja">実装済</span></span></td><td><code>backend/backend/agent/router.py</code> <span class="pill p-rt">runtime-verified</span></td><td class="ui"><span class="en">却下 on the approval card</span><span class="ja" lang="ja">承認カードの却下</span></td></tr>
+      <tr><td class="item">POST /tasks/{id}/revise</td><td class="st"><span class="badge b-impl"><span class="en">Implemented</span><span class="ja" lang="ja">実装済</span></span></td><td><code>backend/backend/agent/router.py</code> <span class="pill p-rt">runtime-verified</span></td><td class="ui"><span class="en">修正 on the approval card</span><span class="ja" lang="ja">承認カードの修正</span></td></tr>
+      <tr><td class="item"><span class="en">Dual router mount (/ + /api)</span><span class="ja" lang="ja">ルーターの二重マウント（/ + /api）</span></td><td class="st"><span class="badge b-impl"><span class="en">Implemented</span><span class="ja" lang="ja">実装済</span></span></td><td><code>backend/backend/agent/app.py</code> <span class="pill p-ca">code-anchor</span></td><td class="ui"><span class="en">frontend uses the /api mirror</span><span class="ja" lang="ja">フロントは /api ミラーを使用</span></td></tr>
+      <tr><td class="item">/knowledge/search · /knowledge/docs · /knowledge/reindex</td><td class="st"><span class="badge b-deferred"><span class="en">Deferred by decision</span><span class="ja" lang="ja">意図的延期</span></span></td><td><span class="en">retrieval logic is built in; no public HTTP routes (roadmap)</span><span class="ja" lang="ja">検索ロジックは内蔵・HTTP ルートなし（ロードマップ）</span> <span class="pill p-none">—</span></td><td class="ui"><span class="en">none</span><span class="ja" lang="ja">なし</span></td></tr>
+      <tr><td class="item">/learn/correction · /learn/growth · /learn/unlearn</td><td class="st"><span class="badge b-deferred"><span class="en">Deferred by decision</span><span class="ja" lang="ja">意図的延期</span></span></td><td><span class="en">reject/revise create corrections automatically; no dedicated routes (roadmap)</span><span class="ja" lang="ja">却下／修正が個人修正を自動生成・専用ルートなし（ロードマップ）</span> <span class="pill p-none">—</span></td><td class="ui"><span class="en">none</span><span class="ja" lang="ja">なし</span></td></tr>
+      <tr><td class="item">/eval/run · /eval/results · /eval/cases</td><td class="st"><span class="badge b-deferred"><span class="en">Deferred by decision</span><span class="ja" lang="ja">意図的延期</span></span></td><td><span class="en">the eval runner is batch/CI-internal; no HTTP routes (roadmap)</span><span class="ja" lang="ja">評価ランナーはバッチ／CI 内部・HTTP ルートなし（ロードマップ）</span> <span class="pill p-none">—</span></td><td class="ui"><span class="en">none</span><span class="ja" lang="ja">なし</span></td></tr>
+      <tr><td class="item">/llm/usage · /admin/usage · /admin/health</td><td class="st"><span class="badge b-deferred"><span class="en">Deferred by decision</span><span class="ja" lang="ja">意図的延期</span></span></td><td><span class="en">no instrumentation or admin routes yet (the instrumentation roadmap item)</span><span class="ja" lang="ja">計測・管理ルートなし（計測ロードマップ項目）</span> <span class="pill p-none">—</span></td><td class="ui"><span class="en">none</span><span class="ja" lang="ja">なし</span></td></tr>
+    </tbody>
+  </table>
+  <p class="barlabel">
+    <span class="en"><b>Delta (design sketch → implementation):</b> decision routes are <b>task-scoped</b> (/tasks/{id}/approve | reject | revise) rather than bare; planning and execution are <b>split into two calls</b> (POST /tasks/plan → POST /tasks/{id}/approve); GET /tasks/{id}/plan was added.</span>
+    <span class="ja" lang="ja"><b>差分（設計スケッチ→実装）：</b>決定ルートは bare ではなく<b>タスクスコープ</b>（/tasks/{id}/approve｜reject｜revise）。計画と実行は <b>2コールに分離</b>（POST /tasks/plan → POST /tasks/{id}/approve）。GET /tasks/{id}/plan を追加。</span>
+  </p>
+
+  <h2><span class="en">Production defenses</span><span class="ja" lang="ja">本番運用の防御（7種）</span> <span class="secct"><span class="en">6 implemented · 1 partial</span><span class="ja" lang="ja">6 実装済・1 部分実装</span></span></h2>
+  <table>
+    <thead><tr><th><span class="en">Defense</span><span class="ja" lang="ja">防御</span></th><th><span class="en">Status</span><span class="ja" lang="ja">状態</span></th><th><span class="en">Evidence</span><span class="ja" lang="ja">証拠</span></th></tr></thead>
+    <tbody>
+      <tr><td class="item"><span class="en">① Growth conflict → the personal correction takes precedence (override)</span><span class="ja" lang="ja">① 育成の衝突 → 個人修正の優先（override）</span></td><td class="st"><span class="badge b-impl"><span class="en">Implemented</span><span class="ja" lang="ja">実装済</span></span></td><td><code>backend/backend/corrections.py</code>, <code>agent/service.py</code> <span class="pill p-rt">runtime-verified</span></td></tr>
+      <tr><td class="item"><span class="en">② Growth contamination → versioning + fallback; unlearn is not built</span><span class="ja" lang="ja">② 育成の汚染 → バージョン管理+フォールバック（unlearn は未実装）</span></td><td class="st"><span class="badge b-partial"><span class="en">Partial</span><span class="ja" lang="ja">部分実装</span></span></td><td><code>backend/tests/test_correction_versioning.py</code> <span class="pill p-rt">runtime-verified</span></td></tr>
+      <tr><td class="item"><span class="en">③ Parse errors → structured output enforced + retry</span><span class="ja" lang="ja">③ パース失敗 → 構造化出力の強制 + 再試行</span></td><td class="st"><span class="badge b-impl"><span class="en">Implemented</span><span class="ja" lang="ja">実装済</span></span></td><td><code>backend/backend/slotfill.py</code> <span class="pill p-rt">runtime-verified</span></td></tr>
+      <tr><td class="item"><span class="en">④ Async races → no sleep; wait on asserted state</span><span class="ja" lang="ja">④ 非同期レース → sleep 禁止・状態の待ち合わせ</span></td><td class="st"><span class="badge b-impl"><span class="en">Implemented</span><span class="ja" lang="ja">実装済</span></span></td><td><code>adapter/adapter/base.py</code> <span class="pill p-rt">runtime-verified</span></td></tr>
+      <tr><td class="item"><span class="en">⑤ WebSocket drops → WS = notification, DB = source of truth</span><span class="ja" lang="ja">⑤ WS 切断 → WS=通知／DB=真実の源泉</span></td><td class="st"><span class="badge b-impl"><span class="en">Implemented</span><span class="ja" lang="ja">実装済</span></span></td><td><code>agent/ws.py</code>, <code>manager.py</code>, <code>useAgentStream.ts</code> <span class="pill p-rt">runtime-verified</span></td></tr>
+      <tr><td class="item"><span class="en">⑥ Duplicate submission → idempotency keys</span><span class="ja" lang="ja">⑥ 重複送信 → 冪等キー</span></td><td class="st"><span class="badge b-impl"><span class="en">Implemented</span><span class="ja" lang="ja">実装済</span></span></td><td><code>backend/backend/coreloop.py</code>, <code>trip_repo.py</code> <span class="pill p-rt">runtime-verified</span></td></tr>
+      <tr><td class="item"><span class="en">⑦ Missing verify → post-action screen assertion → replan</span><span class="ja" lang="ja">⑦ verify 不在 → 実行後の画面検証 → 再計画</span></td><td class="st"><span class="badge b-impl"><span class="en">Implemented</span><span class="ja" lang="ja">実装済</span></span></td><td><code>backend/backend/coreloop.py</code> <span class="pill p-rt">runtime-verified</span></td></tr>
+    </tbody>
+  </table>
+
+  <h2><span class="en">Operations, three layers</span><span class="ja" lang="ja">運用の3層</span> <span class="secct"><span class="en">1 partial · 2 deferred by decision</span><span class="ja" lang="ja">1 部分実装・2 意図的延期</span></span></h2>
+  <table>
+    <thead><tr><th><span class="en">Item</span><span class="ja" lang="ja">項目</span></th><th><span class="en">Status</span><span class="ja" lang="ja">状態</span></th><th><span class="en">Evidence</span><span class="ja" lang="ja">証拠</span></th><th>UI</th></tr></thead>
+    <tbody>
+      <tr><td class="item"><span class="en">Layer 1 — alerts (health heartbeat · verify-failure rate · token/cost surge)</span><span class="ja" lang="ja">第1層 — アラート（ハートビート・verify 失敗率・トークン／コスト急増）</span></td><td class="st"><span class="badge b-deferred"><span class="en">Deferred by decision</span><span class="ja" lang="ja">意図的延期</span></span></td><td><span class="en">no instrumentation point or alert channel yet; designed in the <a href="../operations/">operations note</a></span><span class="ja" lang="ja">計測点・通知チャネル未構築。設計は<a href="../operations/">運用設計ノート</a></span></td><td class="ui"><span class="en">none</span><span class="ja" lang="ja">なし</span></td></tr>
+      <tr><td class="item"><span class="en">Layer 2 — dashboard (live status · pass rates · retries · LLM calls · latency p50/p95)</span><span class="ja" lang="ja">第2層 — ダッシュボード（ライブ状態・通過率・再試行・LLM 呼び出し・レイテンシ p50/p95）</span></td><td class="st"><span class="badge b-deferred"><span class="en">Deferred by decision</span><span class="ja" lang="ja">意図的延期</span></span></td><td><span class="en">tracked with the instrumentation roadmap item</span><span class="ja" lang="ja">計測ロードマップ項目として管理</span></td><td class="ui"><span class="en">none</span><span class="ja" lang="ja">なし</span></td></tr>
+      <tr><td class="item"><span class="en">Layer 3 — drill-down (timeline + inspector + key-sequence trace + replay + audit log)</span><span class="ja" lang="ja">第3層 — ドリルダウン（タイムライン+Inspector+キー列トレース+再生+監査ログ）</span><span class="note en">Timeline, Inspector and the audit log are built; trace replay and drill-down queries were deferred at this snapshot.</span><span class="note ja" lang="ja">タイムライン・Inspector・監査ログは実装済み。トレース再生とドリルダウンクエリはスナップショット時点で延期。</span></td><td class="st"><span class="badge b-partial"><span class="en">Partial</span><span class="ja" lang="ja">部分実装</span></span></td><td><code>Timeline.tsx</code>, <code>Inspector.tsx</code>, <span class="en">audit log</span><span class="ja" lang="ja">監査ログ</span></td><td class="ui">ExecutionPanel</td></tr>
+    </tbody>
+  </table>
+
+  <h2>CI/CD <span class="secct"><span class="en">9 implemented · 1 partial · 2 deferred by decision</span><span class="ja" lang="ja">9 実装済・1 部分実装・2 意図的延期</span></span></h2>
+  <table>
+    <thead><tr><th><span class="en">Item</span><span class="ja" lang="ja">項目</span></th><th><span class="en">Status</span><span class="ja" lang="ja">状態</span></th><th><span class="en">Evidence</span><span class="ja" lang="ja">証拠</span></th></tr></thead>
+    <tbody>
+      <tr><td class="item"><span class="en">ruff lint</span><span class="ja" lang="ja">ruff リント</span></td><td class="st"><span class="badge b-impl"><span class="en">Implemented</span><span class="ja" lang="ja">実装済</span></span></td><td><code>.github/workflows/verify.yml</code> <span class="pill p-rt">runtime-verified</span></td></tr>
+      <tr><td class="item"><span class="en">gitleaks secret scan</span><span class="ja" lang="ja">gitleaks シークレットスキャン</span></td><td class="st"><span class="badge b-impl"><span class="en">Implemented</span><span class="ja" lang="ja">実装済</span></span></td><td><code>.github/workflows/verify.yml</code> <span class="pill p-rt">runtime-verified</span></td></tr>
+      <tr><td class="item"><span class="en">trufflehog second scan</span><span class="ja" lang="ja">trufflehog 追加スキャン</span></td><td class="st"><span class="badge b-impl"><span class="en">Implemented</span><span class="ja" lang="ja">実装済</span></span></td><td><code>.github/workflows/verify.yml</code> <span class="pill p-rt">runtime-verified</span></td></tr>
+      <tr><td class="item"><span class="en">Golden-fixture parity (eval cases must match the committed fixture)</span><span class="ja" lang="ja">ゴールデンフィクスチャ一致（評価ケースはコミット済みフィクスチャと一致必須）</span></td><td class="st"><span class="badge b-impl"><span class="en">Implemented</span><span class="ja" lang="ja">実装済</span></span></td><td><code>.github/workflows/verify.yml</code> <span class="pill p-rt">runtime-verified</span></td></tr>
+      <tr><td class="item"><span class="en">mock-as400 pytest</span><span class="ja" lang="ja">mock-as400 の pytest</span></td><td class="st"><span class="badge b-impl"><span class="en">Implemented</span><span class="ja" lang="ja">実装済</span></span></td><td><code>.github/workflows/verify.yml</code> <span class="pill p-rt">runtime-verified</span></td></tr>
+      <tr><td class="item"><span class="en">adapter pytest</span><span class="ja" lang="ja">adapter の pytest</span></td><td class="st"><span class="badge b-impl"><span class="en">Implemented</span><span class="ja" lang="ja">実装済</span></span></td><td><code>.github/workflows/verify.yml</code> <span class="pill p-rt">runtime-verified</span></td></tr>
+      <tr><td class="item"><span class="en">backend pytest</span><span class="ja" lang="ja">backend の pytest</span><span class="note en">Embedding/eval tests are skipped — no embedding service in CI.</span><span class="note ja" lang="ja">埋め込み・評価テストはスキップ — CI に埋め込みサービスなし。</span></td><td class="st"><span class="badge b-partial"><span class="en">Partial</span><span class="ja" lang="ja">部分実装</span></span></td><td><code>.github/workflows/verify.yml</code> <span class="pill p-rt">runtime-verified</span></td></tr>
+      <tr><td class="item"><span class="en">frontend lint + test + build</span><span class="ja" lang="ja">frontend の lint + test + build</span></td><td class="st"><span class="badge b-impl"><span class="en">Implemented</span><span class="ja" lang="ja">実装済</span></span></td><td><code>.github/workflows/verify.yml</code> <span class="pill p-rt">runtime-verified</span></td></tr>
+      <tr><td class="item"><span class="en">Required status check = the verify job (branch protection)</span><span class="ja" lang="ja">必須ステータスチェック = verify ジョブ（ブランチ保護）</span></td><td class="st"><span class="badge b-impl"><span class="en">Implemented</span><span class="ja" lang="ja">実装済</span></span></td><td><span class="en"><code>verify.yml</code> + ruleset</span><span class="ja" lang="ja"><code>verify.yml</code> + ルールセット</span> <span class="pill p-rt">runtime-verified</span></td></tr>
+      <tr><td class="item"><span class="en">Automated PR review workflow</span><span class="ja" lang="ja">PR の自動レビューワークフロー</span></td><td class="st"><span class="badge b-impl"><span class="en">Implemented</span><span class="ja" lang="ja">実装済</span></span></td><td><code>.github/workflows/claude.yml</code> <span class="pill p-ca">code-anchor</span></td></tr>
+      <tr><td class="item"><span class="en">Eval regression gate (merge-blocking)</span><span class="ja" lang="ja">評価回帰ゲート（マージブロック）</span></td><td class="st"><span class="badge b-deferred"><span class="en">Deferred by decision</span><span class="ja" lang="ja">意図的延期</span></span></td><td><span class="en">recorded disposition: stretch</span><span class="ja" lang="ja">処分記録：ストレッチ</span> <span class="pill p-ca">code-anchor</span></td></tr>
+      <tr><td class="item"><span class="en">CD pipeline (compose smoke · deploy)</span><span class="ja" lang="ja">CD パイプライン（compose スモーク・デプロイ）</span></td><td class="st"><span class="badge b-deferred"><span class="en">Deferred by decision</span><span class="ja" lang="ja">意図的延期</span></span></td><td><span class="en">recorded disposition: roadmap</span><span class="ja" lang="ja">処分記録：ロードマップ</span> <span class="pill p-ca">code-anchor</span></td></tr>
+    </tbody>
+  </table>
+
+  <h2><span class="en">Data model</span><span class="ja" lang="ja">データモデル</span> <span class="secct"><span class="en">9 implemented · 1 partial · 2 deferred by decision</span><span class="ja" lang="ja">9 実装済・1 部分実装・2 意図的延期</span></span></h2>
+  <table>
+    <thead><tr><th><span class="en">Table</span><span class="ja" lang="ja">テーブル</span></th><th><span class="en">Status</span><span class="ja" lang="ja">状態</span></th><th><span class="en">Evidence / note</span><span class="ja" lang="ja">証拠／備考</span></th></tr></thead>
+    <tbody>
+      <tr><td class="item">operation_docs</td><td class="st"><span class="badge b-impl"><span class="en">Implemented</span><span class="ja" lang="ja">実装済</span></span></td><td><code>backend/backend/models.py</code></td></tr>
+      <tr><td class="item">knowledge_chunks <span class="en">(1024-dim vector + FTS)</span><span class="ja" lang="ja">（1024次元ベクトル + 全文検索）</span></td><td class="st"><span class="badge b-impl"><span class="en">Implemented</span><span class="ja" lang="ja">実装済</span></span></td><td><code>backend/backend/models.py</code> — <span class="en">the hybrid-retrieval substrate</span><span class="ja" lang="ja">ハイブリッド検索の基盤</span></td></tr>
+      <tr><td class="item">tasks</td><td class="st"><span class="badge b-impl"><span class="en">Implemented</span><span class="ja" lang="ja">実装済</span></span></td><td><code>backend/backend/models.py</code></td></tr>
+      <tr><td class="item">task_steps</td><td class="st"><span class="badge b-impl"><span class="en">Implemented</span><span class="ja" lang="ja">実装済</span></span></td><td><code>backend/backend/models.py</code> — <span class="en">the timeline's data</span><span class="ja" lang="ja">タイムラインのデータ</span></td></tr>
+      <tr><td class="item">approvals</td><td class="st"><span class="badge b-impl"><span class="en">Implemented</span><span class="ja" lang="ja">実装済</span></span></td><td><code>backend/backend/models.py</code></td></tr>
+      <tr><td class="item">executions</td><td class="st"><span class="badge b-impl"><span class="en">Implemented</span><span class="ja" lang="ja">実装済</span></span></td><td><code>backend/backend/models.py</code></td></tr>
+      <tr><td class="item">personal_corrections <span class="en">(versioned)</span><span class="ja" lang="ja">（バージョン管理つき）</span></td><td class="st"><span class="badge b-impl"><span class="en">Implemented</span><span class="ja" lang="ja">実装済</span></span></td><td><code>backend/backend/models.py</code> — <span class="en">version + supersedes chain</span><span class="ja" lang="ja">version + supersedes の連鎖</span></td></tr>
+      <tr><td class="item">audit_log</td><td class="st"><span class="badge b-impl"><span class="en">Implemented</span><span class="ja" lang="ja">実装済</span></span></td><td><code>backend/backend/models.py</code> — <span class="en">every decision recorded</span><span class="ja" lang="ja">すべての決定を記録</span></td></tr>
+      <tr><td class="item">eval_runs / eval_cases / eval_results</td><td class="st"><span class="badge b-impl"><span class="en">Implemented</span><span class="ja" lang="ja">実装済</span></span></td><td><code>backend/backend/models.py</code></td></tr>
+      <tr><td class="item">growth_metrics</td><td class="st"><span class="badge b-partial"><span class="en">Partial</span><span class="ja" lang="ja">部分実装</span></span></td><td><span class="en">carried on the eval-run record; no dedicated per-user table (schema delta)</span><span class="ja" lang="ja">評価実行レコード上で保持・専用の利用者別テーブルなし（スキーマ差分）</span></td></tr>
+      <tr><td class="item">manager_guidelines</td><td class="st"><span class="badge b-deferred"><span class="en">Deferred by decision</span><span class="ja" lang="ja">意図的延期</span></span></td><td><span class="en">central-manager scope — roadmap</span><span class="ja" lang="ja">中央管理者スコープ — ロードマップ</span></td></tr>
+      <tr><td class="item">llm_usage</td><td class="st"><span class="badge b-deferred"><span class="en">Deferred by decision</span><span class="ja" lang="ja">意図的延期</span></span></td><td><span class="en">the instrumentation roadmap item (see the note above); no table or logging yet</span><span class="ja" lang="ja">計測ロードマップ項目（上の注記参照）。テーブル・ロギングとも未構築</span></td></tr>
+    </tbody>
+  </table>
+
+  <h2><span class="en">Security</span><span class="ja" lang="ja">セキュリティ</span> <span class="secct"><span class="en">4 implemented · 1 partial · 1 deferred by decision</span><span class="ja" lang="ja">4 実装済・1 部分実装・1 意図的延期</span></span></h2>
+  <table>
+    <thead><tr><th><span class="en">Item</span><span class="ja" lang="ja">項目</span></th><th><span class="en">Status</span><span class="ja" lang="ja">状態</span></th><th><span class="en">Evidence</span><span class="ja" lang="ja">証拠</span></th></tr></thead>
+    <tbody>
+      <tr><td class="item"><span class="en">Synthetic identifiers in all public material (自社 / ABC商事 / 製品X …)</span><span class="ja" lang="ja">公開物の識別子はすべて架空（自社／ABC商事／製品X など）</span></td><td class="st"><span class="badge b-impl"><span class="en">Implemented</span><span class="ja" lang="ja">実装済</span></span></td><td><span class="en">abstracted names throughout the code and data</span><span class="ja" lang="ja">コード・データ全体で抽象化した名称を使用</span></td></tr>
+      <tr><td class="item"><span class="en">Secrets in environment variables only; an example file is public</span><span class="ja" lang="ja">シークレットは環境変数のみ・サンプルファイルを公開</span></td><td class="st"><span class="badge b-impl"><span class="en">Implemented</span><span class="ja" lang="ja">実装済</span></span></td><td><code>.gitignore</code>, <code>.env.example</code></td></tr>
+      <tr><td class="item"><span class="en">Content ≠ command — screen content is never executed as an instruction; the adapter types values only as keystrokes</span><span class="ja" lang="ja">コンテンツ≠命令 — 画面の内容を命令として実行しない。アダプタは値をキー入力としてのみ送出</span></td><td class="st"><span class="badge b-impl"><span class="en">Implemented</span><span class="ja" lang="ja">実装済</span></span></td><td><code>backend/backend/slotfill.py</code> + <span class="en">structured output</span><span class="ja" lang="ja">構造化出力</span></td></tr>
+      <tr><td class="item"><span class="en">Confirmation = a human tap (HITL)</span><span class="ja" lang="ja">確定 = 人のタップ（HITL）</span></td><td class="st"><span class="badge b-impl"><span class="en">Implemented</span><span class="ja" lang="ja">実装済</span></span></td><td><code>backend/backend/agent/router.py</code></td></tr>
+      <tr><td class="item"><span class="en">Least privilege / sandboxing</span><span class="ja" lang="ja">最小権限／サンドボックス</span><span class="note en">Container isolation only; OS-level hardening is out of this build's scope.</span><span class="note ja" lang="ja">コンテナ分離まで。OS レベルの強化はこのビルドの範囲外。</span></td><td class="st"><span class="badge b-partial"><span class="en">Partial</span><span class="ja" lang="ja">部分実装</span></span></td><td><span class="en">docker isolation</span><span class="ja" lang="ja">docker 分離</span></td></tr>
+      <tr><td class="item"><span class="en">Passwords in an OS keychain</span><span class="ja" lang="ja">パスワード = OS キーチェーン</span><span class="note en">Environment variables today; the production keychain is future work, stated in the README.</span><span class="note ja" lang="ja">現状は環境変数。本番キーチェーンは将来課題として README に明記。</span></td><td class="st"><span class="badge b-deferred"><span class="en">Deferred by decision</span><span class="ja" lang="ja">意図的延期</span></span></td><td><code>backend/backend/config.py</code>, README</td></tr>
+    </tbody>
+  </table>
+
+  <h2><span class="en">Instrumentation</span><span class="ja" lang="ja">計測</span> <span class="secct"><span class="en">1 deferred by decision</span><span class="ja" lang="ja">1 意図的延期</span></span></h2>
+  <table>
+    <thead><tr><th><span class="en">Item</span><span class="ja" lang="ja">項目</span></th><th><span class="en">Status</span><span class="ja" lang="ja">状態</span></th><th><span class="en">Evidence / note</span><span class="ja" lang="ja">証拠／備考</span></th></tr></thead>
+    <tbody>
+      <tr><td class="item"><span class="en">LLM client wrapper as the single instrumentation point — tokens · cost · latency · retries · model logging</span><span class="ja" lang="ja">LLM クライアントラッパー = 単一計測点 — トークン・コスト・レイテンシ・再試行・モデルのロギング</span></td><td class="st"><span class="badge b-deferred"><span class="en">Deferred by decision</span><span class="ja" lang="ja">意図的延期</span></span></td><td><span class="en">the instrumentation roadmap item (see the note above) — paired with the llm_usage table</span><span class="ja" lang="ja">計測ロードマップ項目（上の注記参照）— llm_usage テーブルと対</span></td></tr>
+    </tbody>
+  </table>
+
+  <p class="foot">
+    <span class="en">Produced by static, read-only code analysis; runtime-verified rows are limited to tests that executed and passed in a green CI run. No product code was modified to produce this page.</span>
+    <span class="ja" lang="ja">静的な読み取り専用のコード分析にもとづきます。runtime-verified の行は、グリーンの CI 実行で実際に走って通過したテストに限ります。本ページの作成にあたり製品コードは一切変更していません。</span>
+  </p>
+
+</div>
+
+<script>
+(function(){
+  var root=document.documentElement;
+  var buttons=document.querySelectorAll(".lang-btn");
+  function apply(lang){
+    root.setAttribute("data-lang",lang);
+    root.setAttribute("lang",lang);
+    buttons.forEach(function(b){b.classList.toggle("active",b.getAttribute("data-lang")===lang);});
+    try{localStorage.setItem("tanomude-lang",lang);}catch(e){}
+  }
+  buttons.forEach(function(b){b.addEventListener("click",function(){apply(b.getAttribute("data-lang"));});});
+  var saved=null;
+  try{saved=localStorage.getItem("tanomude-lang");}catch(e){}
+  apply(saved==="ja"?"ja":"en");
+})();
+</script>
+</body>
+</html>

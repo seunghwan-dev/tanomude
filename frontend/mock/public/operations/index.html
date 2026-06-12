@@ -1,0 +1,193 @@
+<!doctype html>
+<html lang="en" data-lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" type="image/svg+xml" href="../favicon.svg">
+<title>Tanomude — operations design note</title>
+<style>
+  :root{
+    --ink:#1A2230; --soft:#5A6678; --faint:#8A94A6;
+    --line:#E2E6EC; --panel:#FFFFFF; --bg:#F5F7FA; --sunk:#EDF0F4;
+    --accent:#0F766E; --accent-bg:#DEF2F0;
+    --warn:#92600E; --warn-bg:#FFF8E8; --warn-line:#E7CF94;
+    --built:#1C7A45; --built-bg:#E7F4EC;
+    --design:#475569; --design-bg:#EEF1F5;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Segoe UI",system-ui,-apple-system,"Hiragino Sans","Yu Gothic",sans-serif;
+    font-size:15px;line-height:1.7;padding:0 0 80px;}
+  [data-lang="en"] .ja{display:none;}
+  [data-lang="ja"] .en{display:none;}
+  .nav{background:var(--panel);border-bottom:1px solid var(--line);}
+  .nav-inner{max-width:820px;margin:0 auto;padding:10px 22px;display:flex;
+    align-items:center;gap:18px;flex-wrap:wrap;}
+  .brand{font-weight:700;font-size:15px;color:var(--ink);text-decoration:none;}
+  .nav a.nav-link{color:var(--soft);text-decoration:none;font-size:13px;}
+  .nav a.nav-link:hover{color:var(--ink);}
+  .nav a.nav-link.current{color:var(--accent);font-weight:600;}
+  .lang{margin-left:auto;display:flex;gap:4px;}
+  .lang-btn{border:1px solid var(--line);background:var(--panel);color:var(--soft);
+    font-size:12px;padding:3px 10px;border-radius:14px;cursor:pointer;}
+  .lang-btn.active{background:var(--ink);color:#fff;border-color:var(--ink);}
+  .wrap{max-width:820px;margin:0 auto;padding:34px 22px 0;}
+  h1{font-size:26px;margin:0 0 10px;line-height:1.3;}
+  h2{font-size:19px;margin:42px 0 10px;padding-bottom:7px;border-bottom:2px solid var(--line);}
+  p{margin:10px 0;}
+  .standing{background:var(--warn-bg);border:1px solid var(--warn-line);
+    border-left:5px solid var(--warn);border-radius:10px;padding:14px 18px;margin:18px 0;}
+  .standing b{color:var(--warn);}
+  .tag{display:inline-block;padding:1px 8px;border-radius:5px;font-size:11px;
+    font-weight:700;vertical-align:middle;margin-right:6px;white-space:nowrap;}
+  .t-built{background:var(--built-bg);color:var(--built);}
+  .t-design{background:var(--design-bg);color:var(--design);}
+  table{width:100%;border-collapse:collapse;background:var(--panel);
+    border:1px solid var(--line);border-radius:10px;overflow:hidden;margin:14px 0;font-size:13.5px;}
+  thead th{background:var(--sunk);text-align:left;padding:9px 12px;font-size:12.5px;
+    color:var(--soft);font-weight:600;border-bottom:1px solid var(--line);}
+  td{padding:9px 12px;border-bottom:1px solid var(--line);vertical-align:top;width:50%;}
+  tbody tr:last-child td{border-bottom:none;}
+  code{font-family:"Cascadia Code",Consolas,monospace;font-size:13px;
+    background:var(--sunk);padding:1px 5px;border-radius:4px;}
+  ul{margin:10px 0;padding-left:24px;}
+  li{margin:6px 0;}
+  .foot{color:var(--faint);font-size:12px;margin-top:48px;border-top:1px solid var(--line);
+    padding-top:14px;}
+  a{color:var(--accent);}
+</style>
+</head>
+<body>
+
+<nav class="nav"><div class="nav-inner">
+  <a class="brand" href="../about/">Tanomude</a>
+  <a class="nav-link" href="../about/"><span class="en">At a glance</span><span class="ja" lang="ja">全体像</span></a>
+  <a class="nav-link" href="../status/"><span class="en">Status &amp; roadmap</span><span class="ja" lang="ja">実装状況</span></a>
+  <a class="nav-link current" href="./"><span class="en">Operations note</span><span class="ja" lang="ja">運用設計ノート</span></a>
+  <a class="nav-link" href="../"><span class="en">Interactive mock</span><span class="ja" lang="ja">インタラクティブモック</span></a>
+  <div class="lang">
+    <button class="lang-btn" type="button" data-lang="en">English</button>
+    <button class="lang-btn" type="button" data-lang="ja">日本語</button>
+  </div>
+</div></nav>
+
+<div class="wrap">
+
+  <h1><span class="en">Operations design note</span><span class="ja" lang="ja">運用設計ノート</span></h1>
+
+  <div class="standing">
+    <p style="margin:0;" class="en"><b>This note is design intent, not an operations report.</b> Nothing described below is built or running: there is no deployment, no alert has ever fired, no dashboard exists, and no on-call rotation is in place. The product this note would operate does exist, and where one of its shipped behaviors is load-bearing for the design, the note marks it <span class="tag t-built">built</span>; everything else is <span class="tag t-design">design</span> — future work, recorded now so the eventual build has a target it can be checked against.</p>
+    <p style="margin:0;" class="ja" lang="ja"><b>本ノートは設計意図であり、運用報告ではありません。</b>以下に書かれているものは構築も稼働もしていません。デプロイは存在せず、アラートは一度も発報しておらず、ダッシュボードもオンコール体制もありません。本ノートが運用対象とする製品自体は存在しており、出荷済みの挙動が設計の支えになっている箇所は <span class="tag t-built">built</span> と明示します。それ以外はすべて <span class="tag t-design">design</span> — 将来の構築物であり、いざ作るときに照合できる目標として今のうちに書き残すものです。</p>
+  </div>
+
+  <h2><span class="en">Why write this before building it</span><span class="ja" lang="ja">なぜ作る前に書くのか</span></h2>
+  <p class="en">An agent that operates a legacy system has an unusual failure profile: the dangerous failures do not crash. They submit. A model that has started flailing produces well-formed keystrokes that pass through the adapter exactly as faithfully as correct ones, and ordinary error logging — built to catch exceptions — sees nothing wrong. Operating such a system is therefore less about uptime and more about noticing wrongness early, diagnosing it fast, and bounding what a wrong action can cost. That conviction already shaped the product: every executed step asserts the resulting screen state, failures roll back, and nothing executes without a human approval. This note extends the same conviction past the product's edge, to the layer that would watch it day after day.</p>
+  <p class="ja" lang="ja">レガシーシステムを操作するエージェントの故障の形は独特です。危険な故障はクラッシュしません — 送信されてしまうのです。挙動の崩れたモデルが整形式のキー入力を生成すれば、アダプタは正しい入力と同じ忠実さでそれを流し、例外を捕まえるために作られた通常のエラーロギングには何の異常も映りません。したがってこのシステムの運用は、稼働率の話である以上に、「誤りに早く気づくこと」「速く診断すること」「誤った操作の被害を限定すること」の話になります。この確信は製品自体をすでに形づくっています — 実行された各ステップは画面状態を検証し、失敗はロールバックし、人の承認なしには何も実行されません。本ノートは同じ確信を製品の縁の外、つまり日々それを見守る層へと延長するものです。</p>
+
+  <h2><span class="en">The three-layer funnel</span><span class="ja" lang="ja">3層の漏斗</span></h2>
+  <p class="en"><span class="tag t-design">design</span> Operations is structured as a funnel of three layers, ordered by how the operator encounters a problem: first you are <i>called</i> (alerts), then you <i>see</i> (a dashboard), then you ask <i>why</i> (drill-down). The deliberate principle behind the funnel: operations is not a separate system bolted on later, but a reader of records the product already writes — task steps, approval decisions, verify outcomes, the audit log — plus one instrumentation point that is itself still unbuilt: a wrapper around the LLM client logging tokens, cost, latency, retries and model per call.</p>
+  <p class="ja" lang="ja"><span class="tag t-design">design</span> 運用は3層の漏斗として設計します。並び順は、運用者が問題に出会う順序そのものです — まず<i>呼ばれる</i>（アラート）、つぎに<i>見る</i>（ダッシュボード）、最後に<i>なぜかを問う</i>（ドリルダウン）。漏斗の背後にある意図的な原則：運用は後付けの別システムではなく、製品がもともと書き残す記録 — タスクステップ・承認の決定・verify の結果・監査ログ — の読み手である、ということです。これに、それ自体まだ未構築の計測点が一つ加わります。LLM クライアントを包み、呼び出しごとにトークン・コスト・レイテンシ・再試行・モデルを記録するラッパーです。</p>
+
+  <h2><span class="en">Layer 1 — alerts: being called</span><span class="ja" lang="ja">第1層 — アラート：呼ばれる</span></h2>
+  <p class="en"><span class="tag t-design">design</span> Four rule families are designed, each tied to a distinct failure mode:</p>
+  <p class="ja" lang="ja"><span class="tag t-design">design</span> 4系統のルールを設計しています。それぞれが異なる故障モードに対応します：</p>
+  <ul>
+    <li><span class="en"><b>Heartbeat death</b> — a health endpoint stops answering: the plain outage case.</span><span class="ja" lang="ja"><b>ハートビートの死</b> — ヘルスエンドポイントが応答しなくなる、素朴な停止のケース。</span></li>
+    <li><span class="en"><b>Verify-failure-rate spike</b> — the screen keeps disagreeing with the plan. This is the tripwire for silent malfunction: the system has started doing the wrong thing without crashing.</span><span class="ja" lang="ja"><b>verify 失敗率の急騰</b> — 画面が計画と食い違い続ける。クラッシュなしに誤った動作が始まったことを捕まえる、静かな誤作動への仕掛け線です。</span></li>
+    <li><span class="en"><b>Error / retry-rate spike</b> — the adapter or the legacy target has changed under the agent's feet.</span><span class="ja" lang="ja"><b>エラー／再試行率の急騰</b> — アダプタかレガシー側が、エージェントの足元で変わったことの兆候。</span></li>
+    <li><span class="en"><b>Token / cost surge with a budget cap</b> — the runaway-loop safeguard: calls per task climbing past the budget means the loop is spinning, not working.</span><span class="ja" lang="ja"><b>トークン／コストの急増と予算上限</b> — 暴走ループへの安全装置。タスクあたりの呼び出しが予算を超えて伸びるのは、働いているのではなく空回りしている兆候です。</span></li>
+  </ul>
+  <p class="en">The designed channel is the same messenger the assistant itself uses, so the operator's phone is the pager — an alert like "verify failure rate is climbing" arrives as a push message. Thresholds are deliberately not stated in this note: inventing them on paper would be exactly the kind of unmeasured claim the rest of this project avoids. They would be set from observed baselines during a measurement period, then tightened.</p>
+  <p class="ja" lang="ja">通知チャネルの設計は、アシスタント自身が使うのと同じメッセンジャーです。運用者の携帯がそのままポケベルになり、「verify 失敗率が上昇中」のようなアラートがプッシュ通知で届きます。しきい値をこのノートにあえて書かないのは意図的です。紙の上でしきい値をでっち上げることは、このプロジェクトが一貫して避けてきた「測っていない主張」そのものだからです。しきい値は計測期間に観測されたベースラインから定め、その後で絞り込みます。</p>
+
+  <h2><span class="en">Layer 2 — the dashboard: seeing at a glance</span><span class="ja" lang="ja">第2層 — ダッシュボード：一目で見る</span></h2>
+  <p class="en"><span class="tag t-design">design</span> One screen, answerable in five seconds: is it green or red right now? The designed panel set: live status; a feed of recent task successes and failures; verify pass rate; error and retry rates; LLM calls per task (the loop detector); and latency p50/p95. An anomaly should be visible as a line falling or a tile turning red — before anyone writes a query. The dashboard reads the same records as the alerts; it is the alert rules made continuously visible.</p>
+  <p class="ja" lang="ja"><span class="tag t-design">design</span> 一枚の画面で、5秒で答えられること — いま緑か、赤か。設計上のパネル構成は、ライブ状態、直近タスクの成功・失敗フィード、verify 通過率、エラー率と再試行率、タスクあたりの LLM 呼び出し数（ループ検知器）、レイテンシ p50/p95 です。異常は、誰かがクエリを書くより先に、線が落ちる・タイルが赤くなるという形で見えるべきです。ダッシュボードはアラートと同じ記録を読みます — アラートルールを常時可視化したものです。</p>
+
+  <h2><span class="en">Layer 3 — drill-down: asking why</span><span class="ja" lang="ja">第3層 — ドリルダウン：なぜかを問う</span></h2>
+  <p class="en"><span class="tag t-built">built</span> This is the one layer whose substrate already ships in the product. Every task persists its step-by-step timeline; the inspector drills from an intent to the exact key sequence sent; the console renders the screen states the run produced; and every approval decision lands in an append-only audit log. <span class="tag t-design">design</span> What the operations layer would add on top: clicking a failure in the dashboard's feed and landing directly on the full trace — retrieval, plan, keys sent, the assertion that failed, the screen that came back — so that "it broke" becomes "the screen returned X where the plan expected Y, here." The aggregation queries and the dashboard-to-trace navigation are the unbuilt part; the trace itself is recorded today.</p>
+  <p class="ja" lang="ja"><span class="tag t-built">built</span> この層だけは、その基盤がすでに製品として出荷されています。すべてのタスクはステップ単位のタイムラインを永続化し、インスペクタは意図から実際に送られたキー列までを掘り下げ、コンソールは実行が生んだ画面状態を表示し、すべての承認の決定は追記専用の監査ログに残ります。<span class="tag t-design">design</span> 運用層がその上に足すのは、ダッシュボードのフィードで失敗をクリックすると完全なトレース — 検索・計画・送出キー・失敗した検証・返ってきた画面 — に直接着地する動線です。「壊れた」を「計画は Y を期待したが画面は X を返した、ここで」に変えるためのものです。未構築なのは集計クエリとダッシュボードからトレースへの導線で、トレース自体は今日すでに記録されています。</p>
+
+  <h2><span class="en">SLOs — which signals would carry objectives</span><span class="ja" lang="ja">SLO — どの信号に目標を載せるか</span></h2>
+  <p class="en"><span class="tag t-design">design</span> The signals that would carry service-level objectives are the ones the funnel already watches: verify pass rate, the rate of executions that complete without needing human rescue, replan frequency, and plan latency at p95. Two honesty rules govern them. First, no target is stated in this note — the eval harness's published figures are measurements of a fixed 24-case suite, not operational baselines, and borrowing them as SLO targets would conflate the two. Targets come from a baseline period in real operation. Second, a verify failure spends error budget even when recovery succeeds: the system noticing its own mistake is better than not noticing, but the objective is to need the recovery less.</p>
+  <p class="ja" lang="ja"><span class="tag t-design">design</span> SLO を載せる信号は、漏斗がすでに見ているものと同じです — verify 通過率、人の救援なしで完了した実行の割合、再計画の頻度、計画レイテンシの p95。これらを律する正直さのルールが2つあります。第一に、本ノートには目標値を書きません。評価ハーネスの公表数値は固定された24ケースのスイートに対する測定であって運用ベースラインではなく、それを SLO 目標に流用するのは両者の混同です。目標値は実運用のベースライン期間から定めます。第二に、リカバリが成功しても verify の失敗はエラーバジェットを消費します。自分の誤りに気づくシステムは気づかないものよりましですが、目標はリカバリの必要自体を減らすことだからです。</p>
+
+  <h2><span class="en">On-call — who gets called, with what in hand</span><span class="ja" lang="ja">オンコール — 誰が、何を手にして呼ばれるか</span></h2>
+  <p class="en"><span class="tag t-design">design</span> The honest on-call design for a single-maintainer system is one person: the maintainer is the rotation. What makes that survivable is the funnel — the design goal is that an alert never arrives naked. It carries the failing signal, and the diagnosis is one click deep, because layer 3 already holds the trace. Escalation in the usual sense (a second responder) is a non-goal at this scale; the meaningful escalation path already exists in the product itself, where any execution the system cannot defend lands on a human's desk as a re-entry or needs-investigation outcome rather than being retried into the legacy system.</p>
+  <p class="ja" lang="ja"><span class="tag t-design">design</span> 保守者が一人のシステムにおける正直なオンコール設計は、一人 — 保守者自身が当番表です。それを成り立たせるのが漏斗です。設計目標は、アラートが裸で届かないこと。アラートは異常を起こした信号を携えて届き、第3層がすでにトレースを保持しているため、診断は1クリック先にあります。通常の意味でのエスカレーション（第二応答者）はこの規模では目標にしません。意味のあるエスカレーション経路はすでに製品の中にあります — システムが正当化できない実行は、レガシーシステムへ再試行されるのではなく、再入力または要調査の結果として人の机に届きます。</p>
+
+  <h2><span class="en">Automatic rollback — two different things by the same name</span><span class="ja" lang="ja">自動ロールバック — 同じ名前の異なる二つ</span></h2>
+  <p class="en"><span class="tag t-built">built</span> Inside a single execution, rollback already exists and runs on the product path: a failed screen assertion triggers replanning up to a hard cap, then rolls the session back to a safe screen state instead of leaving a half-entered application behind; bad input data short-circuits straight to a person; and idempotency keys make a re-submission yield one application, not two. <span class="tag t-design">design</span> What this note designs is rollback at the operations level — above executions, over the knowledge the system accumulates. The canonical case is a personal correction that turns out to be wrong: the designed mechanism rolls the correction set back to its previous version — the versioned, supersedes-chained storage this requires already ships — and quarantines the offending entry for human review rather than deleting it silently.</p>
+  <p class="ja" lang="ja"><span class="tag t-built">built</span> 単一の実行の内側では、ロールバックはすでに存在し、製品の経路で動いています。画面検証の失敗は上限つきの再計画をトリガーし、それでも駄目ならセッションを安全な画面状態へ巻き戻し、入力途中の申請を残しません。不正な入力データは人へ直行し、冪等キーにより再送信しても申請は2件ではなく1件になります。<span class="tag t-design">design</span> 本ノートが設計するのは、その上の運用レベルのロールバック — 実行の上位、システムが蓄積する知識に対するものです。典型例は、誤りだと判明した個人修正です。設計上の機構は、修正セットを前のバージョンへ巻き戻し（これに必要なバージョン管理と supersedes 連鎖つきの保存はすでに出荷済み）、問題のエントリを黙って消すのではなく隔離して人のレビューに回します。</p>
+
+  <h2><span class="en">育成 hygiene — detecting contamination</span><span class="ja" lang="ja">育成の衛生 — 汚染の検知</span></h2>
+  <p class="en"><span class="tag t-design">design</span> The growth loop is the product's most distinctive surface and its most distinctive risk: a wrong correction does not crash anything — it quietly bends every future plan for that operator. The boundary that limits the blast radius is already enforced in code (a correction cannot touch what the request grounds; that invariant measures 1.0 and is re-verified on every eval run). What remains is detecting contamination inside the territory corrections legitimately govern. The designed mechanism couples the growth loop to the eval harness: corrections enter versioned, as they already do; the eval suite re-runs on a schedule and after correction changes; and a metric regression that coincides with a correction version becomes a flagged, quarantinable event — fall back to the prior version, surface the correction for review. True unlearning (removing a correction's influence entirely) is listed in the product's stretch scope and is unbuilt; until it exists, quarantine-and-fallback is the designed containment.</p>
+  <p class="ja" lang="ja"><span class="tag t-design">design</span> 育成ループはこの製品の最も特徴的な面であり、同時に最も特徴的なリスクです。誤った修正は何もクラッシュさせません — そのオペレーターの将来のすべての計画を静かに歪めます。被害半径を限定する境界はすでにコードで強制されています（修正は依頼が根拠づける値に触れられない。この不変条件の測定値は 1.0 で、評価実行のたびに再検証されます）。残る課題は、修正が正当に支配する領域の内側での汚染の検知です。設計上の機構は育成ループを評価ハーネスに結合します。修正は現状どおりバージョン付きで入り、評価スイートは定期と修正変更後に再実行され、修正バージョンと時を同じくする指標の後退は、フラグ付きの隔離可能なイベントになります — 前バージョンへフォールバックし、当該修正をレビューに浮上させる。真の unlearn（修正の影響の完全な除去）は製品のストレッチ範囲に記録されており未構築です。それが存在するまでは、隔離とフォールバックが設計上の封じ込めです。</p>
+
+  <h2><span class="en">The daily loop</span><span class="ja" lang="ja">日々のループ</span></h2>
+  <p class="en"><span class="tag t-design">design</span> The designed steady state, by trigger rather than by clock: the dashboard and alerts stand watch continuously. A guideline change triggers an eval regression run before it is trusted. A change on the legacy side announces itself as verify failures — the adapter is fixed, not the symptom. A model update means the full eval suite re-runs before the new model serves. And growth hygiene is periodic: corrections are reviewed and pruned, because the previous section's detector only catches what regresses a metric, not what merely accumulates.</p>
+  <p class="ja" lang="ja"><span class="tag t-design">design</span> 設計上の定常運転は、時刻ではなくトリガーで回ります。ダッシュボードとアラートは常時の見張り。指針の変更は、信頼する前に評価回帰の実行をトリガーします。レガシー側の変更は verify の失敗として自己申告してくるので、直すのは症状ではなくアダプタです。モデルの更新は、新モデルが本番に就く前に評価スイートの全再実行を意味します。そして育成の衛生は定期作業です — 前節の検知器が捕まえるのは指標を後退させるものだけで、ただ溜まっていくものは捕まえないため、修正は定期的にレビューし、剪定します。</p>
+
+  <h2><span class="en">One instrumentation point, two cost regimes</span><span class="ja" lang="ja">一つの計測点、二つのコスト体系</span></h2>
+  <p class="en"><span class="tag t-design">design</span> The wrapper that instruments the LLM client is designed provider-agnostic, because the numbers worth watching change with the serving path: an on-premise deployment watches GPU utilization, throughput and VRAM headroom, while an API-served deployment watches tokens and spend. Only the cost arithmetic differs per path; the instrumentation point, the usage table, and the alert rules above it stay the same.</p>
+  <p class="ja" lang="ja"><span class="tag t-design">design</span> LLM クライアントを計測するラッパーはプロバイダ非依存に設計します。見るべき数値が配信経路で変わるからです — オンプレミス配備では GPU 使用率・スループット・VRAM の余裕を、API 配信ではトークンと支出を見ます。経路ごとに異なるのはコストの算術だけで、計測点・利用量テーブル・その上のアラートルールは同一のままです。</p>
+
+  <h2><span class="en">What exists today, what this note designs</span><span class="ja" lang="ja">今日あるもの、このノートが設計するもの</span></h2>
+  <table>
+    <thead><tr>
+      <th><span class="tag t-built">built</span> <span class="en">ships in the product today</span><span class="ja" lang="ja">今日、製品として出荷済み</span></th>
+      <th><span class="tag t-design">design</span> <span class="en">designed here, not built</span><span class="ja" lang="ja">ここで設計・未構築</span></th>
+    </tr></thead>
+    <tbody>
+      <tr>
+        <td><span class="en">Per-step screen verification; replan with a hard cap; rollback to a safe screen state</span><span class="ja" lang="ja">ステップ単位の画面検証。上限つき再計画。安全な画面状態へのロールバック</span></td>
+        <td><span class="en">Alert rules (heartbeat, verify-failure rate, error/retry rate, cost surge) and the messenger channel</span><span class="ja" lang="ja">アラートルール（ハートビート・verify 失敗率・エラー／再試行率・コスト急増）と通知チャネル</span></td>
+      </tr>
+      <tr>
+        <td><span class="en">Bad-input short-circuit to a person; idempotency keys on submission</span><span class="ja" lang="ja">入力不良の人への短絡。送信の冪等キー</span></td>
+        <td><span class="en">The operations dashboard and its panels</span><span class="ja" lang="ja">運用ダッシュボードとその各パネル</span></td>
+      </tr>
+      <tr>
+        <td><span class="en">Step timeline, intent→key inspector, screen-state rendering, append-only audit log</span><span class="ja" lang="ja">ステップタイムライン、意図→キーのインスペクタ、画面状態の表示、追記専用の監査ログ</span></td>
+        <td><span class="en">SLOs and their baseline-derived targets; error-budget accounting</span><span class="ja" lang="ja">SLO とベースライン由来の目標値。エラーバジェットの会計</span></td>
+      </tr>
+      <tr>
+        <td><span class="en">Correction versioning with a supersedes chain; fallback to a prior version</span><span class="ja" lang="ja">supersedes 連鎖つきの修正バージョン管理。前バージョンへのフォールバック</span></td>
+        <td><span class="en">On-call tooling; dashboard-to-trace navigation and aggregation queries</span><span class="ja" lang="ja">オンコールのツール群。ダッシュボードからトレースへの導線と集計クエリ</span></td>
+      </tr>
+      <tr>
+        <td><span class="en">Code-enforced correction immunity for grounded input (measures 1.0)</span><span class="ja" lang="ja">根拠づいた入力へのコード強制の修正上書き不可（測定値 1.0）</span></td>
+        <td><span class="en">Operations-level automatic rollback of correction versions; contamination auto-detection coupled to eval; unlearn</span><span class="ja" lang="ja">運用レベルの修正バージョン自動ロールバック。評価と結合した汚染の自動検知。unlearn</span></td>
+      </tr>
+      <tr>
+        <td><span class="en">The eval harness itself (runs locally with the model); a deterministic model-free CI gate</span><span class="ja" lang="ja">評価ハーネス本体（モデルとともにローカル実行）。決定論的なモデル非依存の CI ゲート</span></td>
+        <td><span class="en">LLM-usage instrumentation (tokens · cost · latency); scheduled eval re-runs as an operational trigger; the eval regression gate in CI</span><span class="ja" lang="ja">LLM 利用量の計測（トークン・コスト・レイテンシ）。運用トリガーとしての評価の定期再実行。CI の評価回帰ゲート</span></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <p class="foot">
+    <span class="en">Design intent throughout — see the standing note at the top. The implementation inventory behind the built/design split is on the <a href="../status/">status &amp; roadmap page</a>; the measured numbers referenced here are the published eval figures, unchanged.</span>
+    <span class="ja" lang="ja">全文が設計意図です — 冒頭の注記をご覧ください。built／design の区分の根拠となる実装一覧は<a href="../status/">実装状況ページ</a>に、ここで言及した測定数値は公表済みの評価数値のままです。</span>
+  </p>
+
+</div>
+
+<script>
+(function(){
+  var root=document.documentElement;
+  var buttons=document.querySelectorAll(".lang-btn");
+  function apply(lang){
+    root.setAttribute("data-lang",lang);
+    root.setAttribute("lang",lang);
+    buttons.forEach(function(b){b.classList.toggle("active",b.getAttribute("data-lang")===lang);});
+    try{localStorage.setItem("tanomude-lang",lang);}catch(e){}
+  }
+  buttons.forEach(function(b){b.addEventListener("click",function(){apply(b.getAttribute("data-lang"));});});
+  var saved=null;
+  try{saved=localStorage.getItem("tanomude-lang");}catch(e){}
+  apply(saved==="ja"?"ja":"en");
+})();
+</script>
+</body>
+</html>
