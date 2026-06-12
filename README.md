@@ -18,6 +18,12 @@ A no-backend, hand-authored interactive mock of the approval console — **not a
 
 > **Demo video — coming soon**
 
+Three companion pages put the mock in context:
+
+- **[Tanomude at a glance](https://seunghwan-dev.github.io/tanomude/about/)** — the through-line on one page: what it is, why (技能伝承), how it works, the measured proof, and the architecture.
+- **[Status & roadmap](https://seunghwan-dev.github.io/tanomude/status/)** — the honest implementation ledger, item by item: 73 implemented · 11 partial · 27 deferred by decision, 111 rows, with the deferred items openly marked.
+- **[Operations design note](https://seunghwan-dev.github.io/tanomude/operations/)** — how the system is designed to be operated: SLOs, alerting, on-call, rollback, and 育成 contamination detection. Design intent only — none of it is running today.
+
 ---
 
 ## At a glance
