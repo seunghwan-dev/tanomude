@@ -116,7 +116,7 @@
       </tr>
       <tr>
         <td class="d"><span class="en">Hybrid retrieval — vector + full-text, rank-fused</span><span class="ja" lang="ja">ハイブリッド検索 — ベクトル＋全文を順位融合</span></td>
-        <td><span class="en">Queries are Japanese prose, but the load-bearing tokens are screen codes (<code>DEST</code>, <code>P-###</code>). The vector channel carries meaning; the full-text channel (the unstemmed <code>simple</code> dictionary) carries exact tokens; reciprocal-rank fusion (k=60) combines the two rankings without having to calibrate two unrelated score scales.</span><span class="ja" lang="ja">問い合わせは日本語の文章ですが、効いてくるのは画面コード（<code>DEST</code>・<code>P-###</code>）のような正確なトークンです。ベクトル側が意味を、全文検索側（語幹処理なしの <code>simple</code> 辞書）が正確な字面を受け持ち、RRF（k=60）が二つの異なるスコア尺度を調整せずに順位だけで融合します。</span></td>
+        <td><span class="en">Queries are Japanese prose, but the load-bearing tokens are exact screen codes and keys (<code>DEST</code>, <code>P-###</code>). The dense vector channel carries the manuals' prose meaning; the sparse full-text channel (the unstemmed <code>simple</code> dictionary) carries the exact tokens — the hybrid catches both. Reciprocal-rank fusion combines the two rankings without having to calibrate two unrelated score scales; k=60 is the conventional RRF default, adopted as-is rather than tuned.</span><span class="ja" lang="ja">問い合わせは日本語の文章ですが、効いてくるのは画面コードやキー（<code>DEST</code>・<code>P-###</code>）のような正確なトークンです。密なベクトル側が手順書の文意を、疎な全文検索側（語幹処理なしの <code>simple</code> 辞書）が正確な字面を受け持ち、両方を取りこぼしません。RRF は二つの異なるスコア尺度を調整せずに順位だけで融合します。k=60 はチューニングの結果ではなく、RRF の慣例的な既定値をそのまま採用した値です。</span></td>
       </tr>
       <tr>
         <td class="d"><span class="en">Structure-aware chunking</span><span class="ja" lang="ja">構造認識チャンキング</span></td>
@@ -124,7 +124,7 @@
       </tr>
       <tr>
         <td class="d"><span class="en">One Postgres (+pgvector) as the whole platform store</span><span class="ja" lang="ja">プラットフォームの保存層は Postgres（+pgvector）一つ</span></td>
-        <td><span class="en">Chunks, vectors, full-text indexes, tasks, plans, approvals, the audit log, personal corrections and eval runs all live in one relational database — one backup, one transaction model, and no separate vector service to operate on-premises.</span><span class="ja" lang="ja">チャンク・ベクトル・全文索引・タスク・計画・承認・監査ログ・個人修正・評価結果のすべてが一つのリレーショナル DB に載ります — バックアップは一つ、トランザクションモデルも一つ、オンプレで別途運用すべきベクトルサービスもありません。</span></td>
+        <td><span class="en">Chunks, vectors, full-text indexes, tasks, plans, approvals, the audit log, personal corrections and eval runs all live in one relational database — one backup, one transaction model, and no separate vector service to operate on-premises. Minimizing the components run on-premises is the same direct-control stance that keeps the serving path in plain code.</span><span class="ja" lang="ja">チャンク・ベクトル・全文索引・タスク・計画・承認・監査ログ・個人修正・評価結果のすべてが一つのリレーショナル DB に載ります — バックアップは一つ、トランザクションモデルも一つ、オンプレで別途運用すべきベクトルサービスもありません。オンプレで運用する構成要素を最小に保つ — 本番経路を素のコードに置くのと同じ、直接制御の姿勢です。</span></td>
       </tr>
       <tr>
         <td class="d"><span class="en">A second, separate Postgres for the mock AS-400</span><span class="ja" lang="ja">モック AS-400 には別の Postgres</span></td>
@@ -132,7 +132,7 @@
       </tr>
       <tr>
         <td class="d"><span class="en">Local models, fully on-premises</span><span class="ja" lang="ja">ローカルモデル・完全オンプレミス</span></td>
-        <td><span class="en">Ollama serves Gemma (<code>gemma4:e4b</code>) and TEI serves <code>multilingual-e5-large</code> (1024-dim, the bilingual corpus needs a multilingual embedder); nothing leaves the building. The embedding service is deliberately pinned to CPU so the 12 GB GPU stays free for the LLM.</span><span class="ja" lang="ja">Ollama が Gemma（<code>gemma4:e4b</code>）を、TEI が <code>multilingual-e5-large</code>（1024次元。日英二言語コーパスには多言語埋め込みが必要）を配信し、データは社外に出ません。埋め込みサービスは意図的に CPU 固定 — 12GB の GPU を LLM 専用に空けるためです。</span></td>
+        <td><span class="en">Ollama serves Gemma (<code>gemma4:e4b</code>) and TEI serves <code>multilingual-e5-large</code> (1024-dim; the corpus is bilingual — Japanese prose with English technical terms — so the embedder must be multilingual); nothing leaves the building. The embedding service is deliberately pinned to CPU so the 12 GB GPU stays free for the LLM.</span><span class="ja" lang="ja">Ollama が Gemma（<code>gemma4:e4b</code>）を、TEI が <code>multilingual-e5-large</code>（1024次元。日本語＋英語（技術用語）の二言語コーパスのため、多言語埋め込みが必要）を配信し、データは社外に出ません。埋め込みサービスは意図的に CPU 固定 — 12GB の GPU を LLM 専用に空けるためです。</span></td>
       </tr>
       <tr>
         <td class="d"><span class="en">Determinism first</span><span class="ja" lang="ja">決定論を最優先</span></td>
