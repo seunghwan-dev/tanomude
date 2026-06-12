@@ -53,7 +53,7 @@ export default function AnalysisTab({ slots }: { slots: Slots }) {
       <Row label="目的" code="purpose">
         <span className="max-w-[22rem] text-sm text-ink-soft">{slots.purpose || "—"}</span>
       </Row>
-      <Row label="海外出張" code="overseas" growth>
+      <Row label="海外区分" code="overseas" growth>
         <Flag on={slots.overseas} onText="海外" offText="国内" />
       </Row>
       <Row label="前回案件の再利用" code="reuse_prev_proj" growth>
