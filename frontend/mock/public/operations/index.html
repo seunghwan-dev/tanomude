@@ -4,6 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="icon" type="image/svg+xml" href="../favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700&display=swap" rel="stylesheet">
 <title>Tanomude — operations design note</title>
 <style>
   :root{
@@ -16,7 +19,7 @@
   }
   *{box-sizing:border-box;}
   body{margin:0;background:var(--bg);color:var(--ink);
-    font-family:"Segoe UI",system-ui,-apple-system,"Hiragino Sans","Yu Gothic",sans-serif;
+    font-family:"Noto Sans JP","Segoe UI",system-ui,-apple-system,"Hiragino Sans","Yu Gothic",sans-serif;
     font-size:15px;line-height:1.7;padding:0 0 80px;}
   [data-lang="en"] .ja{display:none;}
   [data-lang="ja"] .en{display:none;}
@@ -77,7 +80,7 @@
 
   <div class="standing">
     <p style="margin:0;" class="en"><b>This note is design intent, not an operations report.</b> Nothing described below is built or running: there is no deployment, no alert has ever fired, no dashboard exists, and no on-call rotation is in place. The product this note would operate does exist, and where one of its shipped behaviors is load-bearing for the design, the note marks it <span class="tag t-built">built</span>; everything else is <span class="tag t-design">design</span> — future work, recorded now so the eventual build has a target it can be checked against.</p>
-    <p style="margin:0;" class="ja" lang="ja"><b>本ノートは設計意図であり、運用報告ではありません。</b>以下に書かれているものは構築も稼働もしていません。デプロイは存在せず、アラートは一度も発報しておらず、ダッシュボードもオンコール体制もありません。本ノートが運用対象とする製品自体は存在しており、出荷済みの挙動が設計の支えになっている箇所は <span class="tag t-built">built</span> と明示します。それ以外はすべて <span class="tag t-design">design</span> — 将来の構築物であり、いざ作るときに照合できる目標として今のうちに書き残すものです。</p>
+    <p style="margin:0;" class="ja" lang="ja"><b>ここに書いてあるのは運用の設計であって、運用した記録ではありません。</b>以下のものは、まだ何ひとつ作られておらず、動いてもいません。デプロイは存在せず、アラートが鳴ったことは一度もなく、ダッシュボードもオンコール体制もまだありません。運用の対象になる製品そのものは存在するので、出荷済みの挙動が設計を支えている箇所には <span class="tag t-built">built</span> の印を付けています。それ以外はすべて <span class="tag t-design">design</span> — まだ作っていない将来のものを、いざ作るときに照らし合わせられる目標として、いまのうちに書き残しておくものです。</p>
   </div>
 
   <h2><span class="en">Why write this before building it</span><span class="ja" lang="ja">なぜ作る前に書くのか</span></h2>
@@ -89,8 +92,8 @@
   <p class="ja" lang="ja"><span class="tag t-design">design</span> 運用は3層の漏斗として設計します。並び順は、運用者が問題に出会う順序そのものです — まず<i>呼ばれる</i>（アラート）、つぎに<i>見る</i>（ダッシュボード）、最後に<i>なぜかを問う</i>（ドリルダウン）。漏斗の背後にある意図的な原則：運用は後付けの別システムではなく、製品がもともと書き残す記録 — タスクステップ・承認の決定・verify の結果・監査ログ — の読み手である、ということです。これに、それ自体まだ未構築の計測点が一つ加わります。LLM クライアントを包み、呼び出しごとにトークン・コスト・レイテンシ・再試行・モデルを記録するラッパーです。</p>
 
   <h2><span class="en">Layer 1 — alerts: being called</span><span class="ja" lang="ja">第1層 — アラート：呼ばれる</span></h2>
-  <p class="en"><span class="tag t-design">design</span> Four rule families are designed, each tied to a distinct failure mode:</p>
-  <p class="ja" lang="ja"><span class="tag t-design">design</span> 4系統のルールを設計しています。それぞれが異なる故障モードに対応します：</p>
+  <p class="en"><span class="tag t-design">design</span> The design calls for four families of alert rules, each tied to a distinct failure mode:</p>
+  <p class="ja" lang="ja"><span class="tag t-design">design</span> 設計しているアラートルールは4系統で、それぞれ別の故障モードを受け持ちます。</p>
   <ul>
     <li><span class="en"><b>Heartbeat death</b> — a health endpoint stops answering: the plain outage case.</span><span class="ja" lang="ja"><b>ハートビートの死</b> — ヘルスエンドポイントが応答しなくなる、素朴な停止のケース。</span></li>
     <li><span class="en"><b>Verify-failure-rate spike</b> — the screen keeps disagreeing with the plan. This is the tripwire for silent malfunction: the system has started doing the wrong thing without crashing.</span><span class="ja" lang="ja"><b>verify 失敗率の急騰</b> — 画面が計画と食い違い続ける。クラッシュなしに誤った動作が始まったことを捕まえる、静かな誤作動への仕掛け線です。</span></li>

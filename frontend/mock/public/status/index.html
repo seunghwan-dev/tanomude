@@ -4,6 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="icon" type="image/svg+xml" href="../favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700&display=swap" rel="stylesheet">
 <title>Tanomude — implementation status &amp; roadmap</title>
 <style>
   :root{
@@ -17,7 +20,7 @@
   }
   *{box-sizing:border-box;}
   body{margin:0;background:var(--bg);color:var(--ink);
-    font-family:"Segoe UI",system-ui,-apple-system,"Hiragino Sans","Yu Gothic",sans-serif;
+    font-family:"Noto Sans JP","Segoe UI",system-ui,-apple-system,"Hiragino Sans","Yu Gothic",sans-serif;
     font-size:14px;line-height:1.55;padding:0 0 80px;}
   [data-lang="en"] .ja{display:none;}
   [data-lang="ja"] .en{display:none;}
@@ -99,8 +102,8 @@
 <div class="wrap">
 
   <h1><span class="en">Tanomude — implementation status &amp; roadmap</span><span class="ja" lang="ja">Tanomude — 実装状況とロードマップ</span></h1>
-  <p class="sub en">Every item of the internal master design, judged against the code at the 2026-06-07 snapshot and grouped the way the build was phased: MVP spine, stretch, roadmap. Each row carries its disposition and its evidence.</p>
-  <p class="sub ja" lang="ja">内部マスター設計の全項目を、2026-06-07 時点のコードスナップショットに照らして判定し、ビルドの段階分けどおりに整理したものです：MVP スパイン・ストレッチ・ロードマップ。各行に処分と証拠を併記します。</p>
+  <p class="sub en">Every item of the internal master design, judged against the code at the 2026-06-07 snapshot and grouped the way the build was phased — MVP spine, stretch, roadmap. Each row carries its disposition and its evidence.</p>
+  <p class="sub ja" lang="ja">内部マスター設計の全項目を 2026-06-07 時点のコードスナップショットに照らして判定し、ビルドの段階分け — MVP スパイン・ストレッチ・ロードマップ — のとおりに整理しました。各行に処分と証拠を併記しています。</p>
 
   <div class="cards">
     <div class="card impl"><div class="n">73</div><div class="l">🟢 <span class="en">Implemented</span><span class="ja" lang="ja">実装済</span></div></div>
@@ -122,7 +125,7 @@
 
   <div class="legend">
     <p style="margin:0 0 8px;" class="en"><b>Verdict</b> — the MVP spine (W1–W3) is effectively complete; W4 publication has one remaining item, the demo video. Zero unclassified gaps: every unimplemented item carries a recorded disposition — stretch, roadmap, or out of build scope.</p>
-    <p style="margin:0 0 8px;" class="ja" lang="ja"><b>判定</b> — MVP スパイン（W1〜W3）は実質的に完成。W4（公開）の残りはデモ動画の1項目です。未分類ギャップは0件：未実装の項目はすべて、ストレッチ・ロードマップ・ビルド範囲外のいずれかの処分記録を持ちます。</p>
+    <p style="margin:0 0 8px;" class="ja" lang="ja"><b>判定</b> — MVP スパイン（W1〜W3）は実質的に完成しており、W4（公開）に残るのはデモ動画の1項目です。未分類のギャップは0件。未実装の項目はどれも、ストレッチ・ロードマップ・ビルド範囲外のいずれかとして処分が記録されています。</p>
     <p style="margin:0 0 8px;" class="en"><b>Evidence honesty</b> — <span class="pill p-rt">runtime-verified</span> means a dedicated test executed and passed in CI; <span class="pill p-ca">code-anchor</span> means a static reading of the code. Tests that need the embedding service are skipped in CI, so model- and embedding-dependent rows stay code-anchor rather than being promoted.</p>
     <p style="margin:0 0 8px;" class="ja" lang="ja"><b>証拠の正直さ</b> — <span class="pill p-rt">runtime-verified</span> は専用テストが CI で実行・通過したこと、<span class="pill p-ca">code-anchor</span> は静的なコード判読を意味します。埋め込みサービスを要するテストは CI ではスキップされるため、モデル・埋め込み依存の行は昇格させず code-anchor のままにしています。</p>
     <p style="margin:0;" class="en"><b>Scope note</b> — the design's "screen" layer is realized inside the operator console (a screen-state inspector panel, joined just after this snapshot by a 5250-style replay renderer), not as a separately served terminal page.</p>
