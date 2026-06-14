@@ -51,6 +51,9 @@ export function MockNav() {
         <a style={link} href="../operations/">
           設計と技術選定
         </a>
+        <a style={link} href="../productization/">
+          製品化
+        </a>
       </div>
     </nav>
   );
