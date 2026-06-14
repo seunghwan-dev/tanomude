@@ -63,7 +63,7 @@ def test_absent_dist_is_harmless(tmp_path):
 
 def test_api_alias_and_original_routes_registered():
     client = TestClient(app)
-    assert client.post("/tasks/plan").status_code != status.HTTP_404_NOT_FOUND
-    assert client.post("/api/tasks/plan").status_code != status.HTTP_404_NOT_FOUND
+    assert client.post("/tasks/plan").status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+    assert client.post("/api/tasks/plan").status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
     with client.websocket_connect("/ws/agent"):
         pass
