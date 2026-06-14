@@ -8,7 +8,7 @@
 2. **[Interactive mock](https://seunghwan-dev.github.io/tanomude/mock/)** — a no-backend, hand-authored interactive mock of the approval console; walk the approval flow on recorded data, right in the browser.
 3. **[Status & roadmap](https://seunghwan-dev.github.io/tanomude/status/)** — the honest implementation ledger, item by item: 73 implemented · 11 partial · 27 deferred by decision, 111 rows, with the deferred items openly marked.
 4. **[Design & technology choices](https://seunghwan-dev.github.io/tanomude/operations/)** — the engineering decisions and their reasons, the real structure of the core loop, retrieval, and eval harness, and the operations design — design intent only; none of it is running today.
-5. **[Productization](https://seunghwan-dev.github.io/tanomude/productization/)** — how this becomes a product: positioning, the scaling architecture, and an honest roadmap; design intent only.
+5. **[Productization](https://seunghwan-dev.github.io/tanomude/productization/)** — the go-to-market thinking (experiential marketing at manufacturing trade shows); the strategy and development plan in progress.
 
 ---
 
@@ -93,6 +93,16 @@ Execution resolves to one of four states, surfaced plainly on the timeline:
 Per-user growth is reported as **two** metrics on purpose: a **growth delta** (does a personal correction actually move the model's decision?) and **boundary respect** (does that correction stay out of the inputs it must not override?). Reporting only the first would hide the second.
 
 The loop is live in the shipped UI: an operator's 却下 (reject) or 修正 (revise) with a correction note persists a personal correction that shapes the next plan for the same destination.
+
+## Roadmap
+
+A living project. Next up:
+
+- Promote the request's purpose to a discrete form field with a deterministic pin, hardening the explicit-input boundary.
+- Per-field re-entry guidance driven by the validation codes.
+- Ingest real operating manuals and measure "a correction beats the manual rule" on them.
+- A continuous-integration smoke test of the full container stack.
+- Promote the model-scored eval suite into a CI regression gate (today it runs locally; CI gates only the model-free subset).
 
 ## Under the hood
 
