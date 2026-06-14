@@ -1,0 +1,339 @@
+<!doctype html>
+<html lang="en" data-lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" type="image/svg+xml" href="../favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Noto+Sans+JP:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../shared.css">
+<title>Tanomude — 製品化構想</title>
+<style>
+  :root{
+    --honesty:#B23A26; --honesty-bg:#FBEEEB; --honesty-line:#E6C3BB;
+    --built:#1C7A45; --built-bg:#E4EDE0;
+    --designed:#A3690E; --designed-bg:#F6EAD2;
+    --external:#2A5FA8; --external-bg:#E3EAF5;
+    --roadmap:#8A4A3B; --roadmap-bg:#F1E2DD;
+  }
+  .wrap{max-width:1040px;margin:0 auto;padding:0 22px;}
+  header.page{padding:40px 0 6px;}
+  .eyebrow{display:inline-block;border:1px solid var(--honesty);color:var(--honesty);
+    background:var(--honesty-bg);border-radius:999px;padding:3px 13px;font-size:.74rem;
+    font-weight:700;letter-spacing:.03em;margin:0 0 16px;}
+  h1{font-size:clamp(1.7rem,3.6vw,2.4rem);letter-spacing:-.01em;margin:0 0 12px;line-height:1.22;}
+  .lede{font-size:1.04rem;color:var(--soft);max-width:76ch;margin:0;}
+  section{padding:34px 0 6px;}
+  .sec-head{display:flex;align-items:baseline;gap:14px;margin:0 0 14px;flex-wrap:wrap;}
+  .sec-num{font-size:.78rem;font-weight:600;letter-spacing:.08em;color:var(--faint);}
+  h2{font-size:clamp(1.2rem,2.4vw,1.55rem);letter-spacing:-.01em;margin:0;line-height:1.25;}
+  .badge-design{display:inline-block;background:var(--designed-bg);color:var(--designed);
+    border:1px solid var(--designed);border-radius:999px;padding:2px 11px;font-size:.72rem;
+    font-weight:700;letter-spacing:.02em;}
+  p{margin:12px 0;max-width:80ch;}
+  strong{font-weight:700;color:var(--ink);}
+  .note{font-size:.92rem;color:var(--soft);max-width:80ch;}
+  code{font-family:"JetBrains Mono",Consolas,monospace;font-size:.86em;
+    background:var(--sunk);padding:1px 5px;border-radius:4px;}
+  table.matrix{width:100%;border-collapse:collapse;background:var(--panel);
+    border:1px solid var(--line);border-radius:10px;overflow:hidden;margin:16px 0;font-size:13.5px;}
+  table.matrix thead th{background:var(--sunk);text-align:left;padding:9px 13px;font-size:12.5px;
+    color:var(--soft);font-weight:700;border-bottom:1px solid var(--line);}
+  table.matrix td{padding:10px 13px;border-bottom:1px solid var(--line);border-right:1px solid var(--line);
+    vertical-align:top;}
+  table.matrix td:last-child,table.matrix th:last-child{border-right:none;}
+  table.matrix tbody tr:last-child td{border-bottom:none;}
+  table.matrix td.k{font-weight:700;color:var(--ink);white-space:nowrap;}
+  .oneliner{font-size:clamp(1.1rem,2vw,1.35rem);font-weight:700;text-align:center;
+    color:var(--ink);margin:26px 0 14px;line-height:1.55;}
+  .honesty{border:1px solid var(--honesty-line);border-left:4px solid var(--honesty);
+    background:var(--honesty-bg);border-radius:0 10px 10px 0;padding:14px 18px;margin:18px 0;}
+  .honesty .label{display:inline-block;font-size:.7rem;font-weight:700;letter-spacing:.08em;
+    color:#fff;background:var(--honesty);padding:1px 10px;border-radius:999px;margin:0 0 8px;}
+  .honesty p{margin:0;}
+  .tierlist{margin:14px 0;padding-left:1.3em;color:var(--soft);}
+  .tierlist li{margin:4px 0;}
+  .gtm{background:var(--accent-bg);border:1px solid #9BCBA4;border-radius:12px;
+    padding:18px 22px;margin:14px 0;}
+  .gtm p{margin:0;max-width:none;}
+  .scard{background:var(--panel);border:1px solid var(--line);border-left-width:5px;
+    border-radius:0 10px 10px 0;padding:16px 20px;margin:16px 0;}
+  .scard .label{display:inline-block;font-size:.72rem;font-weight:700;letter-spacing:.06em;
+    color:#fff;padding:2px 11px;border-radius:999px;margin:0 0 10px;}
+  .scard p{margin:0;max-width:none;}
+  .scard.built{border-left-color:var(--built);} .scard.built .label{background:var(--built);}
+  .scard.designed{border-left-color:var(--designed);} .scard.designed .label{background:var(--designed);}
+  .scard.external{border-left-color:var(--external);} .scard.external .label{background:var(--external);}
+  .scard.roadmap{border-left-color:var(--roadmap);} .scard.roadmap .label{background:var(--roadmap);}
+  .closing{text-align:center;font-weight:700;font-size:1.1rem;color:var(--ink);
+    margin:30px 0 4px;line-height:1.6;}
+  .nextlist{margin:14px 0;padding-left:1.3em;}
+  .nextlist li{margin:9px 0;max-width:82ch;}
+  .foot{color:var(--faint);font-size:12px;margin-top:44px;border-top:1px solid var(--line);
+    padding-top:14px;}
+  a{color:var(--accent);}
+  @media (max-width:760px){
+    table.matrix{font-size:12.5px;}
+  }
+</style>
+</head>
+<body>
+
+<nav class="nav"><div class="nav-inner">
+  <a class="brand" href="../">Tanomude</a>
+  <a class="nav-link" href="../mock/"><span class="en">Interactive mock</span><span class="ja" lang="ja">インタラクティブモック</span></a>
+  <a class="nav-link" href="../status/"><span class="en">Status &amp; roadmap</span><span class="ja" lang="ja">実装状況</span></a>
+  <a class="nav-link" href="../operations/"><span class="en">Design &amp; technology choices</span><span class="ja" lang="ja">設計と技術選定</span></a>
+  <a class="nav-link current" href="./"><span class="en">Productization</span><span class="ja" lang="ja">製品化</span></a>
+  <div class="lang">
+    <button class="lang-btn" type="button" data-lang="en">English</button>
+    <button class="lang-btn" type="button" data-lang="ja">日本語</button>
+  </div>
+</div></nav>
+
+<header class="page"><div class="wrap">
+  <div class="eyebrow"><span class="en">Productization — a design exercise</span><span class="ja" lang="ja">製品化構想（design intent）</span></div>
+  <h1><span class="en">Operate your legacy core systems in natural language — without touching them.</span><span class="ja" lang="ja">基幹系を、触らずに、自然言語で。</span></h1>
+  <p class="lede en">Tanomude is a non-invasive, on-premise AI layer placed over your existing core systems — bridging legacy to modern without modifying either. Two layers: operation and judgment. It runs inside your closed network, and every result is verified.</p>
+  <p class="lede ja" lang="ja">既存の基幹システムには一切手を入れない。Tanomude は、レガシーとモダンのあいだに置く非侵襲のオンプレミス AI レイヤーです。構成は「操作」と「判断」の二層。閉域ネットワークの中で動作し、すべての結果は検証を通ります。</p>
+</div></header>
+
+<section><div class="wrap">
+  <div class="sec-head"><span class="sec-num">01</span><h2><span class="en">The problem — knowledge succession and approval lead-time</span><span class="ja" lang="ja">問題 — ナレッジ継承と、承認リードタイム</span></h2></div>
+  <p class="en">Tacit knowledge is breaking down in two places at once.</p>
+  <p class="ja" lang="ja">暗黙知の断絶は、二か所で同時に起きています。</p>
+  <p class="en">First, legacy operation: the know-how to run the core system lives only in the heads of veterans approaching retirement.</p>
+  <p class="ja" lang="ja">一つ目はレガシー操作。基幹系を動かすノウハウは、定年を控えたベテランの頭の中にしか存在しません。</p>
+  <p class="en">Second, approval criteria: what passes and what gets rejected exists only in the section manager's (課長's) head. New staff can only guess, rejections repeat, and approval lead-time balloons.</p>
+  <p class="ja" lang="ja">二つ目は承認基準。何が通り、何が却下されるかは課長の頭の中にしかありません。新人は推測で入力するしかなく、却下が繰り返され、承認リードタイムが膨らんでいきます。</p>
+  <p class="en">And yet manufacturing will not replace its closed legacy systems outright — the desire to own, the sunk cost, the closed network. Since "rebuild" is off the table, what is needed is not a replacement but a knowledge-succession (ナレッジ継承) layer on top of what already exists.</p>
+  <p class="ja" lang="ja">それでも製造業は、閉域のレガシーをリプレースしません。自社で所有していたいという意志、積み上がったサンクコスト、そして閉域ネットワークという前提。「作り直す」が選択肢にならない以上、必要なのはシステムの置き換えではなく、ナレッジ継承の層を既存システムの上に重ねることです。</p>
+</div></section>
+
+<section><div class="wrap">
+  <div class="sec-head"><span class="sec-num">02</span><h2><span class="en">Two layers — operation and judgment</span><span class="ja" lang="ja">二つのレイヤー — 操作と判断</span></h2></div>
+  <p class="en"><strong>The operation layer.</strong> It operates the core system in natural language through the existing interface. No modification, no integration work on the customer side.</p>
+  <p class="ja" lang="ja"><strong>操作レイヤー。</strong>既存の端末をそのまま使い、自然言語で基幹系を操作します。顧客側のシステム改修も、連携開発も不要です。</p>
+  <p class="en"><strong>The judgment layer.</strong> It encodes the manager's approval criteria and enforces them at input time. The goal is first-pass approval: eliminating rework.</p>
+  <p class="ja" lang="ja"><strong>判断レイヤー。</strong>課長の承認基準をコード化し、入力の時点で適用します。狙いは一発承認、すなわち手戻りをなくすことです。</p>
+  <p class="en">The capture mechanism that is actually built is 育成 (growth): the system learns criteria from the manager's real rejections and corrections (revealed preference; no one has to write a spec). The cold-start guideline source is defined as a pluggable upstream port — a defined seam, deliberately out of scope.</p>
+  <p class="ja" lang="ja">基準の獲得メカニズムとして実装済みなのは「育成」です。課長が実際に行った却下・修正から基準を学習します(顕示選好。仕様書を書いてもらう必要はありません)。コールドスタート時のガイドライン供給源は、差し替え可能な上流ポートとして定義済みです(意図的にスコープ外とした、定義済みのシームです)。</p>
+  <div class="honesty">
+    <span class="label"><span class="en">HONESTY</span><span class="ja" lang="ja">正直に</span></span>
+    <p class="en">The manager-guideline channel is not yet in production; 育成 is the production path.</p>
+    <p class="ja" lang="ja">マネージャー・ガイドラインのチャネルは、現時点では本番未実装です。本番経路は育成です。</p>
+  </div>
+</div></section>
+
+<section><div class="wrap">
+  <div class="sec-head"><span class="sec-num">03</span><h2><span class="en">Differentiation — non-invasive, without replacement</span><span class="ja" lang="ja">差別化 — 置き換えない、非侵襲という立ち位置</span></h2></div>
+  <p class="en">Modern backoffice SaaS replaces the employee-facing screen and connects to existing systems via REST API, in the cloud. It is an excellent choice where systems expose APIs and the company will adopt a new UI. Tanomude addresses the cases where those premises do not hold.</p>
+  <p class="ja" lang="ja">モダンな業務 SaaS は、従業員が使う画面そのものを置き換え、REST API で既存システムに接続します(クラウド)。API が公開され、新しい UI の導入を受け入れられる企業には優れた選択肢です。Tanomude は、その前提が成り立たない領域を対象とします。</p>
+  <table class="matrix">
+    <thead>
+      <tr>
+        <th><span class="en">Axis</span><span class="ja" lang="ja">軸</span></th>
+        <th><span class="en">Modern backoffice SaaS</span><span class="ja" lang="ja">モダンな業務SaaS</span></th>
+        <th>Tanomude</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="k"><span class="en">Bind</span><span class="ja" lang="ja">接続</span></td>
+        <td><span class="en">swap the screen + REST API</span><span class="ja" lang="ja">画面を置き換え + REST API</span></td>
+        <td><span class="en">use the EXISTING terminal as-is, no screen swap</span><span class="ja" lang="ja">既存端末をそのまま使う。画面は置き換えない</span></td>
+      </tr>
+      <tr>
+        <td class="k"><span class="en">Needs API?</span><span class="ja" lang="ja">API は必要か</span></td>
+        <td><span class="en">yes</span><span class="ja" lang="ja">必要</span></td>
+        <td><span class="en">no — operates like a human</span><span class="ja" lang="ja">不要。人間と同じように操作する</span></td>
+      </tr>
+      <tr>
+        <td class="k"><span class="en">Data</span><span class="ja" lang="ja">データ</span></td>
+        <td><span class="en">vendor cloud</span><span class="ja" lang="ja">ベンダーのクラウド</span></td>
+        <td><span class="en">on-prem (Sovereign)</span><span class="ja" lang="ja">オンプレ(Sovereign)</span></td>
+      </tr>
+      <tr>
+        <td class="k"><span class="en">Approval</span><span class="ja" lang="ja">承認</span></td>
+        <td><span class="en">approval handled cloud-side</span><span class="ja" lang="ja">承認はクラウド側で処理</span></td>
+        <td><span class="en">your own criteria, on-prem</span><span class="ja" lang="ja">自社の基準で、オンプレで</span></td>
+      </tr>
+    </tbody>
+  </table>
+  <p class="oneliner en">"No new screen, no system change. We operate what you already have, under human approval."</p>
+  <p class="oneliner ja" lang="ja">「画面も、システムも、置き換えない。既存のものを、承認を介して操作する。」</p>
+  <p class="note en">A market for learning approval criteria already exists. Tanomude focuses on the on-prem, legacy, in-house-criteria segment — a different space, not a head-on contest.</p>
+  <p class="note ja" lang="ja">承認基準を学習する市場は、すでに存在します。Tanomude が対象とするのは、オンプレ × レガシー × 自社基準という領域です。正面から競うのではなく、対象が異なります。</p>
+</div></section>
+
+<section><div class="wrap">
+  <div class="sec-head"><span class="sec-num">04</span><h2><span class="en">Why this is defensible — not RPA; trust as code</span><span class="ja" lang="ja">なぜ守れるのか — RPA ではなく、「信頼」をコードにする</span></h2></div>
+  <p class="en">RPA is deterministic record-and-replay; it cannot judge. Tanomude targets exactly the territory RPA leaves to humans.</p>
+  <p class="ja" lang="ja">RPA は決定的な記録・再生であり、判断はできません。Tanomude が狙うのは、まさに RPA が人間に残した領域です。</p>
+  <p class="en">The defensibility is threefold. First, the verify gate: boundary_respect is a code-enforced invariant, 0.25→1.0. Second, the eval harness: behavior is measured across 4 datasets, and the effect of 育成 is measured as growth_delta. Third, 育成 accumulation: customer-specific criteria pile up with use and become switching cost. These are what the harness measures, not marketing wins.</p>
+  <p class="ja" lang="ja">守りの源泉は三つあります。一つ目は検証ゲート。boundary_respect はコードで強制される不変条件で、0.25→1.0 です。二つ目は評価ハーネス。4 つのデータセットで挙動を測定し、育成の効果は growth_delta として計測します。三つ目は育成の蓄積。使うほど顧客固有の基準が積み上がり、スイッチングコストになります。いずれも「ハーネスが何を測っているか」であって、マーケティング上の戦果ではありません。</p>
+  <p class="en">Anthropic's own Computer Use guidance says to use human-in-the-loop for consequential actions, and not to use raw computer-use for accuracy-critical or sensitive work. A core system is exactly that. Tanomude is the trust wrapper that makes computer-use safe for a core system.</p>
+  <p class="ja" lang="ja">Anthropic 自身の Computer Use ガイダンスは、重大なアクションには HITL(人間の承認)を置くこと、精度が重要な業務・機微な業務には生の computer-use を使わないことを明確に述べています。基幹系はその典型です。Tanomude は、computer-use を基幹システムに対して安全にする信頼ラッパーです。</p>
+</div></section>
+
+<section><div class="wrap">
+  <div class="sec-head"><span class="sec-num">05</span><h2><span class="en">Local-first feasibility</span><span class="ja" lang="ja">ローカルファーストの実現性</span></h2></div>
+  <p class="en">As of 2025, external benchmarks show: on the GUI-grounding benchmark ScreenSpot-Pro, the open local model UI-TARS-1.5-7B scores 61.6% versus Claude's 27.7% — an open LOCAL model beats cloud on GUI grounding. It runs on a single consumer GPU (~24GB; ~4–5GB quantized), in a one-appliance-to-N-thin-clients configuration — no per-person GPU.</p>
+  <p class="ja" lang="ja">外部ベンチマーク(2025年時点)では、GUI グラウンディングのベンチマーク ScreenSpot-Pro で、オープンなローカルモデル UI-TARS-1.5-7B は 61.6% を記録し、Claude の 27.7% を上回ります。「画面のどこを操作するか」という一点では、オープンなローカルモデルがクラウドに勝っています。コンシューマー GPU 一枚(約 24GB、量子化で約 4〜5GB)で動作し、アプライアンス 1 台に N 台のシンクライアントをぶら下げる構成です。一人一枚の GPU は要りません。</p>
+  <p class="en">Reliability comes from OUT-OF-BAND artifact readback: we verify the persisted result, not the screenshot.</p>
+  <p class="ja" lang="ja">信頼性は、スクリーンショットの見た目ではなく、帯域外のアーティファクト読み戻しで担保します。永続化された結果そのものを検証するのです。</p>
+  <div class="honesty">
+    <span class="label"><span class="en">HONESTY</span><span class="ja" lang="ja">正直に</span></span>
+    <p class="en">Autonomous long-horizon operation is still weak for open models — which is exactly why the HITL + verify + 育成 harness exists. The harness, not the model, carries the reliability.</p>
+    <p class="ja" lang="ja">オープンモデルの自律的な長時間運転は、まだ弱いです。だからこそ HITL + 検証 + 育成のハーネスがあります。信頼性を担うのはモデルではなく、ハーネスです。</p>
+  </div>
+</div></section>
+
+<section><div class="wrap">
+  <div class="sec-head"><span class="sec-num">06</span><h2><span class="en">Deployment tiers</span><span class="ja" lang="ja">デプロイメント・ティア</span></h2></div>
+  <table class="matrix">
+    <thead>
+      <tr>
+        <th><span class="en">Tier</span><span class="ja" lang="ja">ティア</span></th>
+        <th><span class="en">Where it runs</span><span class="ja" lang="ja">実行環境</span></th>
+        <th><span class="en">Model</span><span class="ja" lang="ja">モデル</span></th>
+        <th><span class="en">Fit</span><span class="ja" lang="ja">想定対象</span></th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="k">Sovereign</td>
+        <td><span class="en">Air-gapped; leased appliance</span><span class="ja" lang="ja">エアギャップ。リースのアプライアンス</span></td>
+        <td><span class="en">Local VLM</span><span class="ja" lang="ja">ローカル VLM</span></td>
+        <td><span class="en">On-prem legacy core systems</span><span class="ja" lang="ja">オンプレのレガシー基幹系</span></td>
+      </tr>
+      <tr>
+        <td class="k">Private-cloud</td>
+        <td><span class="en">Inside the customer's own tenancy</span><span class="ja" lang="ja">顧客自身のテナンシー内</span></td>
+        <td><span class="en">Claude via Bedrock / Vertex</span><span class="ja" lang="ja">Claude(Bedrock / Vertex 経由)</span></td>
+        <td><span class="en">Where work must stay in the customer's own tenancy</span><span class="ja" lang="ja">自社テナンシーで完結させたい環境</span></td>
+      </tr>
+      <tr>
+        <td class="k">Managed</td>
+        <td><span class="en">Cloud + ZDR, controlled egress</span><span class="ja" lang="ja">クラウド + ZDR、egress 制御</span></td>
+        <td>Claude</td>
+        <td><span class="en">Already-cloud SaaS</span><span class="ja" lang="ja">既にクラウドにある SaaS</span></td>
+      </tr>
+    </tbody>
+  </table>
+  <p class="note en">The tier is keyed to the target system's existing data posture: on-prem legacy → Sovereign; already-cloud SaaS → Managed.</p>
+  <p class="note ja" lang="ja">ティアは、対象システムの既存のデータ態勢に合わせて決まります。オンプレのレガシーなら Sovereign、既にクラウドの SaaS なら Managed。</p>
+  <ul class="tierlist en">
+    <li>Own the appliance (CAPEX)</li>
+    <li>Tanomude leases the appliance (OPEX — no GPU purchase)</li>
+    <li>No appliance (cloud tier)</li>
+  </ul>
+  <ul class="tierlist ja" lang="ja">
+    <li>アプライアンスを自社所有(CAPEX)</li>
+    <li>Tanomude がアプライアンスをリース提供(OPEX。GPU の購入は不要)</li>
+    <li>アプライアンスなし(クラウドティア)</li>
+  </ul>
+  <div class="honesty">
+    <span class="label"><span class="en">HONESTY</span><span class="ja" lang="ja">正直に</span></span>
+    <p class="en">Cost and tenancy specifics are to be confirmed. Tiers are described qualitatively; no token-cost or pricing numbers are stated here.</p>
+    <p class="ja" lang="ja">コストやテナンシーの詳細は確認中です。ティアは定性的に記述しており、トークンコストや価格の数字はここでは提示しません。</p>
+  </div>
+</div></section>
+
+<section><div class="wrap">
+  <div class="sec-head"><span class="sec-num">07</span><h2><span class="en">Scaling economics</span><span class="ja" lang="ja">スケーリングの経済性</span></h2><span class="badge-design"><span class="en">Design-validated, not yet built</span><span class="ja" lang="ja">設計検証済み・未実装</span></span></div>
+  <p class="en">Declarative WorkflowDef: roughly 190 lines of workflow-specific code, of which about 85% is expressible as data — within the existing primitives; the honest caveat is that novel transforms and branches still need code. Today, adding a workflow means ~350–600 LOC across 6+ files; with WorkflowDef it becomes ONE data file and near-zero code.</p>
+  <p class="ja" lang="ja">宣言的 WorkflowDef。ワークフロー固有のコードは約 190 行で、その約 85% はデータとして表現できます(既存プリミティブの範囲内。新規の変換や分岐には依然コードが必要、というのが正直な但し書きです)。現状、新しいワークフローの追加は 6 ファイル以上・約 350〜600 行の変更ですが、WorkflowDef ではデータファイル 1 つ+ほぼゼロのコードになります。</p>
+  <p class="en">A new target SYSTEM irreducibly needs a code adapter (~200–600 LOC per tier). Adapter tiering — tn5250 / DOM / vision — is a minimal ABC extension; the core loop stays untouched.</p>
+  <p class="ja" lang="ja">新しい対象システムへの対応は、本質的にコードアダプタを必要とします(ティアあたり約 200〜600 行)。アダプタは tn5250 / DOM / vision の 3 ティアで、最小限の ABC 拡張として実装し、コアループには手を入れません。</p>
+  <p class="en">This is what makes subscription and multi-workflow expansion credible. Labeled clearly: design-validated, not yet built.</p>
+  <p class="ja" lang="ja">これが、サブスクリプションと複数ワークフロー展開を成立させる根拠です。ラベルは明確です。設計段階で検証済み、未実装。</p>
+</div></section>
+
+<section><div class="wrap">
+  <div class="sec-head"><span class="sec-num">08</span><h2><span class="en">Go-to-market — drawing crowds through experience at manufacturing exhibitions</span><span class="ja" lang="ja">集客 — 製造業の展示会で、「体験」で。</span></h2></div>
+  <div class="gtm">
+    <p class="en">Draw crowds at manufacturing exhibitions — FOOMA, POWTEX, and others. The way electronics retailers demo cooking appliances by cooking live, Tanomude demonstrates live at the booth: operating a legacy green-screen in natural language, in front of attendees who actually run legacy systems. Experiential-marketing 集客.</p>
+    <p class="ja" lang="ja">FOOMA・POWTEX をはじめとする製造業の展示会で集客する。家電量販店が調理器具を「その場で調理して」実演するように、Tanomude はブースで——レガシーのグリーンスクリーンを自然言語で操作する様子を——その場で実演する。来場者(=実際にレガシーを抱える層)が、動くところを目の前で見る。体験マーケティングによる集客。</p>
+  </div>
+</div></section>
+
+<section><div class="wrap">
+  <div class="sec-head"><span class="sec-num">09</span><h2><span class="en">Status, honestly</span><span class="ja" lang="ja">正直な現在地</span></h2></div>
+  <div class="scard built">
+    <span class="label"><span class="en">BUILT</span><span class="ja" lang="ja">実装済み</span></span>
+    <p class="en">Single-workflow demo (business-trip application, 出張申請) on a mock host / eval harness (4 datasets) / 育成 (revealed-preference learning from rejections and corrections) / HITL approval gate / verify / replan / rollback / docker-compose reproducibility.</p>
+    <p class="ja" lang="ja">モックホスト上の単一ワークフローデモ(出張申請)/ 評価ハーネス(4 データセット)/ 育成(却下・修正からの顕示選好学習)/ HITL 承認ゲート / verify・replan・rollback / docker-compose による再現性。</p>
+  </div>
+  <div class="scard designed">
+    <span class="label"><span class="en">Design-validated, not yet built</span><span class="ja" lang="ja">設計検証済み・未実装</span></span>
+    <p class="en">Declarative WorkflowDef / 3-tier adapter via minimal ABC extension / pluggable guideline port (org_guidelines) / first-pass-approval eval.</p>
+    <p class="ja" lang="ja">宣言的 WorkflowDef / 最小 ABC 拡張による 3 ティアアダプタ / 差し替え可能なガイドラインポート(org_guidelines)/ 一発承認率の評価。</p>
+  </div>
+  <div class="scard external">
+    <span class="label"><span class="en">EXTERNALLY VALIDATED</span><span class="ja" lang="ja">外部検証済み</span></span>
+    <p class="en">Local model grounding outperforms cloud (external benchmark).</p>
+    <p class="ja" lang="ja">ローカルモデルのグラウンディング性能がクラウドを上回る(外部ベンチマーク)。</p>
+  </div>
+  <div class="scard roadmap">
+    <span class="label"><span class="en">ROADMAP / UNPROVEN</span><span class="ja" lang="ja">未着手・未証明</span></span>
+    <p class="en">Real-host adapter (only a mock implementation exists today — the single biggest gap) / multi-workflow retrieval isolation / approval-event logging separation (blocks the approval KPI until done) / a known input edge-case.</p>
+    <p class="ja" lang="ja">実ホストアダプタ(現在はモック実装のみ。最大のギャップ)/ 複数ワークフロー時の検索分離 / 承認イベントの記録分離(完了するまで承認 KPI は計測不可)/ 既知の入力エッジケース。</p>
+  </div>
+  <p class="closing en">We know exactly what is built, what is validated, and what is pending. This candor is the point.</p>
+  <p class="closing ja" lang="ja">何が実装済みで、何が検証済みで、何が未着手か。私たちはそれを正確に把握しています。この率直さこそが、信頼の根拠です。</p>
+</div></section>
+
+<section><div class="wrap">
+  <div class="sec-head"><span class="sec-num">10</span><h2><span class="en">What's next</span><span class="ja" lang="ja">これから — 次の一手</span></h2></div>
+  <p class="en">Tanomude is built to keep operating &amp; evolving. The concrete next engineering steps:</p>
+  <p class="ja" lang="ja">Tanomude は「運用しながら進化する」プロダクトです。具体的な次の一手は以下のとおりです。</p>
+  <ul class="nextlist en">
+    <li>Promote the request's purpose to a discrete form field with a deterministic pin, hardening the explicit-input boundary.</li>
+    <li>Per-field re-entry guidance driven by the validation codes.</li>
+    <li>Ingest real operating manuals and measure "a correction beats the manual rule" on them.</li>
+    <li>A continuous-integration smoke test of the full container stack.</li>
+    <li>Promote the model-scored eval suite into a CI regression gate (today it runs locally; CI gates only the model-free subset).</li>
+  </ul>
+  <ul class="nextlist ja" lang="ja">
+    <li>依頼の目的を独立したフォーム欄に昇格し、決定論的に固定して、明示入力の境界を強化する。</li>
+    <li>検証コードに基づく、フィールド単位の再入力ガイドメッセージ。</li>
+    <li>実際の手順書を取り込み、「修正が手順書ルールに勝つ」ことを測定する。</li>
+    <li>コンテナスタック全体の継続的インテグレーション・スモークテスト。</li>
+    <li>モデル採点の評価スイートを CI 回帰ゲートへ昇格する（現在はローカル実行で、CI はモデル非依存サブセットのみをゲート）。</li>
+  </ul>
+</div></section>
+
+<section><div class="wrap">
+  <p class="foot">
+    <span class="en">This page is a productization design exercise — design intent, not a shipped product. What is built, what is design-validated, what is externally validated, and what is still unproven is set out honestly in section 09. See also the <a href="../status/">status &amp; roadmap</a> and the <a href="../operations/">design &amp; technology choices</a>.</span>
+    <span class="ja" lang="ja">本ページは製品化の設計演習です — 設計意図であり、出荷済みの製品ではありません。何が実装済みで、何が設計検証済み・外部検証済み・未証明かは、09 節に正直に記しています。<a href="../status/">実装状況</a>・<a href="../operations/">設計と技術選定</a>もあわせてご覧ください。</span>
+  </p>
+</div></section>
+
+<button class="totop" type="button" aria-label="Back to top">&uarr;</button>
+
+<script>
+(function(){
+  var root=document.documentElement;
+  var buttons=document.querySelectorAll(".lang-btn");
+  function apply(lang){
+    root.setAttribute("data-lang",lang);
+    root.setAttribute("lang",lang);
+    buttons.forEach(function(b){b.classList.toggle("active",b.getAttribute("data-lang")===lang);});
+    try{localStorage.setItem("tanomude-lang",lang);}catch(e){}
+  }
+  buttons.forEach(function(b){b.addEventListener("click",function(){apply(b.getAttribute("data-lang"));});});
+  var saved=null;
+  try{saved=localStorage.getItem("tanomude-lang");}catch(e){}
+  apply(saved==="ja"?"ja":"en");
+  var totop=document.querySelector(".totop");
+  function onScroll(){totop.classList.toggle("show",window.scrollY>480);}
+  window.addEventListener("scroll",onScroll,{passive:true});
+  onScroll();
+  totop.addEventListener("click",function(){window.scrollTo({top:0,behavior:"smooth"});});
+})();
+</script>
+</body>
+</html>
