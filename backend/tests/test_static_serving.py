@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, status
 from fastapi.testclient import TestClient
 
 from backend.agent.app import app, mount_frontend
@@ -62,7 +62,8 @@ def test_absent_dist_is_harmless(tmp_path):
 
 
 def test_api_alias_and_original_routes_registered():
-    paths = {getattr(route, "path", None) for route in app.routes}
-    assert "/tasks/plan" in paths
-    assert "/api/tasks/plan" in paths
-    assert "/ws/agent" in paths
+    client = TestClient(app)
+    assert client.post("/tasks/plan").status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+    assert client.post("/api/tasks/plan").status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+    with client.websocket_connect("/ws/agent"):
+        pass
