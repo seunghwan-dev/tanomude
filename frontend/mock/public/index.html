@@ -111,33 +111,39 @@
   <div class="cards">
     <div class="card">
       <h3><span class="en">Problem</span><span class="ja" lang="ja">課題</span></h3>
-      <p class="en">The core system is a legacy green screen, and new or younger staff don't know how to operate it — the procedure lives as tacit skill, with no document.</p>
-      <p class="ja" lang="ja">基幹システムはレガシーなグリーンスクリーンで、若手・新人は操作方法がわからない。手順は暗黙知で、文書がない。</p>
+      <p class="en">When the core system is legacy, younger staff and newly-assigned personnel don't know how to operate it; the operation method is tacit skill, with no document.</p>
+      <p class="ja" lang="ja">基幹システムがレガシーな場合、若手・新規着任者は操作方法がわからない。操作方法は暗黙知で、文書がない。</p>
     </div>
     <div class="card">
       <h3><span class="en">&rarr; Solution</span><span class="ja" lang="ja">&rarr; 解決</span></h3>
-      <p class="en">A one-line instruction becomes a concrete key-sequence, so you can file without knowing the screens; manual RAG and each operator's corrections accumulate the veteran's knowledge in the system.</p>
+      <p class="en">A one-line instruction becomes a concrete key-sequence, so the operator can file without knowing the screens; manual RAG and each operator's corrections accumulate the veteran's knowledge in the system.</p>
       <p class="ja" lang="ja">一行の指示が具体的なキー操作の計画になり、画面を知らなくても申請できる。手順書 RAG と個人修正が、熟練者の知識をシステムに蓄積する。</p>
+      <p class="en">Tech: LLM &middot; RAG &middot; vector search (pgvector) &middot; personal corrections</p>
+      <p class="ja" lang="ja">技術: LLM・RAG・ベクトル検索(pgvector)・個人修正</p>
     </div>
     <div class="card">
       <h3><span class="en">Problem</span><span class="ja" lang="ja">課題</span></h3>
-      <p class="en">The legacy system's UX is poor — driving it screen by screen is slow and drags down efficiency.</p>
-      <p class="ja" lang="ja">レガシー基幹システムは UX が悪く、画面を一つずつ操作するため業務効率が落ちる。</p>
+      <p class="en">A legacy core system has to be driven screen by screen, so efficiency tends to drop without proficiency.</p>
+      <p class="ja" lang="ja">レガシー基幹システムは画面を一つずつ操作する必要があり、習熟しないと業務効率が落ちやすい。</p>
     </div>
     <div class="card">
       <h3><span class="en">&rarr; Solution</span><span class="ja" lang="ja">&rarr; 解決</span></h3>
       <p class="en">Instruction &rarr; plan &rarr; approve &rarr; automated key-by-key execution; the manual screen-driving disappears and the operator focuses on the decision.</p>
       <p class="ja" lang="ja">指示 &rarr; 計画 &rarr; 承認 &rarr; 自動実行。画面操作の手間が消え、人は判断に専念できる。</p>
+      <p class="en">Tech: LLM &middot; structured output &middot; screen adapter &middot; idempotent execution</p>
+      <p class="ja" lang="ja">技術: LLM・構造化出力・画面アダプタ・冪等実行</p>
     </div>
     <div class="card">
       <h3><span class="en">Problem</span><span class="ja" lang="ja">課題</span></h3>
-      <p class="en">The system itself is complete, but approval criteria are informal and unwritten, so requests like business trips get bounced back again and again.</p>
-      <p class="ja" lang="ja">システムは完備していても、承認者の承認基準が形式化されておらず、出張申請などが何度も差し戻される。</p>
+      <p class="en">Even when the system itself is complete, if approval criteria are informal and unwritten, requests like business trips can be bounced back repeatedly.</p>
+      <p class="ja" lang="ja">システムが完備していても、承認基準が形式化されていない場合、出張申請などが繰り返し差し戻されることがある。</p>
     </div>
     <div class="card">
       <h3><span class="en">&rarr; Solution</span><span class="ja" lang="ja">&rarr; 解決</span></h3>
       <p class="en">The plan is shown as a grounded approval card; a reject/revise note persists as a personal correction that reshapes the next plan, so the informal approval bar gradually becomes reusable, explicit knowledge.</p>
       <p class="ja" lang="ja">計画を根拠つきの承認カードで提示。却下・修正のメモは個人修正として次の計画に反映され、形式化されていなかった承認基準が再利用できる知識として蓄積されていく。</p>
+      <p class="en">Tech: structured approval card &middot; personal corrections (growth) &middot; schema validation</p>
+      <p class="ja" lang="ja">技術: 構造化承認カード・個人修正(育成)・スキーマ検証</p>
     </div>
   </div>
 </div></section>
