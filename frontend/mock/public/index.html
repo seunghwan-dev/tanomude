@@ -107,11 +107,39 @@
 </div></header>
 
 <section><div class="wrap">
-  <div class="sec-head"><span class="sec-num">01</span><h2><span class="en">Why it exists — ナレッジ継承</span><span class="ja" lang="ja">なぜ作ったか — ナレッジ継承</span></h2></div>
-  <p class="lead en">Manufacturing back offices still run on green screens, and the operators who can drive them are retiring. How an application actually gets filed — which menu, which keys, which codes, what the next screen should look like — rarely exists as a document. It lives as tacit skill, and it leaves with the person.</p>
-  <p class="lead ja" lang="ja">製造業の基幹業務は今もグリーンスクリーンの上で動いており、それを操作できる熟練オペレーターの退職が進んでいます。申請が実際にどう登録されるのか — どのメニューで、どのキーで、どのコードで、次にどの画面が来るべきか — が文書として残っていることはまれです。その知識は暗黙知として人に宿り、人とともに職場を去ります。</p>
-  <p class="lead soft en">Tanomude is a system-operation answer to the skilled-worker succession problem. Operating manuals become retrievable grounding for a planner; a one-line instruction becomes a concrete, checkable key-sequence plan; and each operator's corrections persist as knowledge the assistant applies the next time. What the veteran knew starts accumulating in the system instead of disappearing from it.</p>
-  <p class="lead soft ja" lang="ja">Tanomude は、このナレッジ継承の問題に対する、システム操作の側からの一つの答えです。手順書は計画の検索可能な根拠となり、一行の指示は具体的で検証可能なキー操作の計画になり、オペレーターの修正は個人修正として永続化されて次の計画に生かされます。熟練者だけが知っていたことが、人と一緒に消えるのではなく、システムに蓄積され始めます。</p>
+  <div class="sec-head"><span class="sec-num">01</span><h2><span class="en">Why it exists — Problems on the floor</span><span class="ja" lang="ja">なぜ作ったか — 現場の課題</span></h2></div>
+  <div class="cards">
+    <div class="card">
+      <h3><span class="en">Problem</span><span class="ja" lang="ja">課題</span></h3>
+      <p class="en">The core system is a legacy green screen, and new or younger staff don't know how to operate it — the procedure lives as tacit skill, with no document.</p>
+      <p class="ja" lang="ja">基幹システムはレガシーなグリーンスクリーンで、若手・新人は操作方法がわからない。手順は暗黙知で、文書がない。</p>
+    </div>
+    <div class="card">
+      <h3><span class="en">&rarr; Solution</span><span class="ja" lang="ja">&rarr; 解決</span></h3>
+      <p class="en">A one-line instruction becomes a concrete key-sequence, so you can file without knowing the screens; manual RAG and each operator's corrections accumulate the veteran's knowledge in the system.</p>
+      <p class="ja" lang="ja">一行の指示が具体的なキー操作の計画になり、画面を知らなくても申請できる。手順書 RAG と個人修正が、熟練者の知識をシステムに蓄積する。</p>
+    </div>
+    <div class="card">
+      <h3><span class="en">Problem</span><span class="ja" lang="ja">課題</span></h3>
+      <p class="en">The legacy system's UX is poor — driving it screen by screen is slow and drags down efficiency.</p>
+      <p class="ja" lang="ja">レガシー基幹システムは UX が悪く、画面を一つずつ操作するため業務効率が落ちる。</p>
+    </div>
+    <div class="card">
+      <h3><span class="en">&rarr; Solution</span><span class="ja" lang="ja">&rarr; 解決</span></h3>
+      <p class="en">Instruction &rarr; plan &rarr; approve &rarr; automated key-by-key execution; the manual screen-driving disappears and the operator focuses on the decision.</p>
+      <p class="ja" lang="ja">指示 &rarr; 計画 &rarr; 承認 &rarr; 自動実行。画面操作の手間が消え、人は判断に専念できる。</p>
+    </div>
+    <div class="card">
+      <h3><span class="en">Problem</span><span class="ja" lang="ja">課題</span></h3>
+      <p class="en">The system itself is complete, but approval criteria are informal and unwritten, so requests like business trips get bounced back again and again.</p>
+      <p class="ja" lang="ja">システムは完備していても、承認者の承認基準が形式化されておらず、出張申請などが何度も差し戻される。</p>
+    </div>
+    <div class="card">
+      <h3><span class="en">&rarr; Solution</span><span class="ja" lang="ja">&rarr; 解決</span></h3>
+      <p class="en">The plan is shown as a grounded approval card; a reject/revise note persists as a personal correction that reshapes the next plan, so the informal approval bar gradually becomes reusable, explicit knowledge.</p>
+      <p class="ja" lang="ja">計画を根拠つきの承認カードで提示。却下・修正のメモは個人修正として次の計画に反映され、形式化されていなかった承認基準が再利用できる知識として蓄積されていく。</p>
+    </div>
+  </div>
 </div></section>
 
 <section><div class="wrap">
