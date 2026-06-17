@@ -161,6 +161,20 @@
 
 <section><div class="wrap">
   <div class="sec-head"><span class="sec-num">03</span><h2><span class="en">Architecture</span><span class="ja" lang="ja">アーキテクチャ</span></h2></div>
+  <p class="lead soft en">The stack is standard — the engineering sits on top.</p>
+  <p class="lead soft ja" lang="ja">標準スタック。設計したのは、その上のメカニズム。</p>
+  <div class="cards">
+    <div class="card">
+      <h3><span class="en">Used — off-the-shelf</span><span class="ja" lang="ja">既存スタック</span></h3>
+      <p class="en">LLM (Gemma 4) &middot; RAG &middot; pgvector &middot; multilingual-e5 &middot; FastAPI &middot; React &middot; Docker</p>
+      <p class="ja" lang="ja">LLM (Gemma 4) &middot; RAG &middot; pgvector &middot; multilingual-e5 &middot; FastAPI &middot; React &middot; Docker</p>
+    </div>
+    <div class="card">
+      <h3><span class="en">Built — engineered</span><span class="ja" lang="ja">設計したメカニズム</span></h3>
+      <p class="en">grounded-slot immunity &middot; correction / growth loop &middot; screen-adapter seam &middot; idempotent execution &middot; eval harness</p>
+      <p class="ja" lang="ja">grounded-slot immunity &middot; correction / growth loop &middot; screen-adapter seam &middot; idempotent execution &middot; eval harness</p>
+    </div>
+  </div>
   <div class="figure">
     <svg id="archdiagram" viewBox="0 0 940 470" role="img" aria-label="Architecture: an instruction is planned over RAG grounding and personal corrections, gated by human approval, executed through a screen adapter against the mock AS-400, verified against the screen, and measured by an eval harness">
       <defs>

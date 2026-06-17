@@ -39,6 +39,18 @@
 - **オンプレミス** — ローカルモデル（Ollama 上の Gemma）、ローカル埋め込み、ローカルDB。データは社外に出ません。
 - **監査ログ** — 承認の判断、ステップ単位の実行タイムライン、修正履歴を永続化します。
 
+## スタック
+
+LLM (Gemma 4 / Ollama) · RAG (ハイブリッド検索) · pgvector + Postgres · multilingual-e5 (TEI) · FastAPI · React/Vite · Docker Compose
+
+## 設計したメカニズム
+
+- **grounded-slot immunity** — 修正は推論スロットのみを動かし、要求由来の根拠スロットはコード強制で不可侵（boundary_respect = 1.0）
+- **per-operator correction / growth loop** — 却下・修正メモから学習、再学習なし
+- **screen-adapter seam** — レガシー端末を隔離する狭いインターフェース（mock ↔ 実 5250）
+- **idempotent execution** — 二重送信の防御（task_id + DB UNIQUE 制約）
+- **eval harness** — 主張を正直に保つ計測
+
 ## アーキテクチャ
 
 <picture>
