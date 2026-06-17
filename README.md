@@ -39,6 +39,18 @@ A no-backend, hand-authored interactive mock of the approval console — **not a
 - **On-premises** — local model (Gemma via Ollama), local embeddings, local databases. Nothing leaves the building.
 - **Audit log** — approval decisions, the step-by-step execution timeline, and correction history are persisted.
 
+## Stack
+
+LLM (Gemma 4 via Ollama) · RAG (hybrid retrieval) · pgvector + Postgres · multilingual-e5 embeddings (TEI) · FastAPI · React/Vite · Docker Compose
+
+## Key engineering
+
+- **grounded-slot immunity** — corrections move inference slots only; request-grounded slots are code-enforced immune (boundary_respect = 1.0)
+- **per-operator correction / growth loop** — learning from reject/revise notes, no retraining
+- **screen-adapter seam** — a narrow interface isolating the legacy terminal (mock ↔ real 5250)
+- **idempotent execution** — duplicate-submit safety (task_id + DB unique constraint)
+- **eval harness** — the measurement that keeps the claims honest
+
 ## Architecture
 
 <picture>
