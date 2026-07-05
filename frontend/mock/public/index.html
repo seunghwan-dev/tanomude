@@ -393,6 +393,66 @@
         <text x="536" y="94" font-size="12.5" font-weight="700" fill="#1C7A45">87.5%</text>
       </g>
     </svg>
+    <svg id="spikemethod" viewBox="0 0 640 426" role="img" aria-label="How the spike was measured: 8 golden cases times 2 arms times 6 runs each — one deterministic and five sampled — is 96 runs; arm 1 asks the model for the whole key sequence, arm 2 asks only for slot values with a deterministic assembler building the sequence in code; a run passes only on complete token-sequence equality with the golden; the bars are the sampled-run exact rates 3 of 40 versus 35 of 40; the abort case is scored separately — 0 correct aborts in 96 runs in both arms, and the accuracy-winning arm fabricated more">
+      <g font-family="'Inter','Noto Sans JP',sans-serif">
+        <text class="en" x="16" y="20" font-size="11" font-weight="700" fill="#8A8479" letter-spacing="2">HOW THE SPIKE WAS MEASURED</text>
+        <text class="ja" x="16" y="20" font-size="11" font-weight="700" fill="#8A8479" letter-spacing="2">スパイクの測定方法</text>
+        <g>
+          <rect x="16" y="34" width="150" height="44" rx="10" fill="#FBFAF6" stroke="#D9D2C3" stroke-width="1.4"/>
+          <text x="91" y="61" text-anchor="middle" font-weight="700" font-size="12.5" fill="#1C1A17"><tspan class="en">8 golden cases</tspan><tspan class="ja">ゴールデン8ケース</tspan></text>
+          <text x="180" y="61" text-anchor="middle" font-size="14" fill="#8A8479">×</text>
+          <rect x="194" y="34" width="86" height="44" rx="10" fill="#FBFAF6" stroke="#D9D2C3" stroke-width="1.4"/>
+          <text x="237" y="61" text-anchor="middle" font-weight="700" font-size="12.5" fill="#1C1A17"><tspan class="en">2 arms</tspan><tspan class="ja">2方式</tspan></text>
+          <text x="294" y="61" text-anchor="middle" font-size="14" fill="#8A8479">×</text>
+          <rect x="308" y="34" width="150" height="44" rx="10" fill="#FBFAF6" stroke="#D9D2C3" stroke-width="1.4"/>
+          <text x="383" y="61" text-anchor="middle" font-weight="700" font-size="12.5" fill="#1C1A17"><tspan class="en">6 runs each</tspan><tspan class="ja">各6ラン</tspan></text>
+          <text x="472" y="61" text-anchor="middle" font-size="14" fill="#8A8479">=</text>
+          <rect x="486" y="34" width="138" height="44" rx="10" fill="#ECE6D8" stroke="#D9D2C3" stroke-width="1.4"/>
+          <text x="555" y="61" text-anchor="middle" font-weight="700" font-size="12.5" fill="#1C1A17"><tspan class="en">96 runs</tspan><tspan class="ja">96ラン</tspan></text>
+        </g>
+        <text class="en" x="320" y="96" text-anchor="middle" font-size="9.5" fill="#4A463F">per case, per arm: 1 deterministic run (seed 42, temp 0) + 5 sampled runs (temp 0.7)</text>
+        <text class="ja" x="320" y="96" text-anchor="middle" font-size="9.5" fill="#4A463F">各ケース・各方式で：決定論1ラン（seed 42・temp 0）＋サンプル5ラン（temp 0.7）</text>
+        <text class="en" x="320" y="112" text-anchor="middle" font-size="9.5" fill="#4A463F">the 8 cases are the same golden fixtures the public CI parity-tests · zero parse failures across all 96 runs</text>
+        <text class="ja" x="320" y="112" text-anchor="middle" font-size="9.5" fill="#4A463F">8ケースは公開 CI が一致検証するゴールデンフィクスチャと同一・全96ランで parse 失敗ゼロ</text>
+        <g>
+          <rect x="16" y="128" width="296" height="94" rx="10" fill="#FBEEDC" stroke="#E7C9A0" stroke-width="1.4"/>
+          <text x="164" y="152" text-anchor="middle" font-weight="700" font-size="12.5" fill="#92400E"><tspan class="en">Arm 1 — free-form generation</tspan><tspan class="ja">方式1 — 自由生成</tspan></text>
+          <text class="en" x="164" y="174" text-anchor="middle" font-size="10" fill="#92400E">the model emits the entire 5250</text>
+          <text class="ja" x="164" y="174" text-anchor="middle" font-size="10" fill="#92400E">モデルがキー操作列の全体を</text>
+          <text class="en" x="164" y="190" text-anchor="middle" font-size="10" fill="#92400E">key sequence as JSON steps</text>
+          <text class="ja" x="164" y="190" text-anchor="middle" font-size="10" fill="#92400E">JSON ステップとして生成する</text>
+        </g>
+        <g>
+          <rect x="328" y="128" width="296" height="94" rx="10" fill="#EAF2E6" stroke="#9BCBA4" stroke-width="1.4"/>
+          <text x="476" y="152" text-anchor="middle" font-weight="700" font-size="12.5" fill="#194D30"><tspan class="en">Arm 2 — skeleton + slot-fill</tspan><tspan class="ja">方式2 — 骨格＋スロットフィル</tspan></text>
+          <text class="en" x="476" y="174" text-anchor="middle" font-size="10" fill="#1C7A45">the model returns only slot values</text>
+          <text class="ja" x="476" y="174" text-anchor="middle" font-size="10" fill="#1C7A45">モデルはスロット値と分岐判断のみを返す</text>
+          <text class="en" x="476" y="190" text-anchor="middle" font-size="10" fill="#1C7A45">and branch decisions — a deterministic</text>
+          <text class="ja" x="476" y="190" text-anchor="middle" font-size="10" fill="#1C7A45">キー操作列はコード側の</text>
+          <text class="en" x="476" y="206" text-anchor="middle" font-size="10" fill="#1C7A45">assembler builds the sequence in code</text>
+          <text class="ja" x="476" y="206" text-anchor="middle" font-size="10" fill="#1C7A45">決定論アセンブラが組み立てる</text>
+        </g>
+        <text class="en" x="320" y="238" text-anchor="middle" font-size="9.5" fill="#4A463F">both arms are given the same manual, guidelines and instruction</text>
+        <text class="ja" x="320" y="238" text-anchor="middle" font-size="9.5" fill="#4A463F">手順書・指針・指示は両方式で同一</text>
+        <text class="en" x="320" y="262" text-anchor="middle" font-size="10" fill="#4A463F">scoring: each step is serialized to a token; a run passes only on complete sequence equality with the golden — no partial credit</text>
+        <text class="ja" x="320" y="262" text-anchor="middle" font-size="10" fill="#4A463F">採点：各ステップをトークン化し、ゴールデン列との完全一致のみを合格とする — 部分一致の加点なし</text>
+        <text class="en" x="320" y="284" text-anchor="middle" font-size="10" fill="#1C1A17">the bars above are the sampled-run exact rates — Arm 1: 3/40 · Arm 2: 35/40</text>
+        <text class="ja" x="320" y="284" text-anchor="middle" font-size="10" fill="#1C1A17">上のバーはサンプルランの exact 率 — 方式1：3/40・方式2：35/40</text>
+        <text class="en" x="320" y="300" text-anchor="middle" font-size="9.5" fill="#4A463F">(40 = 8 cases × 5 sampled runs; on the deterministic runs: 1/8 vs 7/8)</text>
+        <text class="ja" x="320" y="300" text-anchor="middle" font-size="9.5" fill="#4A463F">（40 = 8ケース × サンプル5ラン。決定論ランでは 1/8 対 7/8）</text>
+        <g>
+          <rect x="16" y="316" width="608" height="94" rx="10" fill="#FBEEDC" stroke="#E7C9A0" stroke-width="1.4"/>
+          <text x="320" y="340" text-anchor="middle" font-weight="700" font-size="12.5" fill="#92400E"><tspan class="en">the abort case is scored separately</tspan><tspan class="ja">中断（abort）ケースは別建てで採点</tspan></text>
+          <text class="en" x="320" y="360" text-anchor="middle" font-size="9.5" fill="#92400E">correct abort — producing the exact abort sequence on the empty-required-field case: 0 of 96, in both arms</text>
+          <text class="ja" x="320" y="360" text-anchor="middle" font-size="9.5" fill="#92400E">正しい中断列の生成 — 必須項目が空のケースで 96ラン中 0（両方式とも）</text>
+          <text class="en" x="320" y="376" text-anchor="middle" font-size="9.5" fill="#92400E">fabrication (inventing a value for the empty field) was scored too — the accuracy-winning Arm 2 fabricated more than Arm 1</text>
+          <text class="ja" x="320" y="376" text-anchor="middle" font-size="9.5" fill="#92400E">捏造（空の必須項目に値を作って埋める）も採点 — 精度で勝つ方式2の方が方式1より捏造が多い</text>
+          <text class="en" x="320" y="394" text-anchor="middle" font-size="9.5" fill="#92400E">the arm that wins on accuracy loses on safety — safety must live outside the model</text>
+          <text class="ja" x="320" y="394" text-anchor="middle" font-size="9.5" fill="#92400E">精度で勝つ方式が、安全では負ける — だから安全はモデルの外側に置く</text>
+        </g>
+      </g>
+    </svg>
+    <div class="fig-cap"><span class="en">The measurement method behind the bars above — run structure, the two arms, scoring, and the safety finding.</span><span class="ja" lang="ja">上のバーの背後にある測定方法 — 母数・二つの方式・採点基準・安全所見。</span></div>
     <p class="small en" style="margin:14px 0 0;">The architecture itself was set by measurement before the product was built. A reliability spike on the target task measured free-form key-sequence generation at 7.5% exact accuracy; keeping the sequence skeleton in code and asking the model only for slot values and branch decisions raised it to 87.5% (96 runs, zero parse failures). The same spike produced the finding that shaped everything after it: across all 96 runs the model never once generated the correct abort sequence when a required field was empty — and slot-filling will faithfully assemble a hallucinated value. Safety is therefore engineered outside the model: code-level required-field guards, schema-enforced refusal, human approval before execution, and screen verification after it.</p>
     <p class="small ja" lang="ja" style="margin:14px 0 0;">アーキテクチャ自体も、構築の前の測定で決めています。対象業務での信頼性スパイクでは、キー操作列の自由生成は exact 精度 7.5% でした。操作列の骨格をコード側に置き、モデルにはスロット値と分岐判断だけを任せる方式で 87.5% に上がります（96 ラン、parse 失敗 0）。同じスパイクが、その後のすべてを方向づけた所見も出しました。96 ラン中、必須項目が空のときに正しい中断（abort）列を生成できたことは一度もなく、スロットフィルは幻覚された値を忠実に組み立ててしまう、というものです。だから安全はモデルの外側で作ります — コードによる必須項目ガード、スキーマで強制する却下表現、実行前の人手承認、実行後の画面検証です。</p>
   </div>
