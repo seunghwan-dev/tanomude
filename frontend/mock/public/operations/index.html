@@ -148,6 +148,46 @@
 </div></section>
 
 <section><div class="wrap">
+  <table class="ops">
+    <thead>
+      <tr><th colspan="4"><span class="en">Main design features</span><span class="ja" lang="ja">設計・主要機能</span></th></tr>
+      <tr>
+        <th><span class="en">Feature</span><span class="ja" lang="ja">機能</span></th>
+        <th><span class="en">HITL point</span><span class="ja" lang="ja">HITL（人間ゲート）</span></th>
+        <th><span class="en">Code-enforced</span><span class="ja" lang="ja">コード強制</span></th>
+        <th><span class="en">Measured</span><span class="ja" lang="ja">測定</span></th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="item"><span class="en">HITL loop (→ 02)</span><span class="ja" lang="ja">HITL ループ（→ 02）</span></td>
+        <td><span class="en">plan → approve (human gate) → execute → verify</span><span class="ja" lang="ja">計画 → 承認（人間ゲート）→ 実行 → 検証</span></td>
+        <td><span class="en">no execution before approval · wrong-state decisions → 409</span><span class="ja" lang="ja">承認前は実行不可（状態外の決定は 409）</span></td>
+        <td>—</td>
+      </tr>
+      <tr>
+        <td class="item"><span class="en">RAG grounding (→ 03)</span><span class="ja" lang="ja">RAG グラウンディング（→ 03）</span></td>
+        <td>—</td>
+        <td>—</td>
+        <td><span class="en">recall · precision (retrieval eval)</span><span class="ja" lang="ja">recall・precision（検索評価）</span></td>
+      </tr>
+      <tr>
+        <td class="item"><span class="en">Growth loop (→ 04)</span><span class="ja" lang="ja">育成ループ（→ 04）</span></td>
+        <td><span class="en">a reject or revise note is the human input</span><span class="ja" lang="ja">却下・修正が人間入力</span></td>
+        <td><span class="en">corrections are prompt-injected — applying them is not code-enforced</span><span class="ja" lang="ja">修正はプロンプト注入 — 反映自体はコード強制ではない</span></td>
+        <td><span class="en">growth Δ 0.625</span><span class="ja" lang="ja">育成 Δ 0.625</span></td>
+      </tr>
+      <tr>
+        <td class="item"><span class="en">Safety boundary (→ 03·04)</span><span class="ja" lang="ja">安全境界（→ 03・04）</span></td>
+        <td>—</td>
+        <td><span class="en">grounded slots stay correction-immune (<code>enforce_immunity</code>)</span><span class="ja" lang="ja">根拠スロットは修正で動かない（<code>enforce_immunity</code>）</span></td>
+        <td><span class="en">boundary respect 1.0</span><span class="ja" lang="ja">境界尊重 1.0</span></td>
+      </tr>
+    </tbody>
+  </table>
+</div></section>
+
+<section><div class="wrap">
   <div class="sec-head"><span class="sec-num">02</span><h2><span class="en">The core loop</span><span class="ja" lang="ja">コアループ</span></h2><span class="src"><code>backend/coreloop.py</code> · <code>slotfill.py</code></span></div>
   <p class="note en">Planning is a code → LLM → code sandwich: deterministic guards refuse before the model is ever asked, the model only normalizes values and decides branches, and code assembles the actual keystrokes. Execution then drives the screen adapter step by step, asserting state after every action.</p>
   <p class="note ja" lang="ja">計画は「コード → LLM → コード」のサンドイッチです。決定論的なガードがモデルに尋ねる前に却下し、モデルは値の正規化と分岐判断だけを行い、実際のキー操作はコードが組み立てます。実行は画面アダプタをステップ単位で駆動し、各操作の後に状態を検証します。</p>
