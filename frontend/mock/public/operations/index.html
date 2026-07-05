@@ -402,6 +402,29 @@
       <p><span class="en">Metrics: growth Δ · boundary respect rate (+ a control sanity check).</span><span class="ja" lang="ja">指標：育成 Δ・境界尊重率（＋対照側の健全性チェック）。</span></p>
     </div>
   </div>
+  <table class="ops">
+    <thead><tr><th colspan="2"><span class="en">What the loop does</span><span class="ja" lang="ja">育成ループの仕組み</span></th></tr></thead>
+    <tbody>
+      <tr>
+        <td class="item"><span class="en">Input</span><span class="ja" lang="ja">入力</span></td>
+        <td><span class="en">a reject or revise note — an operator rejects or edits the plan</span><span class="ja" lang="ja">却下・修正のメモ</span></td>
+      </tr>
+      <tr>
+        <td class="item"><span class="en">Persist</span><span class="ja" lang="ja">蓄積</span></td>
+        <td><span class="en">saved as a personal correction — no retraining</span><span class="ja" lang="ja">個人修正として保存（再学習なし）</span></td>
+      </tr>
+      <tr>
+        <td class="item"><span class="en">Apply</span><span class="ja" lang="ja">反映</span></td>
+        <td><span class="en">injected into the next plan generation</span><span class="ja" lang="ja">次回の計画生成に注入</span></td>
+      </tr>
+      <tr>
+        <td class="item"><span class="en">Measured</span><span class="ja" lang="ja">測定</span></td>
+        <td><span class="en">the two numbers below — whether this mechanism actually works</span><span class="ja" lang="ja">下の2指標で実測（この仕組みが本当に効くか）</span></td>
+      </tr>
+    </tbody>
+  </table>
+  <p class="note en">The two metrics below test whether that loop actually works.</p>
+  <p class="note ja" lang="ja">下の2指標が、このループが実際に機能するかを検証します。</p>
   <div class="stats">
     <div class="stat"><div class="n">1.0</div><div class="l"><span class="en">Planning — success &middot; routing &middot; field accuracy</span><span class="ja" lang="ja">計画 — 成功率・ルーティング・フィールド精度</span></div></div>
     <div class="stat"><div class="n">1.0</div><div class="l"><span class="en">Retrieval — recall@3 &middot; precision@expected &middot; MRR</span><span class="ja" lang="ja">検索 — recall@3・precision@expected・MRR</span></div></div>
