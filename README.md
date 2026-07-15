@@ -4,10 +4,10 @@
 
 **The project, on five readable pages** (the interactive mock runs on recorded data — **not a live LLM**):
 
-1. **[Tanomude at a glance](https://seunghwan-dev.github.io/tanomude/)** — the through-line on one page: what it is, why (ナレッジ継承), how it works, the measured proof, and the architecture.
+1. **[Tanomude at a glance](https://seunghwan-dev.github.io/tanomude/)** — the through-line on one page: what it is, why (ナレッジ継承), how it works, and the measured proof.
 2. **[Interactive mock](https://seunghwan-dev.github.io/tanomude/mock/)** — a no-backend, hand-authored interactive mock of the approval console; walk the approval flow on recorded data, right in the browser.
 3. **[Status & roadmap](https://seunghwan-dev.github.io/tanomude/status/)** — the honest implementation ledger, item by item: 73 implemented · 11 partial · 27 deferred by decision, 111 rows, with the deferred items openly marked.
-4. **[Design & technology choices](https://seunghwan-dev.github.io/tanomude/operations/)** — the engineering decisions and their reasons, the real structure of the core loop, retrieval, and eval harness, and the operations design — design intent only; none of it is running today.
+4. **[Design & technology choices](https://seunghwan-dev.github.io/tanomude/operations/)** — the engineering decisions and their reasons, the architecture overview, the real structure of the core loop, retrieval, and eval harness, and the operations design — design intent only; none of it is running today.
 5. **[Productization](https://seunghwan-dev.github.io/tanomude/productization/)** — the go-to-market thinking (experiential marketing at manufacturing trade shows); the strategy and development plan in progress.
 
 ---
