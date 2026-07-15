@@ -4,10 +4,10 @@
 
 **まずは5つのページから**（インタラクティブモックは記録済みデータで動作し、**ライブ LLM ではありません**）：
 
-1. **[Tanomude — 全体像](https://seunghwan-dev.github.io/tanomude/)** — 何を・なぜ（ナレッジ継承）・どう動くか・測定された裏づけ・アーキテクチャを1ページで通覧します。
+1. **[Tanomude — 全体像](https://seunghwan-dev.github.io/tanomude/)** — 何を・なぜ（ナレッジ継承）・どう動くか・測定された裏づけを1ページで通覧します。
 2. **[インタラクティブモック](https://seunghwan-dev.github.io/tanomude/mock/)** — バックエンド不要・手書きの承認コンソールのインタラクティブモック。記録済みデータ上で承認フローをブラウザで体験できます。
 3. **[実装状況とロードマップ](https://seunghwan-dev.github.io/tanomude/status/)** — 項目ごとの正直な実装台帳。実装済 73・部分実装 11・意図的延期 27・全 111 行で、延期項目も明示します。
-4. **[設計と技術選定](https://seunghwan-dev.github.io/tanomude/operations/)** — 技術選定とその理由、コアループ・検索・評価ハーネスの実際の構造、そして運用設計 — 設計意図のみで、現時点で稼働しているものはありません。
+4. **[設計と技術選定](https://seunghwan-dev.github.io/tanomude/operations/)** — 技術選定とその理由、アーキテクチャの概観、コアループ・検索・評価ハーネスの実際の構造、そして運用設計 — 設計意図のみで、現時点で稼働しているものはありません。
 5. **[製品化構想](https://seunghwan-dev.github.io/tanomude/productization/)** — 集客の考え方（製造業の展示会での体験型マーケティング）。製品化戦略・開発計画は策定中です。
 
 ---
