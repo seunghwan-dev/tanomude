@@ -21,12 +21,7 @@
   .demo{padding:30px 0 0;}
   .demo-frame{background:#2A2723;border:1px solid #3A362F;border-radius:16px;padding:10px;
     box-shadow:0 30px 70px -34px rgba(28,26,23,.6);}
-  .demo-slot{aspect-ratio:16/9;background:#050806;border-radius:10px;display:grid;place-items:center;}
-  .demo-slot-inner{display:flex;flex-direction:column;align-items:center;gap:10px;
-    font-family:"JetBrains Mono",Consolas,monospace;font-size:.92rem;color:#34D06A;}
-  .demo-badge{border:1px solid #1F7D49;border-radius:6px;padding:2px 10px;font-size:.72rem;
-    letter-spacing:.18em;opacity:.85;}
-  .demo-frame img{width:100%;display:block;border-radius:10px;}
+  .demo-frame video{width:100%;display:block;border-radius:10px;background:#050806;}
   .demo-bar{display:flex;align-items:center;justify-content:space-between;gap:14px;
     padding:12px 8px 4px;flex-wrap:wrap;}
   .demo-cap{font-size:.85rem;color:#B8B2A6;}
@@ -139,7 +134,7 @@
 
 <section class="demo"><div class="wrap">
   <div class="demo-frame">
-    <video src="./tanomude.mp4" controls autoplay muted loop playsinline preload="metadata" style="width:100%;display:block;border-radius:10px;background:#050806;" aria-label="Tanomude demo — an instruction becomes an approved, verified green-screen run">
+    <video src="./tanomude.mp4" controls autoplay muted loop playsinline preload="metadata" aria-label="Tanomude demo — an instruction becomes an approved, verified green-screen run">
       <span class="en">Your browser cannot play this video — try the interactive mock below.</span><span class="ja" lang="ja">お使いのブラウザでは動画を再生できません — 下のインタラクティブモックをお試しください。</span>
     </video>
     <div class="demo-bar">
@@ -275,6 +270,10 @@
   try{saved=localStorage.getItem("tanomude-lang");}catch(e){}
   var detected=((navigator.language||"").toLowerCase().indexOf("ja")===0)?"ja":"en";
   apply(saved==="ja"||saved==="en"?saved:detected,false);
+  if(window.matchMedia&&window.matchMedia("(prefers-reduced-motion: reduce)").matches){
+    var demo=document.querySelector(".demo-frame video");
+    if(demo){demo.removeAttribute("autoplay");demo.pause();}
+  }
   var totop=document.querySelector(".totop");
   function onScroll(){totop.classList.toggle("show",window.scrollY>480);}
   window.addEventListener("scroll",onScroll,{passive:true});
