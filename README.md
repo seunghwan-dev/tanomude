@@ -26,7 +26,7 @@ A no-backend, hand-authored interactive mock of the approval console — **not a
 
 > Scope: the mock demonstrates the approval and refusal flow on recorded data. The correction-learning loop — a 修正 (revise) reshaping the next plan, and the immunity notice that declines a revise aimed at a grounded slot — runs in the full local product, not in this mock.
 
-> **Demo video — coming soon**
+> **Demo video** — a recorded demo run plays on the landing page (mock data).
 
 ---
 
