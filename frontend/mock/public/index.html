@@ -54,13 +54,6 @@
   .step .t{font-weight:600;font-size:1.02rem;margin:5px 0 0;}
   .step .d{font-size:.78rem;color:var(--faint);margin:3px 0 0;}
   .step.gate{border-color:var(--accent);background:linear-gradient(180deg,var(--accent-bg),var(--panel));}
-  .figure{background:var(--panel);border:1px solid var(--line);border-radius:14px;
-    padding:24px;margin:16px 0 0;}
-  .figure svg{width:100%;height:auto;display:block;}
-  .fig-cap{font-size:.8rem;color:var(--faint);text-align:center;margin:14px 0 0;}
-  .chips{display:flex;flex-wrap:wrap;gap:8px;margin:16px 0 0;}
-  .chip{border:1px solid var(--line);background:var(--panel);border-radius:999px;
-    padding:4px 14px;font-size:12.5px;color:var(--soft);white-space:nowrap;}
   .cards{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin:14px 0 0;}
   .card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:18px 20px;}
   .card h3{font-size:1rem;margin:0 0 8px;color:var(--accent);}
@@ -74,41 +67,30 @@
   .navcard p{margin:0;font-size:.92rem;color:var(--soft);}
   .navcard .go{position:absolute;top:16px;right:18px;color:var(--faint);}
   .navcard:hover .go{color:var(--accent);}
+  .navcard .cue{margin:8px 0 0;font-family:"JetBrains Mono",Consolas,monospace;font-size:11px;color:var(--accent);}
   .cta-band{padding:40px 0 8px;}
   .cta-inner{background:var(--panel);border:1px solid var(--line);border-radius:14px;
     padding:26px 28px;display:flex;align-items:center;justify-content:space-between;
     gap:18px;flex-wrap:wrap;}
   .cta-line{margin:0;font-size:1rem;color:var(--soft);max-width:52ch;}
   .cta-btns{display:flex;gap:10px;flex-wrap:wrap;}
-  .deep{padding:46px 0 0;}
-  .deep-rule{height:1px;background:var(--line);}
-  .deep-label{margin:20px 0 0;font-size:.74rem;font-weight:600;letter-spacing:.22em;
-    text-transform:uppercase;color:var(--faint);}
   .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:16px 0 0;}
   .stat{background:var(--panel);border:1px solid var(--line);border-left:5px solid var(--accent);
     border-radius:10px;padding:14px 16px;}
   .stat .n{font-size:30px;font-weight:700;line-height:1;color:var(--accent);}
   .stat .l{font-size:12px;color:var(--soft);margin-top:7px;}
-  .spike{background:var(--panel);border:1px solid var(--line);border-radius:12px;
-    padding:20px 22px;margin:16px 0 0;}
-  .spike svg{width:100%;max-width:640px;height:auto;display:block;}
-  .small{font-size:.9rem;color:var(--soft);max-width:78ch;}
-  code{font-family:"JetBrains Mono",Consolas,monospace;font-size:.86em;
-    background:var(--sunk);padding:1px 5px;border-radius:4px;}
   .foot{color:var(--faint);font-size:12px;margin-top:40px;border-top:1px solid var(--line);
     padding-top:14px;}
   @media (max-width:720px){
     .hero-grid{grid-template-columns:1fr;gap:24px;}
     .crt{width:200px;}
     .cards{grid-template-columns:1fr;}
-    .stats{grid-template-columns:repeat(2,1fr);}
     .strip3{grid-template-columns:1fr;}
     .navcards{grid-template-columns:1fr;}
     .demo-bar{justify-content:center;text-align:center;}
     .cta-inner{justify-content:center;text-align:center;}
   }
   @media (max-width:430px){
-    .stats{grid-template-columns:1fr;}
     .btn{white-space:normal;text-align:center;}
   }
 </style>
@@ -179,7 +161,7 @@
     <div class="stat"><div class="n">0.625</div><div class="l"><span class="en">Personal-correction growth — &Delta; (inference-tier policy slots)</span><span class="ja" lang="ja">個人修正による育成 — Δ（推論ティアの方針スロット）</span></div></div>
     <div class="stat"><div class="n">1.0</div><div class="l"><span class="en">Retrieval — recall@3 &middot; precision@expected &middot; MRR</span><span class="ja" lang="ja">検索 — recall@3・precision@expected・MRR</span></div></div>
   </div>
-  <p class="strip-note"><span class="en">Measured by the in-repo eval harness — <a href="#measured">full numbers and caveats below</a>.</span><span class="ja" lang="ja">リポジトリ内蔵の評価ハーネスによる実測 — <a href="#measured">数値の詳細と注意点は下に</a>。</span></p>
+  <p class="strip-note"><span class="en">Measured by the in-repo eval harness — <a href="./operations/#eval">full numbers and caveats on the design page</a>.</span><span class="ja" lang="ja">リポジトリ内蔵の評価ハーネスによる実測 — <a href="./operations/#eval">数値の詳細と注意点は設計ページに</a>。</span></p>
 </div></section>
 
 <section><div class="wrap">
@@ -194,178 +176,7 @@
 </div></section>
 
 <section><div class="wrap">
-  <div class="sec-head"><span class="sec-num">02</span><h2><span class="en">Architecture</span><span class="ja" lang="ja">アーキテクチャ</span></h2></div>
-  <p class="lead soft en">The stack is standard — the engineering sits on top.</p>
-  <p class="lead soft ja" lang="ja">標準スタック。設計したのは、その上のメカニズム。</p>
-  <div class="cards">
-    <div class="card">
-      <h3><span class="en">Used — off-the-shelf</span><span class="ja" lang="ja">既存スタック</span></h3>
-      <p class="en">LLM (Gemma 4) &middot; RAG &middot; pgvector &middot; multilingual-e5 &middot; FastAPI &middot; React &middot; Docker</p>
-      <p class="ja" lang="ja">LLM (Gemma 4) &middot; RAG &middot; pgvector &middot; multilingual-e5 &middot; FastAPI &middot; React &middot; Docker</p>
-    </div>
-    <div class="card">
-      <h3><span class="en">Built — engineered</span><span class="ja" lang="ja">設計したメカニズム</span></h3>
-      <p class="en">grounded-slot immunity &middot; correction / growth loop &middot; screen-adapter seam &middot; idempotent execution &middot; eval harness</p>
-      <p class="ja" lang="ja">grounded-slot immunity &middot; correction / growth loop &middot; screen-adapter seam &middot; idempotent execution &middot; eval harness</p>
-    </div>
-  </div>
-  <div class="figure">
-    <svg id="archdiagram" viewBox="0 0 940 470" role="img" aria-label="Architecture: an instruction is planned over RAG grounding and personal corrections, gated by human approval, executed through a screen adapter against the mock AS-400, verified against the screen, and measured by an eval harness">
-      <defs>
-        <marker id="ah" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto">
-          <path d="M0,0 L9,4.5 L0,9 Z" fill="#8A8479"/>
-        </marker>
-        <marker id="ahg" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto">
-          <path d="M0,0 L9,4.5 L0,9 Z" fill="#1C7A45"/>
-        </marker>
-        <marker id="aha" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto">
-          <path d="M0,0 L9,4.5 L0,9 Z" fill="#B45309"/>
-        </marker>
-      </defs>
-      <g font-family="'Inter','Noto Sans JP',sans-serif">
-        <g>
-          <rect x="16" y="58" width="118" height="78" rx="10" fill="#FBFAF6" stroke="#D9D2C3" stroke-width="1.4"/>
-          <text class="en" x="75" y="92" text-anchor="middle" font-weight="700" font-size="16" fill="#1C1A17">Instruction</text>
-          <text class="ja" x="75" y="92" text-anchor="middle" font-weight="700" font-size="16" fill="#1C1A17">指示</text>
-          <text class="en" x="75" y="114" text-anchor="middle" font-size="10.5" fill="#4A463F">natural language</text>
-          <text class="ja" x="75" y="114" text-anchor="middle" font-size="10.5" fill="#4A463F">自然言語</text>
-        </g>
-        <g>
-          <rect x="170" y="50" width="160" height="94" rx="10" fill="#FBFAF6" stroke="#D9D2C3" stroke-width="1.4"/>
-          <text class="en" x="250" y="80" text-anchor="middle" font-weight="700" font-size="16" fill="#1C1A17">Plan</text>
-          <text class="ja" x="250" y="80" text-anchor="middle" font-weight="700" font-size="16" fill="#1C1A17">計画</text>
-          <text class="en" x="250" y="102" text-anchor="middle" font-size="10.5" fill="#4A463F">slot extraction</text>
-          <text class="ja" x="250" y="102" text-anchor="middle" font-size="10.5" fill="#4A463F">スロット抽出</text>
-          <text class="en" x="250" y="120" text-anchor="middle" font-size="10.5" fill="#4A463F">structured output + retry</text>
-          <text class="ja" x="250" y="120" text-anchor="middle" font-size="10.5" fill="#4A463F">構造化出力＋再試行</text>
-        </g>
-        <g>
-          <rect x="366" y="44" width="172" height="106" rx="10" fill="#E4EDE0" stroke="#1C7A45" stroke-width="2.2"/>
-          <text class="en" x="452" y="76" text-anchor="middle" font-weight="700" font-size="16" fill="#194D30">Approval gate</text>
-          <text class="ja" x="452" y="76" text-anchor="middle" font-weight="700" font-size="16" fill="#194D30">承認ゲート</text>
-          <text class="en" x="452" y="98" text-anchor="middle" font-size="10.5" fill="#1C7A45">human approval</text>
-          <text class="ja" x="452" y="98" text-anchor="middle" font-size="10.5" fill="#1C7A45">人手承認</text>
-          <text class="en" x="452" y="118" text-anchor="middle" font-size="10.5" fill="#1C7A45">Approve / Revise / Reject</text>
-          <text class="ja" x="452" y="118" text-anchor="middle" font-size="10.5" fill="#1C7A45">承認 / 修正 / 却下</text>
-          <text class="en" x="452" y="136" text-anchor="middle" font-size="9.5" fill="#4A463F">the only path to execution</text>
-          <text class="ja" x="452" y="136" text-anchor="middle" font-size="9.5" fill="#4A463F">実行への唯一の経路</text>
-        </g>
-        <g>
-          <rect x="574" y="50" width="160" height="94" rx="10" fill="#FBFAF6" stroke="#D9D2C3" stroke-width="1.4"/>
-          <text class="en" x="654" y="80" text-anchor="middle" font-weight="700" font-size="16" fill="#1C1A17">Execute</text>
-          <text class="ja" x="654" y="80" text-anchor="middle" font-weight="700" font-size="16" fill="#1C1A17">実行</text>
-          <text class="en" x="654" y="102" text-anchor="middle" font-size="10.5" fill="#4A463F">key by key, idempotent</text>
-          <text class="ja" x="654" y="102" text-anchor="middle" font-size="10.5" fill="#4A463F">キー単位・冪等</text>
-          <text class="en" x="654" y="120" text-anchor="middle" font-size="10.5" fill="#4A463F">via a screen adapter</text>
-          <text class="ja" x="654" y="120" text-anchor="middle" font-size="10.5" fill="#4A463F">画面アダプタ経由</text>
-        </g>
-        <g>
-          <rect x="770" y="50" width="154" height="94" rx="10" fill="#FBFAF6" stroke="#D9D2C3" stroke-width="1.4"/>
-          <text class="en" x="847" y="80" text-anchor="middle" font-weight="700" font-size="16" fill="#1C1A17">Verify</text>
-          <text class="ja" x="847" y="80" text-anchor="middle" font-weight="700" font-size="16" fill="#1C1A17">検証</text>
-          <text class="en" x="847" y="102" text-anchor="middle" font-size="10.5" fill="#4A463F">assert screen state</text>
-          <text class="ja" x="847" y="102" text-anchor="middle" font-size="10.5" fill="#4A463F">画面照合</text>
-          <text class="en" x="847" y="120" text-anchor="middle" font-size="10.5" fill="#4A463F">after every action</text>
-          <text class="ja" x="847" y="120" text-anchor="middle" font-size="10.5" fill="#4A463F">各操作の後に</text>
-        </g>
-        <g fill="none" stroke="#8A8479" stroke-width="1.6" marker-end="url(#ah)">
-          <line x1="134" y1="97" x2="164" y2="97"/>
-          <line x1="330" y1="97" x2="360" y2="97"/>
-          <line x1="538" y1="97" x2="568" y2="97"/>
-          <line x1="734" y1="97" x2="764" y2="97"/>
-        </g>
-        <g>
-          <rect x="770" y="196" width="154" height="140" rx="10" fill="#FBFAF6" stroke="#D9D2C3" stroke-width="1.4"/>
-          <text class="en" x="847" y="222" text-anchor="middle" font-weight="700" font-size="13" fill="#1C1A17">outcome</text>
-          <text class="ja" x="847" y="222" text-anchor="middle" font-weight="700" font-size="13" fill="#1C1A17">実行結果</text>
-          <text class="en" x="847" y="244" text-anchor="middle" font-size="11" fill="#1C7A45">Submitted</text>
-          <text class="ja" x="847" y="244" text-anchor="middle" font-size="11" fill="#1C7A45">送信済</text>
-          <text class="en" x="847" y="264" text-anchor="middle" font-size="11" fill="#B45309">Re-entry / code check</text>
-          <text class="ja" x="847" y="264" text-anchor="middle" font-size="11" fill="#B45309">再入力／コード確認</text>
-          <text class="en" x="847" y="284" text-anchor="middle" font-size="11" fill="#4A463F">Needs investigation</text>
-          <text class="ja" x="847" y="284" text-anchor="middle" font-size="11" fill="#4A463F">要調査</text>
-          <line x1="784" y1="296" x2="910" y2="296" stroke="#D9D2C3" stroke-width="1"/>
-          <text class="en" x="847" y="312" text-anchor="middle" font-size="9" fill="#4A463F">replan (≤2), then roll back</text>
-          <text class="ja" x="847" y="312" text-anchor="middle" font-size="9" fill="#4A463F">再計画は最大2回→ロールバック</text>
-          <text class="en" x="847" y="326" text-anchor="middle" font-size="9" fill="#B45309">bad data → a person, no retry</text>
-          <text class="ja" x="847" y="326" text-anchor="middle" font-size="9" fill="#B45309">入力不良は再試行せず人へ</text>
-        </g>
-        <line x1="847" y1="144" x2="847" y2="190" fill="none" stroke="#8A8479" stroke-width="1.6" marker-end="url(#ah)"/>
-        <path d="M788 150 C 730 186, 690 168, 672 152" fill="none" stroke="#8A8479" stroke-width="1.5" stroke-dasharray="5 4" marker-end="url(#ah)"/>
-        <text class="en" x="728" y="196" text-anchor="middle" font-size="10" fill="#4A463F">replan</text>
-        <text class="ja" x="728" y="196" text-anchor="middle" font-size="10" fill="#4A463F">再計画</text>
-        <line x1="654" y1="144" x2="654" y2="220" fill="none" stroke="#8A8479" stroke-width="1.5" marker-end="url(#ah)"/>
-        <g>
-          <rect x="16" y="226" width="164" height="90" rx="10" fill="#FBEEDC" stroke="#E7C9A0" stroke-width="1.4"/>
-          <text class="en" x="98" y="254" text-anchor="middle" font-weight="700" font-size="13" fill="#92400E">Reject (pre-execution)</text>
-          <text class="ja" x="98" y="254" text-anchor="middle" font-weight="700" font-size="13" fill="#92400E">却下（実行前）</text>
-          <text class="en" x="98" y="276" text-anchor="middle" font-size="9.5" fill="#92400E">out-of-domain / missing fields</text>
-          <text class="ja" x="98" y="276" text-anchor="middle" font-size="9.5" fill="#92400E">ドメイン外・必須項目不足</text>
-          <text class="en" x="98" y="294" text-anchor="middle" font-size="9.5" fill="#92400E">refused before the gate</text>
-          <text class="ja" x="98" y="294" text-anchor="middle" font-size="9.5" fill="#92400E">ゲートの手前で却下</text>
-        </g>
-        <path d="M190 144 C 160 175, 130 195, 105 220" fill="none" stroke="#B45309" stroke-width="1.5" stroke-dasharray="5 4" marker-end="url(#aha)"/>
-        <g>
-          <rect x="200" y="226" width="168" height="90" rx="10" fill="#ECE6D8" stroke="#D9D2C3" stroke-width="1.4"/>
-          <text class="en" x="284" y="254" text-anchor="middle" font-weight="700" font-size="13" fill="#1C1A17">Manual RAG</text>
-          <text class="ja" x="284" y="254" text-anchor="middle" font-weight="700" font-size="13" fill="#1C1A17">手順書 RAG</text>
-          <text class="en" x="284" y="276" text-anchor="middle" font-size="10" fill="#4A463F">hybrid retrieval</text>
-          <text class="ja" x="284" y="276" text-anchor="middle" font-size="10" fill="#4A463F">ハイブリッド検索</text>
-          <text class="en" x="284" y="294" text-anchor="middle" font-size="10" fill="#4A463F">vector + full-text, rank-fused</text>
-          <text class="ja" x="284" y="294" text-anchor="middle" font-size="10" fill="#4A463F">ベクトル＋全文の融合</text>
-        </g>
-        <g>
-          <rect x="388" y="226" width="160" height="90" rx="10" fill="#ECE6D8" stroke="#D9D2C3" stroke-width="1.4"/>
-          <text class="en" text-anchor="middle" font-weight="700" font-size="13" fill="#1C1A17"><tspan x="468" y="246">Personal correction</tspan><tspan x="468" y="262">(growth)</tspan></text>
-          <text class="ja" x="468" y="254" text-anchor="middle" font-weight="700" font-size="13" fill="#1C1A17">個人修正（育成）</text>
-          <text class="en" x="468" y="276" text-anchor="middle" font-size="10" fill="#4A463F">per-operator corrections</text>
-          <text class="ja" x="468" y="276" text-anchor="middle" font-size="10" fill="#4A463F">利用者ごとに永続化</text>
-          <text class="en" x="468" y="294" text-anchor="middle" font-size="10" fill="#4A463F">reshape the next plan</text>
-          <text class="ja" x="468" y="294" text-anchor="middle" font-size="10" fill="#4A463F">次の計画を作り直す</text>
-        </g>
-        <g>
-          <rect x="574" y="226" width="176" height="90" rx="10" fill="#EAF2E6" stroke="#9BCBA4" stroke-width="1.4"/>
-          <text class="en" x="662" y="254" text-anchor="middle" font-weight="700" font-size="13" fill="#194D30">Mock AS-400</text>
-          <text class="ja" x="662" y="254" text-anchor="middle" font-weight="700" font-size="13" fill="#194D30">モック AS-400</text>
-          <text class="en" x="662" y="276" text-anchor="middle" font-size="9.5" fill="#1C7A45">a deterministic screen state machine</text>
-          <text class="ja" x="662" y="276" text-anchor="middle" font-size="9.5" fill="#1C7A45">決定論的な画面状態機械</text>
-          <text class="en" x="662" y="294" text-anchor="middle" font-size="9.5" fill="#1C7A45">the same seam as a real 5250</text>
-          <text class="ja" x="662" y="294" text-anchor="middle" font-size="9.5" fill="#1C7A45">実機5250と同じ継ぎ目</text>
-        </g>
-        <g fill="none" stroke="#8A8479" stroke-width="1.5" marker-end="url(#ah)">
-          <path d="M284 226 C 268 196, 252 172, 240 152"/>
-          <path d="M430 226 C 378 196, 330 176, 302 154"/>
-        </g>
-        <path d="M452 150 C 462 178, 472 200, 480 220" fill="none" stroke="#1C7A45" stroke-width="1.6" marker-end="url(#ahg)"/>
-        <text class="en" x="468" y="338" text-anchor="middle" font-size="10" fill="#1C7A45">a reject / revise note persists as a personal correction</text>
-        <text class="ja" x="468" y="338" text-anchor="middle" font-size="10" fill="#1C7A45">却下・修正のメモが個人修正として永続化</text>
-        <text class="en" x="468" y="354" text-anchor="middle" font-size="10" fill="#4A463F">grounded slots are correction-immune, enforced in code</text>
-        <text class="ja" x="468" y="354" text-anchor="middle" font-size="10" fill="#4A463F">根拠スロットは上書き不可（コード強制）</text>
-        <g>
-          <rect x="60" y="390" width="864" height="66" rx="10" fill="none" stroke="#8A8479" stroke-width="1.4" stroke-dasharray="6 5"/>
-          <text class="en" x="492" y="416" text-anchor="middle" font-weight="700" font-size="13" fill="#1C1A17">Eval harness</text>
-          <text class="ja" x="492" y="416" text-anchor="middle" font-weight="700" font-size="13" fill="#1C1A17">評価ハーネス</text>
-          <text class="en" x="492" y="438" text-anchor="middle" font-size="10.5" fill="#4A463F">scores planning · retrieval · recovery · growth Δ · boundary respect — runs locally with the model; CI gates a deterministic subset</text>
-          <text class="ja" x="492" y="438" text-anchor="middle" font-size="10.5" fill="#4A463F">計画・検索・リカバリ・育成Δ・境界尊重を採点 — モデルとともにローカル実行、CI は決定論的サブセットをゲート</text>
-        </g>
-      </g>
-    </svg>
-    <div class="fig-cap"><span class="en">The real serving path: grounded plan &rarr; human gate &rarr; verified execution, with the growth loop and the eval harness around it.</span><span class="ja" lang="ja">実際の実行経路：根拠づいた計画 &rarr; 人のゲート &rarr; 検証つき実行。その周りに育成ループと評価ハーネス。</span></div>
-  </div>
-  <div class="chips">
-    <span class="chip">FastAPI</span>
-    <span class="chip">Ollama &middot; Gemma (temperature 0)</span>
-    <span class="chip">TEI &middot; multilingual-e5 (1024-dim)</span>
-    <span class="chip">Postgres + pgvector</span>
-    <span class="chip">React + TypeScript</span>
-    <span class="chip"><span class="en">fully on-premises</span><span class="ja" lang="ja">完全オンプレミス</span></span>
-  </div>
-  <p class="small en">The agent core is a custom loop rather than a framework: existing agent frameworks were weighed against the safety and verification requirements and declined for the serving path, so that approval gating, screen-state verification, idempotency and rollback live in plain code that can be read and tested. Everything runs on-premises; nothing leaves the building.</p>
-  <p class="small ja" lang="ja">エージェントのコアはフレームワークではなく独自ループです。既存のエージェントフレームワークを安全性・検証要件に照らして評価したうえで本番経路には採用せず、承認ゲート・画面状態の検証・冪等性・ロールバックを、読めてテストできる素のコードに置きました。すべてオンプレミスで動作し、データは社外に出ません。</p>
-</div></section>
-
-<section><div class="wrap">
-  <div class="sec-head"><span class="sec-num">03</span><h2><span class="en">The core mechanisms</span><span class="ja" lang="ja">核となる仕組み</span></h2></div>
+  <div class="sec-head"><span class="sec-num">02</span><h2><span class="en">The core mechanisms</span><span class="ja" lang="ja">核となる仕組み</span></h2></div>
   <div class="cards">
     <div class="card">
       <h3><span class="en">Grounded planning</span><span class="ja" lang="ja">根拠づいた計画</span></h3>
@@ -398,93 +209,38 @@
       <p class="ja" lang="ja">リポジトリの運営には何重ものゲートを置いています。必須の CI verify チェック（lint・型チェック・ユニットテスト・ゴールデンフィクスチャ一致・シークレットスキャン）、全 PR への独立した自動レビュー、そして複数段の QC — 公開コミットで全公表数値を5回の決定論的再測定によって確かめ直したことを含みます。</p>
     </div>
   </div>
-  <div class="figure">
-    <svg id="growthdiagram" viewBox="0 0 940 640" role="img" aria-label="Growth loop: an operator request is planned by the AI with an inference-tier guess, a veteran rejects it with a correcting note, the note is saved as a versioned personal correction triggered by the destination, and the next matching request has it prompt-injected above the manual context — stored once, no retraining, and applying it is not code-enforced">
-      <defs>
-        <marker id="ah3" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto">
-          <path d="M0,0 L9,4.5 L0,9 Z" fill="#8A8479"/>
-        </marker>
-        <marker id="ahg3" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto">
-          <path d="M0,0 L9,4.5 L0,9 Z" fill="#1C7A45"/>
-        </marker>
-      </defs>
-      <g font-family="'Inter','Noto Sans JP',sans-serif">
-        <text class="en" x="16" y="32" font-size="11" font-weight="700" fill="#8A8479" letter-spacing="2">GROWTH LOOP — one correction's lifecycle</text>
-        <text class="ja" x="16" y="32" font-size="11" font-weight="700" fill="#8A8479" letter-spacing="2">育成ループ — ある修正のライフサイクル</text>
-        <g>
-          <rect x="210" y="44" width="520" height="70" rx="10" fill="#FBFAF6" stroke="#D9D2C3" stroke-width="1.4"/>
-          <text x="470" y="72" text-anchor="middle" font-weight="700" font-size="12.5" fill="#1C1A17"><tspan class="en">operator request</tspan><tspan class="ja">オペレーターの依頼</tspan></text>
-          <text x="470" y="94" text-anchor="middle" font-size="10.5" fill="#4A463F">「大阪出張を申請」</text>
-        </g>
-        <line x1="470" y1="114" x2="470" y2="136" fill="none" stroke="#8A8479" stroke-width="1.6" marker-end="url(#ah3)"/>
-        <g>
-          <rect x="210" y="142" width="520" height="78" rx="10" fill="#ECE6D8" stroke="#D9D2C3" stroke-width="1.4"/>
-          <text x="470" y="170" text-anchor="middle" font-weight="700" font-size="12.5" fill="#1C1A17"><tspan class="en">AI drafts the plan</tspan><tspan class="ja">AI が計画を作成</tspan></text>
-          <text class="en" x="470" y="190" text-anchor="middle" font-size="10" fill="#4A463F">guesses "new project" for the project code</text>
-          <text class="ja" x="470" y="190" text-anchor="middle" font-size="10" fill="#4A463F">案件コードを「新規」と推測</text>
-          <text class="en" x="470" y="206" text-anchor="middle" font-size="9.5" fill="#4A463F">reuse_prev_proj — an inference-tier slot, not grounded</text>
-          <text class="ja" x="470" y="206" text-anchor="middle" font-size="9.5" fill="#4A463F">reuse_prev_proj — 根拠のない推論ティアのスロット</text>
-        </g>
-        <line x1="470" y1="220" x2="470" y2="248" fill="none" stroke="#8A8479" stroke-width="1.6" marker-end="url(#ah3)"/>
-        <g>
-          <rect x="210" y="254" width="520" height="78" rx="10" fill="#FBEEDC" stroke="#E7C9A0" stroke-width="1.4"/>
-          <text x="470" y="282" text-anchor="middle" font-weight="700" font-size="12.5" fill="#92400E"><tspan class="en">the veteran rejects &amp; corrects</tspan><tspan class="ja">ベテランが却下・修正</tspan></text>
-          <text x="470" y="302" text-anchor="middle" font-size="10.5" fill="#92400E">「案件は前回の P-123 を再利用」</text>
-          <text class="en" x="470" y="318" text-anchor="middle" font-size="9.5" fill="#92400E">the reject / revise note is the human input</text>
-          <text class="ja" x="470" y="318" text-anchor="middle" font-size="9.5" fill="#92400E">却下・修正のメモが人間入力</text>
-        </g>
-        <line x1="470" y1="332" x2="470" y2="372" fill="none" stroke="#1C7A45" stroke-width="1.6" marker-end="url(#ahg3)"/>
-        <text class="en" x="486" y="357" font-size="10" fill="#1C7A45">saved — no retraining</text>
-        <text class="ja" x="486" y="357" font-size="10" fill="#1C7A45">保存（再学習なし）</text>
-        <g>
-          <rect x="210" y="378" width="520" height="78" rx="10" fill="#EAF2E6" stroke="#9BCBA4" stroke-width="1.4"/>
-          <text x="470" y="406" text-anchor="middle" font-weight="700" font-size="12.5" fill="#194D30"><tspan class="en">saved as a personal correction</tspan><tspan class="ja">個人修正として保存</tspan></text>
-          <text x="470" y="426" text-anchor="middle" font-size="10.5" fill="#1C7A45">trigger = {"dest": "大阪"}</text>
-          <text class="en" x="470" y="442" text-anchor="middle" font-size="9.5" fill="#1C7A45">a versioned row in Postgres — the model's weights never change</text>
-          <text class="ja" x="470" y="442" text-anchor="middle" font-size="9.5" fill="#1C7A45">Postgres にバージョン管理で保存 — モデルの重みは変わらない</text>
-        </g>
-        <line x1="470" y1="456" x2="470" y2="496" fill="none" stroke="#1C7A45" stroke-width="1.6" marker-end="url(#ahg3)"/>
-        <text class="en" x="486" y="481" font-size="10" fill="#1C7A45">injected into the next plan</text>
-        <text class="ja" x="486" y="481" font-size="10" fill="#1C7A45">次回の計画に注入</text>
-        <g>
-          <rect x="210" y="502" width="520" height="78" rx="10" fill="#E4EDE0" stroke="#1C7A45" stroke-width="1.6"/>
-          <text x="470" y="530" text-anchor="middle" font-weight="700" font-size="12.5" fill="#194D30"><tspan class="en">reused automatically next time</tspan><tspan class="ja">次回、自動で反映</tspan></text>
-          <text class="en" x="470" y="550" text-anchor="middle" font-size="10" fill="#1C7A45">the next 大阪 request applies P-123 — even when the veteran is away</text>
-          <text class="ja" x="470" y="550" text-anchor="middle" font-size="10" fill="#1C7A45">次の大阪出張に「P-123」を適用 — ベテラン不在でも</text>
-          <text class="en" x="470" y="566" text-anchor="middle" font-size="9.5" fill="#1C7A45">prompt-injected above the manual — applying it is not code-enforced</text>
-          <text class="ja" x="470" y="566" text-anchor="middle" font-size="9.5" fill="#1C7A45">手順書の上にプロンプト注入 — 反映自体はコード強制ではない</text>
-        </g>
-        <text class="en" x="470" y="606" text-anchor="middle" font-size="10" fill="#4A463F">measured as a one-time A/B — the growth Δ below is treatment minus control, not a curve over time</text>
-        <text class="ja" x="470" y="606" text-anchor="middle" font-size="10" fill="#4A463F">測定は一回きりの A/B — 下の育成 Δ は処置と対照の差で、時間経過の改善曲線ではありません</text>
-        <text class="en" x="470" y="623" text-anchor="middle" font-size="10" fill="#4A463F">a correction can move only inference-tier slots — grounded slots stay immune, as the retrieval diagram above shows</text>
-        <text class="ja" x="470" y="623" text-anchor="middle" font-size="10" fill="#4A463F">修正が動かせるのは推論ティアのスロットのみ — 根拠スロットは上の検索の図のとおり動きません</text>
-      </g>
-    </svg>
-    <div class="fig-cap"><span class="en">A single correction's lifecycle: <code>record_reject</code> / <code>record_revise</code> → <code>stage_correction</code> → <code>apply_corrections</code>; the note is replayed by prompt injection, never by retraining.</span><span class="ja" lang="ja">ある修正のライフサイクル：<code>record_reject</code>／<code>record_revise</code> → <code>stage_correction</code> → <code>apply_corrections</code>。メモは再学習ではなくプロンプト注入で再利用されます。</span></div>
-  </div>
 </div></section>
 
 <section><div class="wrap">
-  <div class="sec-head"><span class="sec-num">04</span><h2><span class="en">Explore</span><span class="ja" lang="ja">各ページへ</span></h2></div>
+  <p class="lead soft en">An on-premise, human-in-the-loop AI assistant that operates an AS-400-style legacy green screen from natural-language instructions. The agent proposes a plan; a person approves it; every executed step is verified against the screen and recorded in an append-only audit trail. Nothing reaches the legacy system without a human decision.</p>
+  <p class="lead soft ja" lang="ja">自然言語の指示で AS-400 風レガシーシステムのグリーンスクリーンを操作する、オンプレミス・人手承認（HITL）型の AI アシスタントです。エージェントが計画を提案し、人が承認し、実行された各ステップは画面状態に照らして検証され、追記専用の監査証跡に記録されます。人の決定なしにレガシーシステムへ届く操作はありません。</p>
+</div></section>
+
+<section><div class="wrap">
+  <div class="sec-head"><span class="sec-num">03</span><h2><span class="en">Explore</span><span class="ja" lang="ja">各ページへ</span></h2></div>
   <div class="navcards">
     <a class="navcard" href="./mock/">
       <h3><span class="en">Interactive mock</span><span class="ja" lang="ja">インタラクティブモック</span></h3>
       <p><span class="en">The operator console in your browser — generate a plan, approve it, watch the green-screen replay.</span><span class="ja" lang="ja">ブラウザで動く承認コンソール — 計画を生成し、承認し、グリーンスクリーンの再生を見る。</span></p>
+      <p class="cue"><span class="en">hands-on: plan &rarr; approve &rarr; replay</span><span class="ja" lang="ja">体験：計画 &rarr; 承認 &rarr; 再生</span></p>
       <span class="go">&rarr;</span>
     </a>
     <a class="navcard" href="./status/">
       <h3><span class="en">Status &amp; roadmap</span><span class="ja" lang="ja">実装状況</span></h3>
       <p><span class="en">What is implemented, partial, and deferred by decision — item by item, with code anchors.</span><span class="ja" lang="ja">何が実装済で、何が部分実装・意図的延期か — 項目別、コードアンカーつき。</span></p>
+      <p class="cue"><span class="en">the item-by-item ledger</span><span class="ja" lang="ja">項目別の実装台帳</span></p>
       <span class="go">&rarr;</span>
     </a>
     <a class="navcard" href="./operations/">
       <h3><span class="en">Design &amp; technology choices</span><span class="ja" lang="ja">設計と技術選定</span></h3>
       <p><span class="en">Why each mechanism exists — the guards, the growth loop, and the operations design.</span><span class="ja" lang="ja">各メカニズムがなぜあるのか — ガード、育成ループ、運用設計。</span></p>
+      <p class="cue"><span class="en">the deep dive: why it exists &middot; architecture &middot; spike method &middot; eval numbers &amp; caveats</span><span class="ja" lang="ja">深掘り：課題と解決 &middot; アーキテクチャ &middot; スパイク測定法 &middot; 評価数値と注意点</span></p>
       <span class="go">&rarr;</span>
     </a>
     <a class="navcard" href="./productization/">
       <h3><span class="en">Productization</span><span class="ja" lang="ja">製品化</span></h3>
       <p><span class="en">The path from this prototype to a product.</span><span class="ja" lang="ja">このプロトタイプから製品までの道筋。</span></p>
+      <p class="cue"><span class="en">go-to-market &amp; the product plan</span><span class="ja" lang="ja">GTM と製品化計画</span></p>
       <span class="go">&rarr;</span>
     </a>
   </div>
@@ -497,147 +253,6 @@
       <a class="btn ghost" href="https://github.com/seunghwan-dev/tanomude"><span class="en">View source on GitHub</span><span class="ja" lang="ja">GitHub でソースを見る</span></a>
       <a class="btn primary" href="./mock/"><span class="en">Tour the mock</span><span class="ja" lang="ja">モックを見る</span></a>
     </div>
-  </div>
-</div></section>
-
-<section class="deep"><div class="wrap">
-  <div class="deep-rule"></div>
-  <div class="deep-label"><span class="en">Deep dive — the full story</span><span class="ja" lang="ja">深掘り — 全体の詳細</span></div>
-  <p class="lead soft en">An on-premise, human-in-the-loop AI assistant that operates an AS-400-style legacy green screen from natural-language instructions. The agent proposes a plan; a person approves it; every executed step is verified against the screen and recorded in an append-only audit trail. Nothing reaches the legacy system without a human decision.</p>
-  <p class="lead soft ja" lang="ja">自然言語の指示で AS-400 風レガシーシステムのグリーンスクリーンを操作する、オンプレミス・人手承認（HITL）型の AI アシスタントです。エージェントが計画を提案し、人が承認し、実行された各ステップは画面状態に照らして検証され、追記専用の監査証跡に記録されます。人の決定なしにレガシーシステムへ届く操作はありません。</p>
-</div></section>
-
-<section><div class="wrap">
-  <div class="sec-head"><span class="sec-num">05</span><h2><span class="en">Why it exists — Problems on the floor</span><span class="ja" lang="ja">なぜ作ったか — 現場の課題</span></h2></div>
-  <div class="cards">
-    <div class="card">
-      <h3><span class="en">Problem</span><span class="ja" lang="ja">課題</span></h3>
-      <p class="en">When the core system is legacy, younger staff and newly-assigned personnel don't know how to operate it; the operation method is tacit skill, with no document.</p>
-      <p class="ja" lang="ja">基幹システムがレガシーな場合、若手・新規着任者は操作方法がわからない。操作方法は暗黙知で、文書がない。</p>
-    </div>
-    <div class="card">
-      <h3><span class="en">&rarr; Solution</span><span class="ja" lang="ja">&rarr; 解決</span></h3>
-      <p class="en">A one-line instruction becomes a concrete key-sequence, so the operator can file without knowing the screens; manual RAG and each operator's corrections accumulate the veteran's knowledge in the system.</p>
-      <p class="ja" lang="ja">一行の指示が具体的なキー操作の計画になり、画面を知らなくても申請できる。手順書 RAG と個人修正が、熟練者の知識をシステムに蓄積する。</p>
-      <p class="en">Tech: LLM &middot; RAG (hybrid) &middot; pgvector &middot; multilingual-e5 &middot; personal corrections</p>
-      <p class="ja" lang="ja">技術：LLM &middot; RAG (hybrid) &middot; pgvector &middot; multilingual-e5 &middot; personal corrections</p>
-    </div>
-    <div class="card">
-      <h3><span class="en">Problem</span><span class="ja" lang="ja">課題</span></h3>
-      <p class="en">A legacy core system has to be driven screen by screen, so efficiency tends to drop without proficiency.</p>
-      <p class="ja" lang="ja">レガシー基幹システムは画面を一つずつ操作する必要があり、習熟しないと業務効率が落ちやすい。</p>
-    </div>
-    <div class="card">
-      <h3><span class="en">&rarr; Solution</span><span class="ja" lang="ja">&rarr; 解決</span></h3>
-      <p class="en">Instruction &rarr; plan &rarr; approve &rarr; automated key-by-key execution; the manual screen-driving disappears and the operator focuses on the decision.</p>
-      <p class="ja" lang="ja">指示 &rarr; 計画 &rarr; 承認 &rarr; 自動実行。画面操作の手間が消え、人は判断に専念できる。</p>
-      <p class="en">Tech: LLM &middot; structured output &middot; screen adapter &middot; idempotent execution</p>
-      <p class="ja" lang="ja">技術：LLM &middot; structured output &middot; screen adapter &middot; idempotent execution</p>
-    </div>
-    <div class="card">
-      <h3><span class="en">Problem</span><span class="ja" lang="ja">課題</span></h3>
-      <p class="en">Even when the system itself is complete, if approval criteria are informal and unwritten, requests like business trips can be bounced back repeatedly.</p>
-      <p class="ja" lang="ja">システムが完備していても、承認基準が形式化されていない場合、出張申請などが繰り返し差し戻されることがある。</p>
-    </div>
-    <div class="card">
-      <h3><span class="en">&rarr; Solution</span><span class="ja" lang="ja">&rarr; 解決</span></h3>
-      <p class="en">The plan is shown as a grounded approval card; a reject/revise note persists as a personal correction that reshapes the next plan, so the informal approval bar gradually becomes reusable, explicit knowledge.</p>
-      <p class="ja" lang="ja">計画を根拠つきの承認カードで提示。却下・修正のメモは個人修正として次の計画に反映され、形式化されていなかった承認基準が再利用できる知識として蓄積されていく。</p>
-      <p class="en">Tech: structured approval card &middot; personal corrections (growth) &middot; grounded-slot immunity</p>
-      <p class="ja" lang="ja">技術：structured approval card &middot; personal corrections (growth) &middot; grounded-slot immunity</p>
-    </div>
-  </div>
-</div></section>
-
-<section id="measured"><div class="wrap">
-  <div class="sec-head"><span class="sec-num">06</span><h2><span class="en">Measured, not asserted</span><span class="ja" lang="ja">主張ではなく測定</span></h2></div>
-  <p class="lead soft en">Every number below comes from running the eval harness locally with the model, is identical across five consecutive full runs, and was re-confirmed by an independent QC pass at the exact commit that went public.</p>
-  <p class="lead soft ja" lang="ja">以下の数値はすべて、評価ハーネスをモデルとともにローカル実行した結果です。連続5回のフル実行で完全に一致し、公開されたまさにそのコミットにおいて独立した QC により再確認されています。</p>
-  <div class="stats">
-    <div class="stat"><div class="n">1.0</div><div class="l"><span class="en">Planning — success &middot; routing &middot; field accuracy</span><span class="ja" lang="ja">計画 — 成功率・ルーティング・フィールド精度</span></div></div>
-    <div class="stat"><div class="n">1.0</div><div class="l"><span class="en">Retrieval — recall@3 &middot; precision@expected &middot; MRR</span><span class="ja" lang="ja">検索 — recall@3・precision@expected・MRR</span></div></div>
-    <div class="stat"><div class="n">0.625</div><div class="l"><span class="en">Personal-correction growth — &Delta; (inference-tier policy slots)</span><span class="ja" lang="ja">個人修正による育成 — Δ（推論ティアの方針スロット）</span></div></div>
-    <div class="stat"><div class="n">1.0</div><div class="l"><span class="en">Boundary respect — a correction must not override grounded input</span><span class="ja" lang="ja">境界尊重 — 修正が根拠づいた入力を上書きしないこと</span></div></div>
-  </div>
-  <p class="small en">The numbers that are not 1.0 are reported as they are. Recovery on transient faults is 0.5 — by design, bad input data is not blindly retried but handed to a person. Verify pass rate is 0.667 — a failed verify is a detection event that triggers rollback and replanning instead of a silent wrong submit. precision@3 is 0.5 — an artifact of fixed k=3 against expected sets smaller than three; precision@expected on the same runs is 1.0. An executed run takes 9.56 steps on average. Growth &Delta; 0.625 means the movable reuse-previous-project slot moves on four of four policy cases and the overseas policy slot on one of four, against a zero control baseline — the limiter is the model's judgment on the ambiguous slot, not the correction plumbing.</p>
-  <p class="small ja" lang="ja">1.0 でない数値もそのまま報告しています。一時障害のリカバリは 0.5 — 設計上、不正な入力データは盲目的に再試行せず人へ引き渡します。verify 通過率は 0.667 — verify の不一致は検知イベントであり、黙った誤送信ではなくロールバックと再計画をトリガーします。precision@3 は 0.5 — 期待集合が 3 未満でも k=3 で割ることによる構造上のアーティファクトで、同じ実行の precision@expected は 1.0 です。実行あたりの平均ステップ数は 9.56。育成 Δ 0.625 は、可動スロットの前回案件再利用が方針4ケースすべてで動き、海外フラグの方針スロットは4ケース中1ケースで動くという意味です（修正なしでは何も動かないゼロの制御ベースラインに対して）。律速はモデルの曖昧スロットに対する判断であり、修正の配線ではありません。</p>
-  <div class="spike">
-    <svg viewBox="0 0 640 110" role="img" aria-label="free-form generation 7.5 percent versus skeleton plus slot-fill 87.5 percent exact accuracy">
-      <g font-family="'Inter','Noto Sans JP',sans-serif">
-        <text class="en" x="0" y="22" font-size="12" fill="#4A463F">free-form key-sequence generation</text>
-        <text class="ja" x="0" y="22" font-size="12" fill="#4A463F">キー操作列の自由生成</text>
-        <rect x="0" y="30" width="600" height="14" rx="7" fill="#ECE6D8"/>
-        <rect x="0" y="30" width="45" height="14" rx="7" fill="#B45309"/>
-        <text x="56" y="42" font-size="12.5" font-weight="700" fill="#B45309">7.5%</text>
-        <text class="en" x="0" y="74" font-size="12" fill="#4A463F">sequence skeleton in code + slot values from the model</text>
-        <text class="ja" x="0" y="74" font-size="12" fill="#4A463F">操作列の骨格はコード側＋スロット値はモデル</text>
-        <rect x="0" y="82" width="600" height="14" rx="7" fill="#ECE6D8"/>
-        <rect x="0" y="82" width="525" height="14" rx="7" fill="#1C7A45"/>
-        <text x="536" y="94" font-size="12.5" font-weight="700" fill="#1C7A45">87.5%</text>
-      </g>
-    </svg>
-    <svg id="spikemethod" viewBox="0 0 640 426" role="img" aria-label="How the spike was measured: 8 golden cases times 2 arms times 6 runs each — one deterministic and five sampled — is 96 runs; arm 1 asks the model for the whole key sequence, arm 2 asks only for slot values with a deterministic assembler building the sequence in code; a run passes only on complete token-sequence equality with the golden; the bars are the sampled-run exact rates 3 of 40 versus 35 of 40; the abort case is scored separately — 0 correct aborts in 96 runs in both arms, and the accuracy-winning arm fabricated more">
-      <g font-family="'Inter','Noto Sans JP',sans-serif">
-        <text class="en" x="16" y="20" font-size="11" font-weight="700" fill="#8A8479" letter-spacing="2">HOW THE SPIKE WAS MEASURED</text>
-        <text class="ja" x="16" y="20" font-size="11" font-weight="700" fill="#8A8479" letter-spacing="2">スパイクの測定方法</text>
-        <g>
-          <rect x="16" y="34" width="150" height="44" rx="10" fill="#FBFAF6" stroke="#D9D2C3" stroke-width="1.4"/>
-          <text x="91" y="61" text-anchor="middle" font-weight="700" font-size="12.5" fill="#1C1A17"><tspan class="en">8 golden cases</tspan><tspan class="ja">ゴールデン8ケース</tspan></text>
-          <text x="180" y="61" text-anchor="middle" font-size="14" fill="#8A8479">×</text>
-          <rect x="194" y="34" width="86" height="44" rx="10" fill="#FBFAF6" stroke="#D9D2C3" stroke-width="1.4"/>
-          <text x="237" y="61" text-anchor="middle" font-weight="700" font-size="12.5" fill="#1C1A17"><tspan class="en">2 arms</tspan><tspan class="ja">2方式</tspan></text>
-          <text x="294" y="61" text-anchor="middle" font-size="14" fill="#8A8479">×</text>
-          <rect x="308" y="34" width="150" height="44" rx="10" fill="#FBFAF6" stroke="#D9D2C3" stroke-width="1.4"/>
-          <text x="383" y="61" text-anchor="middle" font-weight="700" font-size="12.5" fill="#1C1A17"><tspan class="en">6 runs each</tspan><tspan class="ja">各6ラン</tspan></text>
-          <text x="472" y="61" text-anchor="middle" font-size="14" fill="#8A8479">=</text>
-          <rect x="486" y="34" width="138" height="44" rx="10" fill="#ECE6D8" stroke="#D9D2C3" stroke-width="1.4"/>
-          <text x="555" y="61" text-anchor="middle" font-weight="700" font-size="12.5" fill="#1C1A17"><tspan class="en">96 runs</tspan><tspan class="ja">96ラン</tspan></text>
-        </g>
-        <text class="en" x="320" y="96" text-anchor="middle" font-size="9.5" fill="#4A463F">per case, per arm: 1 deterministic run (seed 42, temp 0) + 5 sampled runs (temp 0.7)</text>
-        <text class="ja" x="320" y="96" text-anchor="middle" font-size="9.5" fill="#4A463F">各ケース・各方式で：決定論1ラン（seed 42・temp 0）＋サンプル5ラン（temp 0.7）</text>
-        <text class="en" x="320" y="112" text-anchor="middle" font-size="9.5" fill="#4A463F">the 8 cases are the same golden fixtures the public CI parity-tests · zero parse failures across all 96 runs</text>
-        <text class="ja" x="320" y="112" text-anchor="middle" font-size="9.5" fill="#4A463F">8ケースは公開 CI が一致検証するゴールデンフィクスチャと同一・全96ランで parse 失敗ゼロ</text>
-        <g>
-          <rect x="16" y="128" width="296" height="94" rx="10" fill="#FBEEDC" stroke="#E7C9A0" stroke-width="1.4"/>
-          <text x="164" y="152" text-anchor="middle" font-weight="700" font-size="12.5" fill="#92400E"><tspan class="en">Arm 1 — free-form generation</tspan><tspan class="ja">方式1 — 自由生成</tspan></text>
-          <text class="en" x="164" y="174" text-anchor="middle" font-size="10" fill="#92400E">the model emits the entire 5250</text>
-          <text class="ja" x="164" y="174" text-anchor="middle" font-size="10" fill="#92400E">モデルがキー操作列の全体を</text>
-          <text class="en" x="164" y="190" text-anchor="middle" font-size="10" fill="#92400E">key sequence as JSON steps</text>
-          <text class="ja" x="164" y="190" text-anchor="middle" font-size="10" fill="#92400E">JSON ステップとして生成する</text>
-        </g>
-        <g>
-          <rect x="328" y="128" width="296" height="94" rx="10" fill="#EAF2E6" stroke="#9BCBA4" stroke-width="1.4"/>
-          <text x="476" y="152" text-anchor="middle" font-weight="700" font-size="12.5" fill="#194D30"><tspan class="en">Arm 2 — skeleton + slot-fill</tspan><tspan class="ja">方式2 — 骨格＋スロットフィル</tspan></text>
-          <text class="en" x="476" y="174" text-anchor="middle" font-size="10" fill="#1C7A45">the model returns only slot values</text>
-          <text class="ja" x="476" y="174" text-anchor="middle" font-size="10" fill="#1C7A45">モデルはスロット値と分岐判断のみを返す</text>
-          <text class="en" x="476" y="190" text-anchor="middle" font-size="10" fill="#1C7A45">and branch decisions — a deterministic</text>
-          <text class="ja" x="476" y="190" text-anchor="middle" font-size="10" fill="#1C7A45">キー操作列はコード側の</text>
-          <text class="en" x="476" y="206" text-anchor="middle" font-size="10" fill="#1C7A45">assembler builds the sequence in code</text>
-          <text class="ja" x="476" y="206" text-anchor="middle" font-size="10" fill="#1C7A45">決定論アセンブラが組み立てる</text>
-        </g>
-        <text class="en" x="320" y="238" text-anchor="middle" font-size="9.5" fill="#4A463F">both arms are given the same manual, guidelines and instruction</text>
-        <text class="ja" x="320" y="238" text-anchor="middle" font-size="9.5" fill="#4A463F">手順書・指針・指示は両方式で同一</text>
-        <text class="en" x="320" y="262" text-anchor="middle" font-size="10" fill="#4A463F">scoring: each step is serialized to a token; a run passes only on complete sequence equality with the golden — no partial credit</text>
-        <text class="ja" x="320" y="262" text-anchor="middle" font-size="10" fill="#4A463F">採点：各ステップをトークン化し、ゴールデン列との完全一致のみを合格とする — 部分一致の加点なし</text>
-        <text class="en" x="320" y="284" text-anchor="middle" font-size="10" fill="#1C1A17">the bars above are the sampled-run exact rates — Arm 1: 3/40 · Arm 2: 35/40</text>
-        <text class="ja" x="320" y="284" text-anchor="middle" font-size="10" fill="#1C1A17">上のバーはサンプルランの exact 率 — 方式1：3/40・方式2：35/40</text>
-        <text class="en" x="320" y="300" text-anchor="middle" font-size="9.5" fill="#4A463F">(40 = 8 cases × 5 sampled runs; on the deterministic runs: 1/8 vs 7/8)</text>
-        <text class="ja" x="320" y="300" text-anchor="middle" font-size="9.5" fill="#4A463F">（40 = 8ケース × サンプル5ラン。決定論ランでは 1/8 対 7/8）</text>
-        <g>
-          <rect x="16" y="316" width="608" height="94" rx="10" fill="#FBEEDC" stroke="#E7C9A0" stroke-width="1.4"/>
-          <text x="320" y="340" text-anchor="middle" font-weight="700" font-size="12.5" fill="#92400E"><tspan class="en">the abort case is scored separately</tspan><tspan class="ja">中断（abort）ケースは別建てで採点</tspan></text>
-          <text class="en" x="320" y="360" text-anchor="middle" font-size="9.5" fill="#92400E">correct abort — producing the exact abort sequence on the empty-required-field case: 0 of 96, in both arms</text>
-          <text class="ja" x="320" y="360" text-anchor="middle" font-size="9.5" fill="#92400E">正しい中断列の生成 — 必須項目が空のケースで 96ラン中 0（両方式とも）</text>
-          <text class="en" x="320" y="376" text-anchor="middle" font-size="9.5" fill="#92400E">fabrication (inventing a value for the empty field) was scored too — the accuracy-winning Arm 2 fabricated more than Arm 1</text>
-          <text class="ja" x="320" y="376" text-anchor="middle" font-size="9.5" fill="#92400E">捏造（空の必須項目に値を作って埋める）も採点 — 精度で勝つ方式2の方が方式1より捏造が多い</text>
-          <text class="en" x="320" y="394" text-anchor="middle" font-size="9.5" fill="#92400E">the arm that wins on accuracy loses on safety — safety must live outside the model</text>
-          <text class="ja" x="320" y="394" text-anchor="middle" font-size="9.5" fill="#92400E">精度で勝つ方式が、安全では負ける — だから安全はモデルの外側に置く</text>
-        </g>
-      </g>
-    </svg>
-    <div class="fig-cap"><span class="en">The measurement method behind the bars above — run structure, the two arms, scoring, and the safety finding.</span><span class="ja" lang="ja">上のバーの背後にある測定方法 — 母数・二つの方式・採点基準・安全所見。</span></div>
-    <p class="small en" style="margin:14px 0 0;">The architecture itself was set by measurement before the product was built. A reliability spike on the target task measured free-form key-sequence generation at 7.5% exact accuracy; keeping the sequence skeleton in code and asking the model only for slot values and branch decisions raised it to 87.5% (96 runs, zero parse failures). The same spike produced the finding that shaped everything after it: across all 96 runs the model never once generated the correct abort sequence when a required field was empty — and slot-filling will faithfully assemble a hallucinated value. Safety is therefore engineered outside the model: code-level required-field guards, schema-enforced refusal, human approval before execution, and screen verification after it.</p>
-    <p class="small ja" lang="ja" style="margin:14px 0 0;">アーキテクチャ自体も、構築の前の測定で決めています。対象業務での信頼性スパイクでは、キー操作列の自由生成は exact 精度 7.5% でした。操作列の骨格をコード側に置き、モデルにはスロット値と分岐判断だけを任せる方式で 87.5% に上がります（96 ラン、parse 失敗 0）。同じスパイクが、その後のすべてを方向づけた所見も出しました。96 ラン中、必須項目が空のときに正しい中断（abort）列を生成できたことは一度もなく、スロットフィルは幻覚された値を忠実に組み立ててしまう、というものです。だから安全はモデルの外側で作ります — コードによる必須項目ガード、スキーマで強制する却下表現、実行前の人手承認、実行後の画面検証です。</p>
   </div>
 </div></section>
 
