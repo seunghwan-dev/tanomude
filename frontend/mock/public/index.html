@@ -11,15 +11,36 @@
 <title>Tanomude — 頼むで</title>
 <style>
   .wrap{max-width:1040px;margin:0 auto;padding:0 22px;}
-  header.hero{padding:56px 0 8px;}
+  header.hero{padding:60px 0 10px;}
   .hero-grid{display:grid;grid-template-columns:1fr auto;gap:44px;align-items:center;}
   .eyebrow{font-size:.74rem;font-weight:600;letter-spacing:.22em;text-transform:uppercase;color:var(--faint);}
-  h1.thesis{font-weight:700;font-size:clamp(1.9rem,4.6vw,3rem);line-height:1.18;
+  h1.thesis{font-weight:700;font-size:clamp(2.1rem,5.2vw,3.3rem);line-height:1.14;
     letter-spacing:-.02em;margin:14px 0 0;}
-  h1.thesis .arrow{color:var(--accent);}
-  .sub{font-size:clamp(.98rem,1.6vw,1.08rem);color:var(--soft);max-width:62ch;margin:20px 0 0;}
-  .hero-rule{height:1px;background:var(--line);margin:44px 0 0;}
+  .sub{font-size:clamp(1.02rem,1.7vw,1.16rem);color:var(--soft);max-width:58ch;margin:18px 0 0;}
   .crt{width:250px;height:auto;}
+  .demo{padding:30px 0 0;}
+  .demo-frame{background:#2A2723;border:1px solid #3A362F;border-radius:16px;padding:10px;
+    box-shadow:0 30px 70px -34px rgba(28,26,23,.6);}
+  .demo-slot{aspect-ratio:16/9;background:#050806;border-radius:10px;display:grid;place-items:center;}
+  .demo-slot-inner{display:flex;flex-direction:column;align-items:center;gap:10px;
+    font-family:"JetBrains Mono",Consolas,monospace;font-size:.92rem;color:#34D06A;}
+  .demo-badge{border:1px solid #1F7D49;border-radius:6px;padding:2px 10px;font-size:.72rem;
+    letter-spacing:.18em;opacity:.85;}
+  .demo-frame img{width:100%;display:block;border-radius:10px;}
+  .demo-bar{display:flex;align-items:center;justify-content:space-between;gap:14px;
+    padding:12px 8px 4px;flex-wrap:wrap;}
+  .demo-cap{font-size:.85rem;color:#B8B2A6;}
+  .btn{display:inline-flex;align-items:center;gap:9px;border-radius:10px;padding:11px 18px;
+    font-size:.95rem;font-weight:600;text-decoration:none;line-height:1.2;}
+  .btn.primary{background:var(--accent);color:#fff;box-shadow:0 12px 26px -12px rgba(28,122,69,.65);}
+  .btn.primary:hover{background:#166237;}
+  .btn.ghost{border:1px solid var(--line);background:var(--panel);color:var(--ink);}
+  .btn.ghost:hover{border-color:var(--faint);}
+  .btn .play{font-size:.8em;}
+  .metrics{padding:32px 0 0;}
+  .strip3{grid-template-columns:repeat(3,1fr);margin:0;}
+  .strip-note{font-size:.8rem;color:var(--faint);margin:10px 2px 0;}
+  .strip-note a{color:var(--accent);}
   section{padding:34px 0 6px;}
   .sec-head{display:flex;align-items:baseline;gap:14px;margin:0 0 14px;}
   .sec-num{font-size:.78rem;font-weight:600;letter-spacing:.08em;color:var(--faint);}
@@ -44,6 +65,25 @@
   .card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:18px 20px;}
   .card h3{font-size:1rem;margin:0 0 8px;color:var(--accent);}
   .card p{margin:0;font-size:.92rem;color:var(--soft);}
+  .navcards{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin:14px 0 0;}
+  .navcard{position:relative;display:block;background:var(--panel);border:1px solid var(--line);
+    border-radius:12px;padding:18px 20px;text-decoration:none;color:var(--ink);
+    transition:border-color .15s,transform .15s;}
+  .navcard:hover{border-color:var(--accent);transform:translateY(-2px);}
+  .navcard h3{font-size:1rem;margin:0 0 8px;color:var(--accent);}
+  .navcard p{margin:0;font-size:.92rem;color:var(--soft);}
+  .navcard .go{position:absolute;top:16px;right:18px;color:var(--faint);}
+  .navcard:hover .go{color:var(--accent);}
+  .cta-band{padding:40px 0 8px;}
+  .cta-inner{background:var(--panel);border:1px solid var(--line);border-radius:14px;
+    padding:26px 28px;display:flex;align-items:center;justify-content:space-between;
+    gap:18px;flex-wrap:wrap;}
+  .cta-line{margin:0;font-size:1rem;color:var(--soft);max-width:52ch;}
+  .cta-btns{display:flex;gap:10px;flex-wrap:wrap;}
+  .deep{padding:46px 0 0;}
+  .deep-rule{height:1px;background:var(--line);}
+  .deep-label{margin:20px 0 0;font-size:.74rem;font-weight:600;letter-spacing:.22em;
+    text-transform:uppercase;color:var(--faint);}
   .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:16px 0 0;}
   .stat{background:var(--panel);border:1px solid var(--line);border-left:5px solid var(--accent);
     border-radius:10px;padding:14px 16px;}
@@ -53,6 +93,8 @@
     padding:20px 22px;margin:16px 0 0;}
   .spike svg{width:100%;max-width:640px;height:auto;display:block;}
   .small{font-size:.9rem;color:var(--soft);max-width:78ch;}
+  code{font-family:"JetBrains Mono",Consolas,monospace;font-size:.86em;
+    background:var(--sunk);padding:1px 5px;border-radius:4px;}
   .foot{color:var(--faint);font-size:12px;margin-top:40px;border-top:1px solid var(--line);
     padding-top:14px;}
   @media (max-width:720px){
@@ -60,6 +102,14 @@
     .crt{width:200px;}
     .cards{grid-template-columns:1fr;}
     .stats{grid-template-columns:repeat(2,1fr);}
+    .strip3{grid-template-columns:1fr;}
+    .navcards{grid-template-columns:1fr;}
+    .demo-bar{justify-content:center;text-align:center;}
+    .cta-inner{justify-content:center;text-align:center;}
+  }
+  @media (max-width:430px){
+    .stats{grid-template-columns:1fr;}
+    .btn{white-space:normal;text-align:center;}
   }
 </style>
 </head>
@@ -81,9 +131,9 @@
   <div class="hero-grid">
     <div>
       <div class="eyebrow">Tanomude — 頼むで</div>
-      <h1 class="thesis"><span class="en">A plain instruction <span class="arrow">&rarr;</span> a verified green-screen operation</span><span class="ja" lang="ja">一行の指示 <span class="arrow">&rarr;</span> 検証済みのグリーンスクリーン操作</span></h1>
-      <p class="sub en">An on-premise, human-in-the-loop AI assistant that operates an AS-400-style legacy green screen from natural-language instructions. The agent proposes a plan; a person approves it; every executed step is verified against the screen and recorded in an append-only audit trail. Nothing reaches the legacy system without a human decision.</p>
-      <p class="sub ja" lang="ja">自然言語の指示で AS-400 風レガシーシステムのグリーンスクリーンを操作する、オンプレミス・人手承認（HITL）型の AI アシスタントです。エージェントが計画を提案し、人が承認し、実行された各ステップは画面状態に照らして検証され、追記専用の監査証跡に記録されます。人の決定なしにレガシーシステムへ届く操作はありません。</p>
+      <h1 class="thesis"><span class="en">Talk to your legacy system.</span><span class="ja" lang="ja">レガシーシステムに、話しかける。</span></h1>
+      <p class="sub en">An on-prem AI assistant for AS-400 green screens — natural language in, human-approved execution out.</p>
+      <p class="sub ja" lang="ja">AS-400 グリーンスクリーンのためのオンプレミス AI アシスタント — 入力は自然言語、実行は人の承認を経てから。</p>
     </div>
     <svg class="crt" viewBox="0 0 250 175" role="img" aria-label="green-screen terminal with an approval seal">
       <rect x="4" y="4" width="242" height="152" rx="10" fill="#2A2723"/>
@@ -103,53 +153,37 @@
       </g>
     </svg>
   </div>
-  <div class="hero-rule"></div>
 </div></header>
 
-<section><div class="wrap">
-  <div class="sec-head"><span class="sec-num">01</span><h2><span class="en">Why it exists — Problems on the floor</span><span class="ja" lang="ja">なぜ作ったか — 現場の課題</span></h2></div>
-  <div class="cards">
-    <div class="card">
-      <h3><span class="en">Problem</span><span class="ja" lang="ja">課題</span></h3>
-      <p class="en">When the core system is legacy, younger staff and newly-assigned personnel don't know how to operate it; the operation method is tacit skill, with no document.</p>
-      <p class="ja" lang="ja">基幹システムがレガシーな場合、若手・新規着任者は操作方法がわからない。操作方法は暗黙知で、文書がない。</p>
+<section class="demo"><div class="wrap">
+  <div class="demo-frame">
+    <!-- DEMO GIF SLOT: when the recording is ready, replace the <div class="demo-slot">...</div>
+         below with a single tag:
+         <img src="./demo.gif" alt="Tanomude demo — an instruction becomes an approved, verified green-screen run"> -->
+    <div class="demo-slot">
+      <div class="demo-slot-inner">
+        <span class="demo-badge">DEMO</span>
+        <span class="en">Demo recording coming soon</span><span class="ja" lang="ja">デモ動画は近日公開</span>
+      </div>
     </div>
-    <div class="card">
-      <h3><span class="en">&rarr; Solution</span><span class="ja" lang="ja">&rarr; 解決</span></h3>
-      <p class="en">A one-line instruction becomes a concrete key-sequence, so the operator can file without knowing the screens; manual RAG and each operator's corrections accumulate the veteran's knowledge in the system.</p>
-      <p class="ja" lang="ja">一行の指示が具体的なキー操作の計画になり、画面を知らなくても申請できる。手順書 RAG と個人修正が、熟練者の知識をシステムに蓄積する。</p>
-      <p class="en">Tech: LLM &middot; RAG (hybrid) &middot; pgvector &middot; multilingual-e5 &middot; personal corrections</p>
-      <p class="ja" lang="ja">技術：LLM &middot; RAG (hybrid) &middot; pgvector &middot; multilingual-e5 &middot; personal corrections</p>
-    </div>
-    <div class="card">
-      <h3><span class="en">Problem</span><span class="ja" lang="ja">課題</span></h3>
-      <p class="en">A legacy core system has to be driven screen by screen, so efficiency tends to drop without proficiency.</p>
-      <p class="ja" lang="ja">レガシー基幹システムは画面を一つずつ操作する必要があり、習熟しないと業務効率が落ちやすい。</p>
-    </div>
-    <div class="card">
-      <h3><span class="en">&rarr; Solution</span><span class="ja" lang="ja">&rarr; 解決</span></h3>
-      <p class="en">Instruction &rarr; plan &rarr; approve &rarr; automated key-by-key execution; the manual screen-driving disappears and the operator focuses on the decision.</p>
-      <p class="ja" lang="ja">指示 &rarr; 計画 &rarr; 承認 &rarr; 自動実行。画面操作の手間が消え、人は判断に専念できる。</p>
-      <p class="en">Tech: LLM &middot; structured output &middot; screen adapter &middot; idempotent execution</p>
-      <p class="ja" lang="ja">技術：LLM &middot; structured output &middot; screen adapter &middot; idempotent execution</p>
-    </div>
-    <div class="card">
-      <h3><span class="en">Problem</span><span class="ja" lang="ja">課題</span></h3>
-      <p class="en">Even when the system itself is complete, if approval criteria are informal and unwritten, requests like business trips can be bounced back repeatedly.</p>
-      <p class="ja" lang="ja">システムが完備していても、承認基準が形式化されていない場合、出張申請などが繰り返し差し戻されることがある。</p>
-    </div>
-    <div class="card">
-      <h3><span class="en">&rarr; Solution</span><span class="ja" lang="ja">&rarr; 解決</span></h3>
-      <p class="en">The plan is shown as a grounded approval card; a reject/revise note persists as a personal correction that reshapes the next plan, so the informal approval bar gradually becomes reusable, explicit knowledge.</p>
-      <p class="ja" lang="ja">計画を根拠つきの承認カードで提示。却下・修正のメモは個人修正として次の計画に反映され、形式化されていなかった承認基準が再利用できる知識として蓄積されていく。</p>
-      <p class="en">Tech: structured approval card &middot; personal corrections (growth) &middot; grounded-slot immunity</p>
-      <p class="ja" lang="ja">技術：structured approval card &middot; personal corrections (growth) &middot; grounded-slot immunity</p>
+    <div class="demo-bar">
+      <span class="demo-cap"><span class="en">instruction &rarr; plan &rarr; approval &rarr; verified execution</span><span class="ja" lang="ja">指示 &rarr; 計画 &rarr; 承認 &rarr; 検証つき実行</span></span>
+      <a class="btn primary" href="./mock/"><span class="play">&#9654;</span><span class="en">Try it live — interactive mock</span><span class="ja" lang="ja">実際に触ってみる — インタラクティブモック</span></a>
     </div>
   </div>
 </div></section>
 
+<section class="metrics"><div class="wrap">
+  <div class="stats strip3">
+    <div class="stat"><div class="n">1.0</div><div class="l"><span class="en">Boundary respect — a correction must not override grounded input</span><span class="ja" lang="ja">境界尊重 — 修正が根拠づいた入力を上書きしないこと</span></div></div>
+    <div class="stat"><div class="n">0.625</div><div class="l"><span class="en">Personal-correction growth — &Delta; (inference-tier policy slots)</span><span class="ja" lang="ja">個人修正による育成 — Δ（推論ティアの方針スロット）</span></div></div>
+    <div class="stat"><div class="n">1.0</div><div class="l"><span class="en">Retrieval — recall@3 &middot; precision@expected &middot; MRR</span><span class="ja" lang="ja">検索 — recall@3・precision@expected・MRR</span></div></div>
+  </div>
+  <p class="strip-note"><span class="en">Measured by the in-repo eval harness — <a href="#measured">full numbers and caveats below</a>.</span><span class="ja" lang="ja">リポジトリ内蔵の評価ハーネスによる実測 — <a href="#measured">数値の詳細と注意点は下に</a>。</span></p>
+</div></section>
+
 <section><div class="wrap">
-  <div class="sec-head"><span class="sec-num">02</span><h2><span class="en">How it works</span><span class="ja" lang="ja">どう動くか</span></h2></div>
+  <div class="sec-head"><span class="sec-num">01</span><h2><span class="en">How it works</span><span class="ja" lang="ja">どう動くか</span></h2></div>
   <div class="steps">
     <div class="step"><div class="n">1</div><div class="t"><span class="en">Instruction</span><span class="ja" lang="ja">指示</span></div><div class="d"><span class="en">instruction</span><span class="ja" lang="ja">自然言語</span></div></div>
     <div class="step"><div class="n">2</div><div class="t"><span class="en">Plan</span><span class="ja" lang="ja">計画</span></div><div class="d"><span class="en">plan, grounded</span><span class="ja" lang="ja">根拠つき</span></div></div>
@@ -160,7 +194,7 @@
 </div></section>
 
 <section><div class="wrap">
-  <div class="sec-head"><span class="sec-num">03</span><h2><span class="en">Architecture</span><span class="ja" lang="ja">アーキテクチャ</span></h2></div>
+  <div class="sec-head"><span class="sec-num">02</span><h2><span class="en">Architecture</span><span class="ja" lang="ja">アーキテクチャ</span></h2></div>
   <p class="lead soft en">The stack is standard — the engineering sits on top.</p>
   <p class="lead soft ja" lang="ja">標準スタック。設計したのは、その上のメカニズム。</p>
   <div class="cards">
@@ -331,7 +365,7 @@
 </div></section>
 
 <section><div class="wrap">
-  <div class="sec-head"><span class="sec-num">04</span><h2><span class="en">The core mechanisms</span><span class="ja" lang="ja">核となる仕組み</span></h2></div>
+  <div class="sec-head"><span class="sec-num">03</span><h2><span class="en">The core mechanisms</span><span class="ja" lang="ja">核となる仕組み</span></h2></div>
   <div class="cards">
     <div class="card">
       <h3><span class="en">Grounded planning</span><span class="ja" lang="ja">根拠づいた計画</span></h3>
@@ -364,10 +398,159 @@
       <p class="ja" lang="ja">リポジトリの運営には何重ものゲートを置いています。必須の CI verify チェック（lint・型チェック・ユニットテスト・ゴールデンフィクスチャ一致・シークレットスキャン）、全 PR への独立した自動レビュー、そして複数段の QC — 公開コミットで全公表数値を5回の決定論的再測定によって確かめ直したことを含みます。</p>
     </div>
   </div>
+  <div class="figure">
+    <svg id="growthdiagram" viewBox="0 0 940 640" role="img" aria-label="Growth loop: an operator request is planned by the AI with an inference-tier guess, a veteran rejects it with a correcting note, the note is saved as a versioned personal correction triggered by the destination, and the next matching request has it prompt-injected above the manual context — stored once, no retraining, and applying it is not code-enforced">
+      <defs>
+        <marker id="ah3" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto">
+          <path d="M0,0 L9,4.5 L0,9 Z" fill="#8A8479"/>
+        </marker>
+        <marker id="ahg3" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto">
+          <path d="M0,0 L9,4.5 L0,9 Z" fill="#1C7A45"/>
+        </marker>
+      </defs>
+      <g font-family="'Inter','Noto Sans JP',sans-serif">
+        <text class="en" x="16" y="32" font-size="11" font-weight="700" fill="#8A8479" letter-spacing="2">GROWTH LOOP — one correction's lifecycle</text>
+        <text class="ja" x="16" y="32" font-size="11" font-weight="700" fill="#8A8479" letter-spacing="2">育成ループ — ある修正のライフサイクル</text>
+        <g>
+          <rect x="210" y="44" width="520" height="70" rx="10" fill="#FBFAF6" stroke="#D9D2C3" stroke-width="1.4"/>
+          <text x="470" y="72" text-anchor="middle" font-weight="700" font-size="12.5" fill="#1C1A17"><tspan class="en">operator request</tspan><tspan class="ja">オペレーターの依頼</tspan></text>
+          <text x="470" y="94" text-anchor="middle" font-size="10.5" fill="#4A463F">「大阪出張を申請」</text>
+        </g>
+        <line x1="470" y1="114" x2="470" y2="136" fill="none" stroke="#8A8479" stroke-width="1.6" marker-end="url(#ah3)"/>
+        <g>
+          <rect x="210" y="142" width="520" height="78" rx="10" fill="#ECE6D8" stroke="#D9D2C3" stroke-width="1.4"/>
+          <text x="470" y="170" text-anchor="middle" font-weight="700" font-size="12.5" fill="#1C1A17"><tspan class="en">AI drafts the plan</tspan><tspan class="ja">AI が計画を作成</tspan></text>
+          <text class="en" x="470" y="190" text-anchor="middle" font-size="10" fill="#4A463F">guesses "new project" for the project code</text>
+          <text class="ja" x="470" y="190" text-anchor="middle" font-size="10" fill="#4A463F">案件コードを「新規」と推測</text>
+          <text class="en" x="470" y="206" text-anchor="middle" font-size="9.5" fill="#4A463F">reuse_prev_proj — an inference-tier slot, not grounded</text>
+          <text class="ja" x="470" y="206" text-anchor="middle" font-size="9.5" fill="#4A463F">reuse_prev_proj — 根拠のない推論ティアのスロット</text>
+        </g>
+        <line x1="470" y1="220" x2="470" y2="248" fill="none" stroke="#8A8479" stroke-width="1.6" marker-end="url(#ah3)"/>
+        <g>
+          <rect x="210" y="254" width="520" height="78" rx="10" fill="#FBEEDC" stroke="#E7C9A0" stroke-width="1.4"/>
+          <text x="470" y="282" text-anchor="middle" font-weight="700" font-size="12.5" fill="#92400E"><tspan class="en">the veteran rejects &amp; corrects</tspan><tspan class="ja">ベテランが却下・修正</tspan></text>
+          <text x="470" y="302" text-anchor="middle" font-size="10.5" fill="#92400E">「案件は前回の P-123 を再利用」</text>
+          <text class="en" x="470" y="318" text-anchor="middle" font-size="9.5" fill="#92400E">the reject / revise note is the human input</text>
+          <text class="ja" x="470" y="318" text-anchor="middle" font-size="9.5" fill="#92400E">却下・修正のメモが人間入力</text>
+        </g>
+        <line x1="470" y1="332" x2="470" y2="372" fill="none" stroke="#1C7A45" stroke-width="1.6" marker-end="url(#ahg3)"/>
+        <text class="en" x="486" y="357" font-size="10" fill="#1C7A45">saved — no retraining</text>
+        <text class="ja" x="486" y="357" font-size="10" fill="#1C7A45">保存（再学習なし）</text>
+        <g>
+          <rect x="210" y="378" width="520" height="78" rx="10" fill="#EAF2E6" stroke="#9BCBA4" stroke-width="1.4"/>
+          <text x="470" y="406" text-anchor="middle" font-weight="700" font-size="12.5" fill="#194D30"><tspan class="en">saved as a personal correction</tspan><tspan class="ja">個人修正として保存</tspan></text>
+          <text x="470" y="426" text-anchor="middle" font-size="10.5" fill="#1C7A45">trigger = {"dest": "大阪"}</text>
+          <text class="en" x="470" y="442" text-anchor="middle" font-size="9.5" fill="#1C7A45">a versioned row in Postgres — the model's weights never change</text>
+          <text class="ja" x="470" y="442" text-anchor="middle" font-size="9.5" fill="#1C7A45">Postgres にバージョン管理で保存 — モデルの重みは変わらない</text>
+        </g>
+        <line x1="470" y1="456" x2="470" y2="496" fill="none" stroke="#1C7A45" stroke-width="1.6" marker-end="url(#ahg3)"/>
+        <text class="en" x="486" y="481" font-size="10" fill="#1C7A45">injected into the next plan</text>
+        <text class="ja" x="486" y="481" font-size="10" fill="#1C7A45">次回の計画に注入</text>
+        <g>
+          <rect x="210" y="502" width="520" height="78" rx="10" fill="#E4EDE0" stroke="#1C7A45" stroke-width="1.6"/>
+          <text x="470" y="530" text-anchor="middle" font-weight="700" font-size="12.5" fill="#194D30"><tspan class="en">reused automatically next time</tspan><tspan class="ja">次回、自動で反映</tspan></text>
+          <text class="en" x="470" y="550" text-anchor="middle" font-size="10" fill="#1C7A45">the next 大阪 request applies P-123 — even when the veteran is away</text>
+          <text class="ja" x="470" y="550" text-anchor="middle" font-size="10" fill="#1C7A45">次の大阪出張に「P-123」を適用 — ベテラン不在でも</text>
+          <text class="en" x="470" y="566" text-anchor="middle" font-size="9.5" fill="#1C7A45">prompt-injected above the manual — applying it is not code-enforced</text>
+          <text class="ja" x="470" y="566" text-anchor="middle" font-size="9.5" fill="#1C7A45">手順書の上にプロンプト注入 — 反映自体はコード強制ではない</text>
+        </g>
+        <text class="en" x="470" y="606" text-anchor="middle" font-size="10" fill="#4A463F">measured as a one-time A/B — the growth Δ below is treatment minus control, not a curve over time</text>
+        <text class="ja" x="470" y="606" text-anchor="middle" font-size="10" fill="#4A463F">測定は一回きりの A/B — 下の育成 Δ は処置と対照の差で、時間経過の改善曲線ではありません</text>
+        <text class="en" x="470" y="623" text-anchor="middle" font-size="10" fill="#4A463F">a correction can move only inference-tier slots — grounded slots stay immune, as the retrieval diagram above shows</text>
+        <text class="ja" x="470" y="623" text-anchor="middle" font-size="10" fill="#4A463F">修正が動かせるのは推論ティアのスロットのみ — 根拠スロットは上の検索の図のとおり動きません</text>
+      </g>
+    </svg>
+    <div class="fig-cap"><span class="en">A single correction's lifecycle: <code>record_reject</code> / <code>record_revise</code> → <code>stage_correction</code> → <code>apply_corrections</code>; the note is replayed by prompt injection, never by retraining.</span><span class="ja" lang="ja">ある修正のライフサイクル：<code>record_reject</code>／<code>record_revise</code> → <code>stage_correction</code> → <code>apply_corrections</code>。メモは再学習ではなくプロンプト注入で再利用されます。</span></div>
+  </div>
 </div></section>
 
 <section><div class="wrap">
-  <div class="sec-head"><span class="sec-num">05</span><h2><span class="en">Measured, not asserted</span><span class="ja" lang="ja">主張ではなく測定</span></h2></div>
+  <div class="sec-head"><span class="sec-num">04</span><h2><span class="en">Explore</span><span class="ja" lang="ja">各ページへ</span></h2></div>
+  <div class="navcards">
+    <a class="navcard" href="./mock/">
+      <h3><span class="en">Interactive mock</span><span class="ja" lang="ja">インタラクティブモック</span></h3>
+      <p><span class="en">The operator console in your browser — generate a plan, approve it, watch the green-screen replay.</span><span class="ja" lang="ja">ブラウザで動く承認コンソール — 計画を生成し、承認し、グリーンスクリーンの再生を見る。</span></p>
+      <span class="go">&rarr;</span>
+    </a>
+    <a class="navcard" href="./status/">
+      <h3><span class="en">Status &amp; roadmap</span><span class="ja" lang="ja">実装状況</span></h3>
+      <p><span class="en">What is implemented, partial, and deferred by decision — item by item, with code anchors.</span><span class="ja" lang="ja">何が実装済で、何が部分実装・意図的延期か — 項目別、コードアンカーつき。</span></p>
+      <span class="go">&rarr;</span>
+    </a>
+    <a class="navcard" href="./operations/">
+      <h3><span class="en">Design &amp; technology choices</span><span class="ja" lang="ja">設計と技術選定</span></h3>
+      <p><span class="en">Why each mechanism exists — the guards, the growth loop, and the operations design.</span><span class="ja" lang="ja">各メカニズムがなぜあるのか — ガード、育成ループ、運用設計。</span></p>
+      <span class="go">&rarr;</span>
+    </a>
+    <a class="navcard" href="./productization/">
+      <h3><span class="en">Productization</span><span class="ja" lang="ja">製品化</span></h3>
+      <p><span class="en">The path from this prototype to a product.</span><span class="ja" lang="ja">このプロトタイプから製品までの道筋。</span></p>
+      <span class="go">&rarr;</span>
+    </a>
+  </div>
+</div></section>
+
+<section class="cta-band"><div class="wrap">
+  <div class="cta-inner">
+    <p class="cta-line"><span class="en">The source is public — the pages, the mock, and the eval harness behind the numbers.</span><span class="ja" lang="ja">ソースコードは公開しています — ページも、モックも、数値の背後にある評価ハーネスも。</span></p>
+    <div class="cta-btns">
+      <a class="btn ghost" href="https://github.com/seunghwan-dev/tanomude"><span class="en">View source on GitHub</span><span class="ja" lang="ja">GitHub でソースを見る</span></a>
+      <a class="btn primary" href="./mock/"><span class="en">Tour the mock</span><span class="ja" lang="ja">モックを見る</span></a>
+    </div>
+  </div>
+</div></section>
+
+<section class="deep"><div class="wrap">
+  <div class="deep-rule"></div>
+  <div class="deep-label"><span class="en">Deep dive — the full story</span><span class="ja" lang="ja">深掘り — 全体の詳細</span></div>
+  <p class="lead soft en">An on-premise, human-in-the-loop AI assistant that operates an AS-400-style legacy green screen from natural-language instructions. The agent proposes a plan; a person approves it; every executed step is verified against the screen and recorded in an append-only audit trail. Nothing reaches the legacy system without a human decision.</p>
+  <p class="lead soft ja" lang="ja">自然言語の指示で AS-400 風レガシーシステムのグリーンスクリーンを操作する、オンプレミス・人手承認（HITL）型の AI アシスタントです。エージェントが計画を提案し、人が承認し、実行された各ステップは画面状態に照らして検証され、追記専用の監査証跡に記録されます。人の決定なしにレガシーシステムへ届く操作はありません。</p>
+</div></section>
+
+<section><div class="wrap">
+  <div class="sec-head"><span class="sec-num">05</span><h2><span class="en">Why it exists — Problems on the floor</span><span class="ja" lang="ja">なぜ作ったか — 現場の課題</span></h2></div>
+  <div class="cards">
+    <div class="card">
+      <h3><span class="en">Problem</span><span class="ja" lang="ja">課題</span></h3>
+      <p class="en">When the core system is legacy, younger staff and newly-assigned personnel don't know how to operate it; the operation method is tacit skill, with no document.</p>
+      <p class="ja" lang="ja">基幹システムがレガシーな場合、若手・新規着任者は操作方法がわからない。操作方法は暗黙知で、文書がない。</p>
+    </div>
+    <div class="card">
+      <h3><span class="en">&rarr; Solution</span><span class="ja" lang="ja">&rarr; 解決</span></h3>
+      <p class="en">A one-line instruction becomes a concrete key-sequence, so the operator can file without knowing the screens; manual RAG and each operator's corrections accumulate the veteran's knowledge in the system.</p>
+      <p class="ja" lang="ja">一行の指示が具体的なキー操作の計画になり、画面を知らなくても申請できる。手順書 RAG と個人修正が、熟練者の知識をシステムに蓄積する。</p>
+      <p class="en">Tech: LLM &middot; RAG (hybrid) &middot; pgvector &middot; multilingual-e5 &middot; personal corrections</p>
+      <p class="ja" lang="ja">技術：LLM &middot; RAG (hybrid) &middot; pgvector &middot; multilingual-e5 &middot; personal corrections</p>
+    </div>
+    <div class="card">
+      <h3><span class="en">Problem</span><span class="ja" lang="ja">課題</span></h3>
+      <p class="en">A legacy core system has to be driven screen by screen, so efficiency tends to drop without proficiency.</p>
+      <p class="ja" lang="ja">レガシー基幹システムは画面を一つずつ操作する必要があり、習熟しないと業務効率が落ちやすい。</p>
+    </div>
+    <div class="card">
+      <h3><span class="en">&rarr; Solution</span><span class="ja" lang="ja">&rarr; 解決</span></h3>
+      <p class="en">Instruction &rarr; plan &rarr; approve &rarr; automated key-by-key execution; the manual screen-driving disappears and the operator focuses on the decision.</p>
+      <p class="ja" lang="ja">指示 &rarr; 計画 &rarr; 承認 &rarr; 自動実行。画面操作の手間が消え、人は判断に専念できる。</p>
+      <p class="en">Tech: LLM &middot; structured output &middot; screen adapter &middot; idempotent execution</p>
+      <p class="ja" lang="ja">技術：LLM &middot; structured output &middot; screen adapter &middot; idempotent execution</p>
+    </div>
+    <div class="card">
+      <h3><span class="en">Problem</span><span class="ja" lang="ja">課題</span></h3>
+      <p class="en">Even when the system itself is complete, if approval criteria are informal and unwritten, requests like business trips can be bounced back repeatedly.</p>
+      <p class="ja" lang="ja">システムが完備していても、承認基準が形式化されていない場合、出張申請などが繰り返し差し戻されることがある。</p>
+    </div>
+    <div class="card">
+      <h3><span class="en">&rarr; Solution</span><span class="ja" lang="ja">&rarr; 解決</span></h3>
+      <p class="en">The plan is shown as a grounded approval card; a reject/revise note persists as a personal correction that reshapes the next plan, so the informal approval bar gradually becomes reusable, explicit knowledge.</p>
+      <p class="ja" lang="ja">計画を根拠つきの承認カードで提示。却下・修正のメモは個人修正として次の計画に反映され、形式化されていなかった承認基準が再利用できる知識として蓄積されていく。</p>
+      <p class="en">Tech: structured approval card &middot; personal corrections (growth) &middot; grounded-slot immunity</p>
+      <p class="ja" lang="ja">技術：structured approval card &middot; personal corrections (growth) &middot; grounded-slot immunity</p>
+    </div>
+  </div>
+</div></section>
+
+<section id="measured"><div class="wrap">
+  <div class="sec-head"><span class="sec-num">06</span><h2><span class="en">Measured, not asserted</span><span class="ja" lang="ja">主張ではなく測定</span></h2></div>
   <p class="lead soft en">Every number below comes from running the eval harness locally with the model, is identical across five consecutive full runs, and was re-confirmed by an independent QC pass at the exact commit that went public.</p>
   <p class="lead soft ja" lang="ja">以下の数値はすべて、評価ハーネスをモデルとともにローカル実行した結果です。連続5回のフル実行で完全に一致し、公開されたまさにそのコミットにおいて独立した QC により再確認されています。</p>
   <div class="stats">
@@ -460,8 +643,8 @@
 
 <section><div class="wrap">
   <p class="foot">
-    <span class="en">All identifiers in the demo data are synthetic (ABC商事, 製品X, …). The source repository is private; these pages and the mock are its public face.</span>
-    <span class="ja" lang="ja">デモデータ中の識別子はすべて架空のものです（ABC商事、製品X など）。ソースリポジトリは非公開であり、これらのページとモックがその公開面です。</span>
+    <span class="en">All identifiers in the demo data are synthetic (ABC商事, 製品X, …). The source repository is public; these pages and the mock are its public face.</span>
+    <span class="ja" lang="ja">デモデータ中の識別子はすべて架空のものです（ABC商事、製品X など）。ソースリポジトリは公開されており、これらのページとモックがその公開面です。</span>
   </p>
 </div></section>
 
@@ -471,16 +654,17 @@
 (function(){
   var root=document.documentElement;
   var buttons=document.querySelectorAll(".lang-btn");
-  function apply(lang){
+  function apply(lang,persist){
     root.setAttribute("data-lang",lang);
     root.setAttribute("lang",lang);
     buttons.forEach(function(b){b.classList.toggle("active",b.getAttribute("data-lang")===lang);});
-    try{localStorage.setItem("tanomude-lang",lang);}catch(e){}
+    if(persist){try{localStorage.setItem("tanomude-lang",lang);}catch(e){}}
   }
-  buttons.forEach(function(b){b.addEventListener("click",function(){apply(b.getAttribute("data-lang"));});});
+  buttons.forEach(function(b){b.addEventListener("click",function(){apply(b.getAttribute("data-lang"),true);});});
   var saved=null;
   try{saved=localStorage.getItem("tanomude-lang");}catch(e){}
-  apply(saved==="ja"?"ja":"en");
+  var detected=((navigator.language||"").toLowerCase().indexOf("ja")===0)?"ja":"en";
+  apply(saved==="ja"||saved==="en"?saved:detected,false);
   var totop=document.querySelector(".totop");
   function onScroll(){totop.classList.toggle("show",window.scrollY>480);}
   window.addEventListener("scroll",onScroll,{passive:true});
